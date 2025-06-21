@@ -1,0 +1,66 @@
+# @file      build.yml
+# @brief     Used to perform build testing
+#
+# Copyright joelguittet and mender-mcu-client contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: build
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    types: [opened, synchronize, reopened]
+  schedule:
+    - cron: '0 0 1 * *'
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-24.04, macos-14, windows-2022]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          path: mender-zephyr-example
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - name: Setup Zephyr project
+        uses: zephyrproject-rtos/action-zephyr-setup@v1
+        with:
+          app-path: mender-zephyr-example
+          toolchains: arm-zephyr-eabi
+      - name: Checkout submodules
+        working-directory: mender-zephyr-example
+        run: git submodule update --init --recursive
+      - name: Build firmware
+        working-directory: mender-zephyr-example
+        shell: bash
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            EXTRA_TWISTER_FLAGS="--short-build-path -O/tmp/twister-out"
+          fi
+          west twister -T app -v --inline-logs --integration $EXTRA_TWISTER_FLAGS
+      - name: Twister Tests
+        working-directory: mender-zephyr-example
+        shell: bash
+        run: |
+          if [ "${{ runner.os }}" = "Windows" ]; then
+            EXTRA_TWISTER_FLAGS="--short-build-path -O/tmp/twister-out"
+          fi
+          west twister -T tests -v --inline-logs --integration $EXTRA_TWISTER_FLAGS
