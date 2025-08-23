@@ -30,8 +30,8 @@ source ~/zephyrproject/.venv/bin/activate
 Then initialize a new workspace using the following commands. This will download the dependencies of the example application.
 
 ```
-west init -m https://github.com/joelguittet/mender-zephyr-example --mr master my-workspace
-cd my-workspace
+west init -m https://github.com/joelguittet/mender-zephyr-example --mr master workspace-zephyr
+cd workspace-zephyr
 west update
 ```
 
@@ -223,7 +223,7 @@ path/to/mender-artifact write module-image --compression none --device-type mend
 
 Upload the artifact `mender-module-hello-world-v1.mender` to the mender server and create a new deployment.
 
-The device checks for the new deployment, downloads the artifact and call the `hellow_world` function of the module, which is simply displyaing `Hello, world, from an llext!` log in the console:
+The device checks for the new deployment, downloads the artifact and call the `hello_world` function of the module, which is simply displaying `Hello, world, from an llext!` log in the console:
 
 ```
 [00:00:12.987,000] <inf> mender: CMAKE_SOURCE_DIR/components/mender-mcu-client/core/src/mender-client.c (884): Checking for deployment...

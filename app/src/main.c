@@ -26,6 +26,9 @@ LOG_MODULE_REGISTER(mender_zephyr_example, LOG_LEVEL_INF);
 #include <zephyr/kernel.h>
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/net_mgmt.h>
+#ifdef CONFIG_WIFI
+#include <zephyr/net/wifi_mgmt.h>
+#endif /* CONFIG_WIFI */
 #include <zephyr/sys/reboot.h>
 
 #ifdef CONFIG_MENDER_CLIENT_ADD_ON_TROUBLESHOOT
@@ -40,20 +43,37 @@ LOG_MODULE_REGISTER(mender_zephyr_example, LOG_LEVEL_INF);
 #include <zephyr/llext/buf_loader.h>
 #endif /* CONFIG_LLEXT */
 
+#ifdef CONFIG_NET_SOCKETS_SOCKOPT_TLS
+#include <zephyr/net/tls_credentials.h>
+
 /*
  * Amazon Root CA 1 certificate, retrieved from https://www.amazontrust.com/repository in DER format.
  * It is converted to include file in application CMakeLists.txt.
  */
-#if defined(CONFIG_NET_SOCKETS_SOCKOPT_TLS)
-#include <zephyr/net/tls_credentials.h>
-#if defined(CONFIG_TLS_CREDENTIAL_FILENAMES)
-static const unsigned char ca_certificate[] = "AmazonRootCA1.cer";
+#ifdef CONFIG_TLS_CREDENTIAL_FILENAMES
+static const unsigned char ca_certificate_primary[] = "AmazonRootCA1.cer";
 #else
-static const unsigned char ca_certificate[] = {
+static const unsigned char ca_certificate_primary[] = {
 #include "AmazonRootCA1.cer.inc"
 };
-#endif
-#endif
+#endif /* CONFIG_TLS_CREDENTIAL_FILENAMES */
+
+/*
+ * Google Trust Services Root R4 certificate, retrieved from https://pki.goog/repository in DER format (original name is r4.crt).
+ * It is converted to include file in application CMakeLists.txt.
+ * This secondary Root CA certificate is to be used if the device is connected to a free hosted Mender account (for which artifacts are saved on a Cloudflare server instead of the Amazon S3 storage)
+ */
+#if (0 != CONFIG_MENDER_NET_CA_CERTIFICATE_TAG_SECONDARY)
+#ifdef CONFIG_TLS_CREDENTIAL_FILENAMES
+static const unsigned char ca_certificate_secondary[] = "GoogleTrustServicesR4.crt";
+#else
+static const unsigned char ca_certificate_secondary[] = {
+#include "GoogleTrustServicesR4.crt.inc"
+};
+#endif /* CONFIG_TLS_CREDENTIAL_FILENAMES */
+#endif /* (0 != CONFIG_MENDER_NET_CA_CERTIFICATE_TAG_SECONDARY) */
+
+#endif /* CONFIG_NET_SOCKETS_SOCKOPT_TLS */
 
 #include "mender-client.h"
 #include "mender-configure.h"
@@ -114,8 +134,13 @@ print_dhcpv4_addr(struct net_if *iface, struct net_if_addr *if_addr, void *user_
  * @param mgmt_event Event
  * @param iface Interface
  */
+#if (ZEPHYR_VERSION_CODE >= ZEPHYR_VERSION(4, 2, 0))
+static void
+net_event_handler(struct net_mgmt_event_callback *cb, uint64_t mgmt_event, struct net_if *iface) {
+#else
 static void
 net_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event, struct net_if *iface) {
+#endif
 
     /* Check event */
     if (NET_EVENT_IPV4_ADDR_ADD != mgmt_event) {
@@ -501,13 +526,44 @@ main(void) {
     net_mgmt_add_event_callback(&mgmt_cb);
     net_dhcpv4_start(iface);
 
-    /* Wait until the network interface is operational */
-    k_event_wait_all(&mender_client_events, MENDER_CLIENT_EVENT_NETWORK_UP, false, K_FOREVER);
+#ifdef CONFIG_WIFI
 
-#if defined(CONFIG_NET_SOCKETS_SOCKOPT_TLS)
-    /* Initialize certificate */
-    tls_credential_add(CONFIG_MENDER_NET_CA_CERTIFICATE_TAG, TLS_CREDENTIAL_CA_CERTIFICATE, ca_certificate, sizeof(ca_certificate));
+    /* Set connection request parameters */
+    struct wifi_connect_req_params params = { 0 };
+    params.band                           = WIFI_FREQ_BAND_UNKNOWN;
+    params.channel                        = WIFI_CHANNEL_ANY;
+    params.mfp                            = WIFI_MFP_OPTIONAL;
+    params.ssid                           = CONFIG_EXAMPLE_WIFI_SSID;
+    params.ssid_length                    = strlen(params.ssid);
+#if defined(CONFIG_EXAMPLE_WIFI_AUTHENTICATION_MODE_WPA2_PSK)
+    params.security   = WIFI_SECURITY_TYPE_PSK;
+    params.psk        = CONFIG_EXAMPLE_WIFI_PSK;
+    params.psk_length = strlen(CONFIG_EXAMPLE_WIFI_PSK);
+#elif defined(CONFIG_EXAMPLE_WIFI_AUTHENTICATION_MODE_WPA3_SAE)
+    params.security            = WIFI_SECURITY_TYPE_SAE;
+    params.sae_password        = CONFIG_EXAMPLE_WIFI_PSK;
+    params.sae_password_length = strlen(CONFIG_EXAMPLE_WIFI_PSK);
+#else
+    params.security = WIFI_SECURITY_TYPE_NONE;
 #endif
+    /* Request connection to the network */
+    while (0 != net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params))) {
+        k_msleep(500);
+    }
+
+#endif /* CONFIG_WIFI */
+
+    /* Wait until the network interface is operational */
+    k_event_wait(&mender_client_events, MENDER_CLIENT_EVENT_NETWORK_UP, true, K_FOREVER);
+
+#ifdef CONFIG_NET_SOCKETS_SOCKOPT_TLS
+    /* Initialize certificate */
+    tls_credential_add(CONFIG_MENDER_NET_CA_CERTIFICATE_TAG_PRIMARY, TLS_CREDENTIAL_CA_CERTIFICATE, ca_certificate_primary, sizeof(ca_certificate_primary));
+#if (0 != CONFIG_MENDER_NET_CA_CERTIFICATE_TAG_SECONDARY)
+    tls_credential_add(
+        CONFIG_MENDER_NET_CA_CERTIFICATE_TAG_SECONDARY, TLS_CREDENTIAL_CA_CERTIFICATE, ca_certificate_secondary, sizeof(ca_certificate_secondary));
+#endif /* (0 != CONFIG_MENDER_NET_CA_CERTIFICATE_TAG_SECONDARY) */
+#endif /* CONFIG_NET_SOCKETS_SOCKOPT_TLS */
 
     /* Read base MAC address of the device */
     char                 mac_address[18];
@@ -635,7 +691,7 @@ main(void) {
     }
 
     /* Wait for mender-mcu-client events */
-    k_event_wait_all(&mender_client_events, MENDER_CLIENT_EVENT_RESTART, false, K_FOREVER);
+    k_event_wait(&mender_client_events, MENDER_CLIENT_EVENT_RESTART, true, K_FOREVER);
 
 RELEASE:
 

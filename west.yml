@@ -28,17 +28,22 @@ manifest:
   projects:
     - name: zephyr
       remote: zephyrproject-rtos
-      revision: v3.7-branch
+      revision: v4.2.0
       import:
         # By using name-allowlist we can clone only the modules that are
         # strictly needed by the application.
         name-allowlist:
-          - cmsis      # required by the ARM port
-          - hal_stm32  # required by the nucleo_l4a6zg board
-          - littlefs   # required for troubleshoot add-on example
+          - cmsis_6
+          - hal_espressif # required for esp TODO board
+          - hal_nordic # required for nrf7002dk board
+          - hal_stm32 # required for nucleo_l4a6zg board
+          - hostap # required for nrf7002dk board
+          - littlefs
           - mbedtls
           - mcuboot
+          - nrf_hw_models # required for nrf7002dk board
+          - nrf_wifi # required for nrf7002dk board
           - picolibc
     - name: mender-mcu-client
       remote: joelguittet
-      revision: 0.11.3
+      revision: 0.12.0
