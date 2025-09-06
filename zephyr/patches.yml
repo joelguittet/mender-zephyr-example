@@ -1,0 +1,11 @@
+patches:
+  - path: zephyr/revert-modules-hostap-cipher-suites.patch
+    sha256sum: 25089706bf1ad6fceef20fecaa2be48a068e2d5d2e41a72707a5c3c04c3ca4bf
+    module: zephyr
+    author: Joel Guittet
+    email: joelguittet@gmail.com
+    date: 2025-09-06
+    upstreamable: false
+    comments: |
+      Revert commit c8fa5e5899575fe5c0a0a6c3013fdc4527d2cdb4 that prevent
+      nRF7002-DK to connect to Wi-Fi Access Point.

@@ -17,6 +17,8 @@
  * limitations under the License.
  */
 
+#include <assert.h>
+
 #include <app_version.h>
 #include <version.h>
 
@@ -334,7 +336,7 @@ config_updated_cb(mender_keystore_t *configuration) {
     /* In this example, we just print the content of the configuration received from the Mender server */
     if (NULL != configuration) {
         size_t index = 0;
-        LOG_INF("Device configuration received from the server");
+        LOG_INF("Mender device configuration received from the server");
         while ((NULL != configuration[index].name) && (NULL != configuration[index].value)) {
             LOG_INF("Key=%s, value=%s", configuration[index].name, configuration[index].value);
             index++;
@@ -606,12 +608,18 @@ main(void) {
                                                           .authentication_failure = authentication_failure_cb,
                                                           .deployment_status      = deployment_status_cb,
                                                           .restart                = restart_cb };
-    assert(MENDER_OK == mender_client_init(&mender_client_config, &mender_client_callbacks));
+    if (MENDER_OK != mender_client_init(&mender_client_config, &mender_client_callbacks)) {
+        LOG_ERR("Unable to initialize mender client");
+        goto RESTART;
+    }
     LOG_INF("Mender client initialized");
 
 #ifdef CONFIG_LLEXT
     /* Register LLEXT hello-world module, no reboot after installing the module, no verification of artifact name to check the version of the module */
-    assert(MENDER_OK == mender_client_register_artifact_type("hello-world", &hello_world_module_cb, false, NULL));
+    if (MENDER_ok != mender_client_register_artifact_type("hello-world", &hello_world_module_cb, false, NULL)) {
+        LOG_ERR("Unable to register hello-world module");
+        goto RELEASE;
+    }
     LOG_INF("Mender client registered hello-world module");
 #endif /* CONFIG_LLEXT */
 
@@ -623,14 +631,18 @@ main(void) {
         .config_updated = config_updated_cb,
 #endif /* CONFIG_MENDER_CLIENT_CONFIGURE_STORAGE */
     };
-    assert(MENDER_OK
-           == mender_client_register_addon(
-               (mender_addon_instance_t *)&mender_configure_addon_instance, (void *)&mender_configure_config, (void *)&mender_configure_callbacks));
+    if (MENDER_OK != mender_client_register_addon((mender_addon_instance_t *)&mender_configure_addon_instance, (void *)&mender_configure_config, (void *)&mender_configure_callbacks)) {
+        LOG_ERR("Unable to register configure add-on");
+        goto RELEASE;
+    }
     LOG_INF("Mender configure add-on registered");
 #endif /* CONFIG_MENDER_CLIENT_ADD_ON_CONFIGURE */
 #ifdef CONFIG_MENDER_CLIENT_ADD_ON_INVENTORY
     mender_inventory_config_t mender_inventory_config = { .refresh_interval = 0 };
-    assert(MENDER_OK == mender_client_register_addon((mender_addon_instance_t *)&mender_inventory_addon_instance, (void *)&mender_inventory_config, NULL));
+    if (MENDER_OK != mender_client_register_addon((mender_addon_instance_t *)&mender_inventory_addon_instance, (void *)&mender_inventory_config, NULL)) {
+        LOG_ERR("Unable to register inventory add-on");
+        goto RELEASE;
+    }
     LOG_INF("Mender inventory add-on registered");
 #endif /* CONFIG_MENDER_CLIENT_ADD_ON_INVENTORY */
 #ifdef CONFIG_MENDER_CLIENT_ADD_ON_TROUBLESHOOT
@@ -650,9 +662,10 @@ main(void) {
         .shell = { .open = mender_shell_open, .resize = mender_shell_resize, .write = mender_shell_write, .close = mender_shell_close }
 #endif /* CONFIG_MENDER_CLIENT_TROUBLESHOOT_SHELL */
     };
-    assert(MENDER_OK
-           == mender_client_register_addon(
-               (mender_addon_instance_t *)&mender_troubleshoot_addon_instance, (void *)&mender_troubleshoot_config, (void *)&mender_troubleshoot_callbacks));
+    if (MENDER_OK != mender_client_register_addon((mender_addon_instance_t *)&mender_troubleshoot_addon_instance, (void *)&mender_troubleshoot_config, (void *)&mender_troubleshoot_callbacks)) {
+        LOG_ERR("Unable to register troubleshoot add-on");
+        goto RELEASE;
+    }
     LOG_INF("Mender troubleshoot add-on registered");
 #endif /* CONFIG_MENDER_CLIENT_ADD_ON_TROUBLESHOOT */
 
@@ -660,15 +673,18 @@ main(void) {
     /* Get mender configuration (this is just an example to illustrate the API) */
     mender_keystore_t *configuration;
     if (MENDER_OK != mender_configure_get(&configuration)) {
-        LOG_ERR("Unable to get mender configuration");
+        LOG_ERR("Unable to get mender device configuration");
+        goto RELEASE;
     } else if (NULL != configuration) {
         size_t index = 0;
-        LOG_INF("Device configuration retrieved");
+        LOG_INF("Mender device configuration retrieved");
         while ((NULL != configuration[index].name) && (NULL != configuration[index].value)) {
             LOG_INF("Key=%s, value=%s", configuration[index].name, configuration[index].value);
             index++;
         }
         mender_utils_keystore_delete(configuration);
+    } else {
+        LOG_INF("Mender device configuration is empty");
     }
 #endif /* CONFIG_MENDER_CLIENT_ADD_ON_CONFIGURE */
 
@@ -681,6 +697,7 @@ main(void) {
                                       { .name = NULL, .value = NULL } };
     if (MENDER_OK != mender_inventory_set(inventory)) {
         LOG_ERR("Unable to set mender inventory");
+        goto RELEASE;
     }
 #endif /* CONFIG_MENDER_CLIENT_ADD_ON_INVENTORY */
 
@@ -698,6 +715,8 @@ RELEASE:
     /* Deactivate and release mender-client */
     mender_client_deactivate();
     mender_client_exit();
+
+RESTART:
 
     /* Restart */
     LOG_INF("Restarting system");

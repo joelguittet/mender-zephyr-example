@@ -28,22 +28,28 @@ manifest:
   projects:
     - name: zephyr
       remote: zephyrproject-rtos
-      revision: v4.2.0
+      #revision: v4.3.0
+      revision: 7837f5e5091f6cc740ee1a8b0d0c84af8975bfd7
+      #revision: c8fa5e5899575fe5c0a0a6c3013fdc4527d2cdb4
+      #revision: 226011b8e155bc9faf6294360b59d60d9d95b6ce
+      #revision: v4.2.0
       import:
         # By using name-allowlist we can clone only the modules that are
         # strictly needed by the application.
         name-allowlist:
           - cmsis_6
-          - hal_espressif # required for esp TODO board
-          - hal_nordic # required for nrf7002dk board
-          - hal_stm32 # required for nucleo_l4a6zg board
-          - hostap # required for nrf7002dk board
+          - hal_espressif # required for esp32-devkitc board
+          - hal_nordic # required for nrf7002-dk board
+          - hal_nxp # required for frdm-mcxn947 board
+          - hal_stm32 # required for nucleo-l4a6zg board
+          - hostap # required for nrf7002-dk board
           - littlefs
           - mbedtls
           - mcuboot
-          - nrf_hw_models # required for nrf7002dk board
-          - nrf_wifi # required for nrf7002dk board
+          - nrf_hw_models # required for nrf7002-dk board
+          - nrf_wifi # required for nrf7002-dk board
           - picolibc
     - name: mender-mcu-client
       remote: joelguittet
-      revision: 0.12.0
+      #revision: 0.12.0
+      revision: enhancement/modify-stack-size-unit
