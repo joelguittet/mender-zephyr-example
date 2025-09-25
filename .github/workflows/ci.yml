@@ -31,9 +31,11 @@ jobs:
     container:
       image: ubuntu:24.04
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          path: mender-zephyr-example
       - name: Install tools
         run: |
           apt-get update
@@ -50,3 +52,30 @@ jobs:
       - name: Check code format
         run: |
           ./.github/workflows/check_code_format.sh
+  test:
+    name: Execute tests on the targets
+    runs-on: self-hosted
+    container:
+      image: ubuntu:24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          path: mender-zephyr-example
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+      - name: Setup Zephyr project
+        uses: zephyrproject-rtos/action-zephyr-setup@v1
+        with:
+          app-path: mender-zephyr-example
+          toolchains: arm-zephyr-eabi:arm-zephyr-xtensa
+      - name: Checkout submodules
+        working-directory: mender-zephyr-example
+        run: git submodule update --init --recursive
+      - name: Build firmware
+        working-directory: mender-zephyr-example
+        run: |
+          west twister -T app -v --inline-logs --device-testing --hardware-map map.yml
