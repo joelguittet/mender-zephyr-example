@@ -36,7 +36,8 @@ jobs:
           fetch-depth: 0
       - name: Install tools
         run: |
-          apt-get install clang-format pcregrep
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y clang-format pcregrep
       - name: Check headers
         run: |
           ./.github/workflows/check_headers.sh
