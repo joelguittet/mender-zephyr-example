@@ -631,7 +631,9 @@ main(void) {
         .config_updated = config_updated_cb,
 #endif /* CONFIG_MENDER_CLIENT_CONFIGURE_STORAGE */
     };
-    if (MENDER_OK != mender_client_register_addon((mender_addon_instance_t *)&mender_configure_addon_instance, (void *)&mender_configure_config, (void *)&mender_configure_callbacks)) {
+    if (MENDER_OK
+        != mender_client_register_addon(
+            (mender_addon_instance_t *)&mender_configure_addon_instance, (void *)&mender_configure_config, (void *)&mender_configure_callbacks)) {
         LOG_ERR("Unable to register configure add-on");
         goto RELEASE;
     }
@@ -662,7 +664,9 @@ main(void) {
         .shell = { .open = mender_shell_open, .resize = mender_shell_resize, .write = mender_shell_write, .close = mender_shell_close }
 #endif /* CONFIG_MENDER_CLIENT_TROUBLESHOOT_SHELL */
     };
-    if (MENDER_OK != mender_client_register_addon((mender_addon_instance_t *)&mender_troubleshoot_addon_instance, (void *)&mender_troubleshoot_config, (void *)&mender_troubleshoot_callbacks)) {
+    if (MENDER_OK
+        != mender_client_register_addon(
+            (mender_addon_instance_t *)&mender_troubleshoot_addon_instance, (void *)&mender_troubleshoot_config, (void *)&mender_troubleshoot_callbacks)) {
         LOG_ERR("Unable to register troubleshoot add-on");
         goto RELEASE;
     }

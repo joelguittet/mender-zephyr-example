@@ -1,2 +1,2 @@
-lib/msgpack-c/include/msgpack/pack_template.h
-lib/msgpack-c/include/msgpack/sysdep.h
+components/msgpack-c/include/msgpack/pack_template.h
+components/msgpack-c/include/msgpack/sysdep.h
