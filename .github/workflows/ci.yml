@@ -80,7 +80,7 @@ jobs:
         uses: zephyrproject-rtos/action-zephyr-setup@v1
         with:
           app-path: mender-zephyr-example
-          toolchains: arm-zephyr-eabi:arm-zephyr-xtensa
+          toolchains: arm-zephyr-eabi:xtensa-espressif_esp32_zephyr-elf
         env:
           PIP_ROOT_USER_ACTION: ignore
       - name: Checkout submodules
