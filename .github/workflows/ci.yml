@@ -63,15 +63,19 @@ jobs:
         with:
           fetch-depth: 0
           path: mender-zephyr-example
-      - name: Set up Python
-        uses: actions/setup-python@v5
+      - name: Setup Python
+        uses: actions/setup-python@v6
         with:
           python-version: 3.11
+        env:
+          PIP_ROOT_USER_ACTION: ignore
       - name: Setup Zephyr project
         uses: zephyrproject-rtos/action-zephyr-setup@v1
         with:
           app-path: mender-zephyr-example
           toolchains: arm-zephyr-eabi:arm-zephyr-xtensa
+        env:
+          PIP_ROOT_USER_ACTION: ignore
       - name: Checkout submodules
         working-directory: mender-zephyr-example
         run: git submodule update --init --recursive
