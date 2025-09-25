@@ -616,7 +616,7 @@ main(void) {
 
 #ifdef CONFIG_LLEXT
     /* Register LLEXT hello-world module, no reboot after installing the module, no verification of artifact name to check the version of the module */
-    if (MENDER_ok != mender_client_register_artifact_type("hello-world", &hello_world_module_cb, false, NULL)) {
+    if (MENDER_OK != mender_client_register_artifact_type("hello-world", &hello_world_module_cb, false, NULL)) {
         LOG_ERR("Unable to register hello-world module");
         goto RELEASE;
     }
