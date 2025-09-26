@@ -67,8 +67,11 @@ jobs:
           path: mender-zephyr-example
       - name: Install tools
         run: |
-          apt-get update && apt-get upgrade
+          apt-get update && apt-get -y upgrade
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends sudo git
+      - name: Checkout submodules
+        working-directory: mender-zephyr-example
+        run: git submodule update --init --recursive
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
@@ -82,9 +85,6 @@ jobs:
           toolchains: arm-zephyr-eabi:xtensa-espressif_esp32_zephyr-elf
         env:
           PIP_ROOT_USER_ACTION: ignore
-      - name: Checkout submodules
-        working-directory: mender-zephyr-example
-        run: git submodule update --init --recursive
       - name: Build firmware
         working-directory: mender-zephyr-example
         run: |
