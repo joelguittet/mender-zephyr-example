@@ -57,8 +57,9 @@ jobs:
   test:
     name: Execute tests on the targets
     runs-on: self-hosted
+    # was ubuntu:24.04
     container:
-      image: ubuntu:24.04
+      image: ghcr.io/zephyrproject-rtos/ci:v0.28.4
       volumes:
         - /dev:/dev
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/map.yml
@@ -96,4 +97,4 @@ jobs:
       - name: Build firmware
         #working-directory: mender-zephyr-example
         run: |
-          west twister -T app -v --inline-logs --device-testing --hardware-map map.yml
+          west twister -T app -v --inline-logs --device-testing --hardware-map /__w/mender-zephyr-example/map.yml
