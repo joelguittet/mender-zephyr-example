@@ -25,5 +25,5 @@ tests:
         tags: foo
         platform_allow: >
             nucleo_l4a6zg
-        extra_overlay_confs:
-            - ../../local-jg.conf
+#        extra_overlay_confs:
+#            - ../../local-jg.conf
