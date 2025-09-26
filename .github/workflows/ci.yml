@@ -31,16 +31,17 @@ jobs:
     container:
       image: ubuntu:24.04
     steps:
+      - name: Install tools
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            clang-format pcregrep
       - name: Checkout
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
         #  clean: true
           #path: mender-zephyr-example
-      - name: Install tools
-        run: |
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y clang-format pcregrep
       - name: Check headers
         run: |
           ./.github/workflows/check_headers.sh
@@ -62,13 +63,6 @@ jobs:
         - /dev:/dev
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/map.yml
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-        with:
-          submodules: recursive
-          #fetch-depth: 0
-          #clean: true
-          #path: mender-zephyr-example
       - name: Install tools
         run: |
           apt-get update && apt-get -y upgrade
@@ -79,6 +73,13 @@ jobs:
      # - name: Checkout submodules
         #working-directory: mender-zephyr-example
       #  run: pwd && git submodule update --init --recursive
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          #fetch-depth: 0
+          #clean: true
+          #path: mender-zephyr-example
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
