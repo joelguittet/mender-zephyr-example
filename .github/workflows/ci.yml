@@ -36,7 +36,7 @@ jobs:
         with:
           clean: true
           fetch-depth: 0
-          path: mender-zephyr-example
+          #path: mender-zephyr-example
       - name: Install tools
         run: |
           apt-get update
