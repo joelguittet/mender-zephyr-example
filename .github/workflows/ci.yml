@@ -60,15 +60,17 @@ jobs:
       image: ubuntu:24.04
       volumes:
         - /dev:/dev
+        - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/map.yml
     steps:
       - name: ENV
         run: |
           pwd
           ls /dev/tty*
+          ls /dev/serial/by-path/* -l
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          clean: true
+          #clean: true
           fetch-depth: 0
           #path: mender-zephyr-example
       - name: Install tools
