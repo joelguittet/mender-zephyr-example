@@ -61,17 +61,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
+          clean: true
           fetch-depth: 0
           path: mender-zephyr-example
       - name: Install tools
         run: |
           apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            sudo git
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends sudo git
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.11
+          python-version: 3.12
         env:
           PIP_ROOT_USER_ACTION: ignore
       - name: Setup Zephyr project
