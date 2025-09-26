@@ -64,13 +64,18 @@ jobs:
         - /dev:/dev
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/map.yml
     steps:
-      - name: Install tools
+      # TODO REM
+      - name: ENV
         run: |
-          apt-get update && apt-get -y upgrade
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            sudo git cmake ninja-build gperf ccache dfu-util device-tree-compiler wget \
-            python3-dev python3-venv python3-tk xz-utils file make \
-            gcc gcc-multilib g++-multilib libsdl2-dev libmagic1
+          cat /__w/mender-zephyr-example/map.yml
+          rm -rf /__w/mender-zephyr-example/.west
+     # - name: Install tools
+    #    run: |
+   #       apt-get update && apt-get -y upgrade
+  #        DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+ #           sudo git cmake ninja-build gperf ccache dfu-util device-tree-compiler wget \
+#            python3-dev python3-venv python3-tk xz-utils file make \
+#            gcc gcc-multilib g++-multilib libsdl2-dev libmagic1
      # - name: Checkout submodules
         #working-directory: mender-zephyr-example
       #  run: pwd && git submodule update --init --recursive
