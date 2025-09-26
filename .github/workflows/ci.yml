@@ -58,7 +58,13 @@ jobs:
     runs-on: self-hosted
     container:
       image: ubuntu:24.04
+      volumes:
+        - /dev:/dev
     steps:
+      - name: ENV
+        run: |
+          pwd
+          ls /dev/tty*
       - name: Checkout
         uses: actions/checkout@v4
         with:
@@ -74,7 +80,7 @@ jobs:
             gcc gcc-multilib g++-multilib libsdl2-dev libmagic1
       - name: Checkout submodules
         #working-directory: mender-zephyr-example
-        run: git submodule update --init --recursive
+        run: pwd && git submodule update --init --recursive
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
