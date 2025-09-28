@@ -63,7 +63,7 @@ jobs:
       volumes:
         - /dev:/dev
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/map.yml
-      options: --user root
+      options: --privileged --user root
     steps:
      # - name: Install tools
     #    run: |
@@ -72,11 +72,13 @@ jobs:
  #           sudo git cmake ninja-build gperf ccache dfu-util device-tree-compiler wget \
 #            python3-dev python3-venv python3-tk xz-utils file make \
 #            gcc gcc-multilib g++-multilib libsdl2-dev libmagic1
+# libmagic1 et python3-tk non installé dans le docker de zephyr (devrait pas etre genant)
 
       - name: END TODO REMOVE
         run: |
           whoami
-          ls -l /dev/ttyACM0
+          ls -la /dev/ttyACM0
+          ls -la /dev/bus/usb/002/002
 
       - name: Cleanup previous build
         run: |
@@ -101,7 +103,13 @@ jobs:
           toolchains: arm-zephyr-eabi:xtensa-espressif_esp32_zephyr-elf
         env:
           PIP_ROOT_USER_ACTION: ignore
-      - name: Build firmware
+      - name: Execute tests
         #working-directory: mender-zephyr-example
         run: |
           west twister -T app -v --inline-logs --device-testing --hardware-map /__w/mender-zephyr-example/map.yml
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: twister-out
+          include-hidden-files: true
