@@ -63,7 +63,7 @@ jobs:
       volumes:
         - /dev:/dev
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/map.yml
-      options: --privileged --user root
+      options: --privileged
     steps:
      # - name: Install tools
     #    run: |
