@@ -61,6 +61,7 @@ jobs:
     container:
       image: ghcr.io/zephyrproject-rtos/ci:v0.28.4
       volumes:
+        - /dev:/dev
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/map.yml
       options: --privileged
     steps:
