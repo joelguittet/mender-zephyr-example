@@ -68,6 +68,8 @@ jobs:
       volumes:
         - /dev:/dev
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/map.yml
+      ports:
+        - 443:443
       options: --privileged
 
     steps:
@@ -106,6 +108,9 @@ jobs:
         run: |
           export MENDER_IMAGE_TAG=v4.0.1
           docker compose up -d
+          MENDER_USERNAME=admin@docker.mender.io
+          MENDER_PASSWORD=PleaseReplaceWithASecurePassword
+          docker compose run --name create-user useradm create-user --username "$MENDER_USERNAME" --password "$MENDER_PASSWORD"
 
       - name: Setup Python
         uses: actions/setup-python@v6
