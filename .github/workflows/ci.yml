@@ -77,8 +77,6 @@ jobs:
       - name: END TODO REMOVE
         run: |
           whoami
-          ls -la /dev/ttyACM0
-          ls -la /dev/bus/usb/002/002
           ls -la /dev/serial/by-path/*
           ls -la /dev/serial/by-id/*
 
