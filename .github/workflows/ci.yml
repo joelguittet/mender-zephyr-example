@@ -127,6 +127,7 @@ jobs:
           west twister -T app -v --inline-logs --device-testing --hardware-map /__w/mender-zephyr-example/map.yml
 
       - name: Upload artifact
+        working-directory: mender-zephyr-example
         uses: actions/upload-artifact@v4
         with:
           name: test-results
@@ -134,9 +135,10 @@ jobs:
           include-hidden-files: true
 
       - name: Cleanup build
+        working-directory: mender-zephyr-example
         if: ${{ always() }}
         run: |
-          rm -rf /__w/mender-zephyr-example/.west
+          rm -rf .west
 
       - name: Cleanup Mender server
         if: ${{ always() }}
