@@ -30,30 +30,36 @@ jobs:
     runs-on: self-hosted
     container:
       image: ubuntu:24.04
+
     steps:
       - name: Install tools
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             clang-format pcregrep
-      - name: Checkout
+
+      - name: Checkout mender-zephyr-example
         uses: actions/checkout@v5
         with:
-          fetch-depth: 0
-        #  clean: true
-          #path: mender-zephyr-example
+          path: mender-zephyr-example
+
       - name: Check headers
+        working-directory: mender-zephyr-example
         run: |
           ./.github/workflows/check_headers.sh
       - name: Check include guards
+        working-directory: mender-zephyr-example
         run: |
           ./.github/workflows/check_include_guards.sh
       - name: Check equivalence tests
+        working-directory: mender-zephyr-example
         run: |
           ./.github/workflows/check_equivalence_tests.sh
       - name: Check code format
+        working-directory: mender-zephyr-example
         run: |
           ./.github/workflows/check_code_format.sh
+
   test:
     name: Execute tests on the targets
     runs-on: self-hosted
@@ -64,6 +70,7 @@ jobs:
         - /dev:/dev
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/map.yml
       options: --privileged
+
     steps:
      # - name: Install tools
     #    run: |
@@ -80,37 +87,58 @@ jobs:
           ls -la /dev/serial/by-path/*
           ls -la /dev/serial/by-id/*
 
-      - name: Checkout
+      - name: Checkout mender-zephyr-example
         uses: actions/checkout@v5
         with:
           submodules: recursive
-          #fetch-depth: 0
-          #clean: true
-          #path: mender-zephyr-example
+          path: mender-zephyr-example
+
+      - name: Checkout mender-server
+        uses: actions/checkout@v5
+        with:
+          repository: mendersoftware/mender-server
+          ref: v4.0.1
+          submodules: recursive
+          path: mender-server
+
+      - name: Setup Mender server
+        working-directory: mender-server
+        run: |
+          ls -la
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
           python-version: 3.12
         env:
           PIP_ROOT_USER_ACTION: ignore
+
       - name: Setup Zephyr project
         uses: zephyrproject-rtos/action-zephyr-setup@v1
         with:
-          #app-path: mender-zephyr-example
+          app-path: mender-zephyr-example
           toolchains: arm-zephyr-eabi:xtensa-espressif_esp32_zephyr-elf
         env:
           PIP_ROOT_USER_ACTION: ignore
+
       - name: Execute tests
-        #working-directory: mender-zephyr-example
+        working-directory: mender-zephyr-example
         run: |
           west twister -T app -v --inline-logs --device-testing --hardware-map /__w/mender-zephyr-example/map.yml
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: twister-out
           include-hidden-files: true
+
       - name: Cleanup build
         if: ${{ always() }}
         run: |
           rm -rf /__w/mender-zephyr-example/.west
+
+      - name: Cleanup Mender server
+        if: ${{ always() }}
+        run: |
+          whoami
