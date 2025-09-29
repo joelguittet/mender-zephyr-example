@@ -68,9 +68,9 @@ jobs:
       volumes:
         - /dev:/dev
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/map.yml
-      ports:
-        - 443:443
       options: --privileged
+      #ports:
+      #  - 443:443
 
     steps:
       - name: Install tools
