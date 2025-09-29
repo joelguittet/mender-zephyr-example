@@ -80,9 +80,6 @@ jobs:
           ls -la /dev/serial/by-path/*
           ls -la /dev/serial/by-id/*
 
-      - name: Cleanup previous build
-        run: |
-          rm -rf /__w/mender-zephyr-example/.west
       - name: Checkout
         uses: actions/checkout@v5
         with:
@@ -113,3 +110,7 @@ jobs:
           name: test-results
           path: twister-out
           include-hidden-files: true
+      - name: Cleanup build
+        if: ${{ always() }}
+        run: |
+          rm -rf /__w/mender-zephyr-example/.west
