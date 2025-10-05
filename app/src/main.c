@@ -48,7 +48,7 @@ LOG_MODULE_REGISTER(mender_zephyr_example, LOG_LEVEL_INF);
 #ifdef CONFIG_NET_SOCKETS_SOCKOPT_TLS
 #include <zephyr/net/tls_credentials.h>
 
-#ifdef CONFIG_EXAMPLE_CERTIFICATE_PATH
+#ifdef CONFIG_EXAMPLE_USE_CUSTOM_CERTIFICATE
 
 /*
  * Certificate must be retrieved in DER format.
@@ -91,7 +91,7 @@ static const unsigned char ca_certificate_secondary[] = {
 #endif /* CONFIG_TLS_CREDENTIAL_FILENAMES */
 #endif /* (0 != CONFIG_MENDER_NET_CA_CERTIFICATE_TAG_SECONDARY) */
 
-#endif /* CONFIG_EXAMPLE_CERTIFICATE_PATH */
+#endif /* CONFIG_EXAMPLE_USE_CUSTOM_CERTIFICATE */
 
 #endif /* CONFIG_NET_SOCKETS_SOCKOPT_TLS */
 
