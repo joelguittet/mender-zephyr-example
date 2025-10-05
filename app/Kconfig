@@ -23,6 +23,11 @@ endmenu
 
 menu "Application"
 
+    config EXAMPLE_CERTIFICATE_PATH
+        string "Certificate path"
+        help
+            Custom certificate path to be integrated in the application instead of the default certificates.
+
     config EXAMPLE_ARTIFACT_NAME_PREFIX
         string "Artifact name"
         help

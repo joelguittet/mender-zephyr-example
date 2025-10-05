@@ -48,6 +48,22 @@ LOG_MODULE_REGISTER(mender_zephyr_example, LOG_LEVEL_INF);
 #ifdef CONFIG_NET_SOCKETS_SOCKOPT_TLS
 #include <zephyr/net/tls_credentials.h>
 
+#ifdef CONFIG_EXAMPLE_CERTIFICATE_PATH
+
+/*
+ * Certificate must be retrieved in DER format.
+ * It is converted to include file in application CMakeLists.txt.
+ */
+#ifdef CONFIG_TLS_CREDENTIAL_FILENAMES
+static const unsigned char ca_certificate_primary[] = "mender.der";
+#else
+static const unsigned char ca_certificate_primary[] = {
+#include "mender.der.inc"
+};
+#endif /* CONFIG_TLS_CREDENTIAL_FILENAMES */
+
+#else
+
 /*
  * Amazon Root CA 1 certificate, retrieved from https://www.amazontrust.com/repository in DER format.
  * It is converted to include file in application CMakeLists.txt.
@@ -74,6 +90,8 @@ static const unsigned char ca_certificate_secondary[] = {
 };
 #endif /* CONFIG_TLS_CREDENTIAL_FILENAMES */
 #endif /* (0 != CONFIG_MENDER_NET_CA_CERTIFICATE_TAG_SECONDARY) */
+
+#endif /* CONFIG_EXAMPLE_CERTIFICATE_PATH */
 
 #endif /* CONFIG_NET_SOCKETS_SOCKOPT_TLS */
 

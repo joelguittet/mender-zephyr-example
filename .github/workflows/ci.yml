@@ -67,12 +67,19 @@ jobs:
       image: ghcr.io/zephyrproject-rtos/ci:v0.28.4
       volumes:
         - /dev:/dev
+        - /home/testbench/mender-zephyr-example/local.conf:/__w/mender-zephyr-example/local.conf
+        - /home/testbench/mender-zephyr-example/mender.crt:/__w/mender-zephyr-example/mender.crt
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/map.yml
       options: --privileged
       #ports:
       #  - 443:443
 
     steps:
+      - name: TODO REM
+        run: |
+          echo ${{ github.workspace }}
+          echo $GITHUB_WORKSPACE
+
       - name: Install tools
         run: |
           apt-get update
@@ -95,22 +102,22 @@ jobs:
           submodules: recursive
           path: mender-zephyr-example
 
-      - name: Checkout mender-server
-        uses: actions/checkout@v5
-        with:
-          repository: mendersoftware/mender-server
-          ref: v4.0.1
-          submodules: recursive
-          path: mender-server
+     # - name: Checkout mender-server
+     #   uses: actions/checkout@v5
+     #   with:
+     #     repository: mendersoftware/mender-server
+     #     ref: v4.0.1
+     #     submodules: recursive
+     #     path: mender-server
 
-      - name: Setup Mender server
-        working-directory: mender-server
-        run: |
-          export MENDER_IMAGE_TAG=v4.0.1
-          docker compose up -d
-          MENDER_USERNAME=admin@docker.mender.io
-          MENDER_PASSWORD=PleaseReplaceWithASecurePassword
-          docker compose run --name create-user useradm create-user --username "$MENDER_USERNAME" --password "$MENDER_PASSWORD"
+      #- name: Setup Mender server
+     #   working-directory: mender-server
+     #   run: |
+     #     export MENDER_IMAGE_TAG=v4.0.1
+     #     docker compose up -d
+     #     MENDER_USERNAME=admin@docker.mender.io
+     #     MENDER_PASSWORD=PleaseReplaceWithASecurePassword
+     #     docker compose run --name create-user useradm create-user --username "$MENDER_USERNAME" --password "$MENDER_PASSWORD"
 
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -130,7 +137,7 @@ jobs:
       - name: Execute tests
         working-directory: mender-zephyr-example
         run: |
-          west twister -T app -v --inline-logs --device-testing --hardware-map /__w/mender-zephyr-example/map.yml
+          west twister -T app -v --inline-logs --device-testing --hardware-map /__w/mender-zephyr-example/map.yml -- -DEXTRA_CONF_FILE="/__w/mender-zephyr-example/local.conf"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -148,4 +155,4 @@ jobs:
 #        working-directory: mender-server
 #        if: ${{ always() }}
 #        run: |
-#          docker compose down
+#          docker compose down -v --remove-orphans
