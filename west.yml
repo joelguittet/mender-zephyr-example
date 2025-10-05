@@ -51,5 +51,4 @@ manifest:
           - picolibc
     - name: mender-mcu-client
       remote: joelguittet
-      #revision: 0.12.0
-      revision: enhancement/modify-stack-size-unit
+      revision: 0.12.1
