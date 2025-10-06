@@ -137,7 +137,7 @@ jobs:
       - name: Execute tests
         working-directory: mender-zephyr-example
         run: |
-          west twister -T app -v --inline-logs --device-testing --hardware-map /__w/mender-zephyr-example/map.yml -- -DEXTRA_CONF_FILE="/__w/mender-zephyr-example/local.conf"
+          west twister -T app -v --inline-logs --device-testing --hardware-map /__w/mender-zephyr-example/map.yml -x=EXTRA_CONF_FILE=/__w/mender-zephyr-example/local.conf
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
