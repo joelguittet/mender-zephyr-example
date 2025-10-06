@@ -31,6 +31,7 @@ target_compile_definitions(app PRIVATE _POSIX_C_SOURCE=200809L) # Required for s
 # Generate Root CA include files
 if (CONFIG_EXAMPLE_USE_CUSTOM_CERTIFICATE)
     generate_inc_file_for_target(app "${CONFIG_EXAMPLE_CERTIFICATE_PATH}" "${ZEPHYR_BINARY_DIR}/include/generated/mender.der.inc")
+else()
+    generate_inc_file_for_target(app "src/AmazonRootCA1.cer" "${ZEPHYR_BINARY_DIR}/include/generated/AmazonRootCA1.cer.inc")
+    generate_inc_file_for_target(app "src/GoogleTrustServicesR4.crt" "${ZEPHYR_BINARY_DIR}/include/generated/GoogleTrustServicesR4.crt.inc")
 endif()
-generate_inc_file_for_target(app "src/AmazonRootCA1.cer" "${ZEPHYR_BINARY_DIR}/include/generated/AmazonRootCA1.cer.inc")
-generate_inc_file_for_target(app "src/GoogleTrustServicesR4.crt" "${ZEPHYR_BINARY_DIR}/include/generated/GoogleTrustServicesR4.crt.inc")
