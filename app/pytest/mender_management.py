@@ -30,7 +30,7 @@ class MenderManagement:
         """Authenticate to Mender Management API and store JWT token."""
         url = f"{self.server}/api/management/v1/useradm/auth/login"
         resp = requests.post(url,
-                             json={"username": self.username, "password": self.password},
+                             auth=HTTPBasicAuth(self.username, self.password),
                              verify=self.ca_cert)
         resp.raise_for_status()
         self.token = resp.text.strip()
