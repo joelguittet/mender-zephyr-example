@@ -68,11 +68,10 @@ jobs:
       volumes:
         - /dev:/dev
         - /home/testbench/mender-zephyr-example/local.conf:/__w/mender-zephyr-example/local.conf
+        - /home/testbench/mender-zephyr-example/mender.crt:/__w/mender-zephyr-example/mender.crt
         - /home/testbench/mender-zephyr-example/mender.der:/__w/mender-zephyr-example/mender.der
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/map.yml
       options: --privileged
-      #ports:
-      #  - 443:443
 
     steps:
       - name: TODO REM
@@ -138,6 +137,11 @@ jobs:
         working-directory: mender-zephyr-example
         run: |
           west twister -T app -v --inline-logs --device-testing --hardware-map /__w/mender-zephyr-example/map.yml -x=EXTRA_CONF_FILE=/__w/mender-zephyr-example/local.conf
+        env:
+          MENDER_SERVER_URL: "https://docker.mender.io"
+          MENDER_USERNAME: ${{ secrets.MENDER_USERNAME }}"
+          MENDER_PASSWORD: ${{ secrets.MENDER_PASSWORD }}"
+          MENDER_CRT_PATH: "/__w/mender-zephyr-example/mender.crt"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
