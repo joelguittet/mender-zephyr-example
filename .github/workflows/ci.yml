@@ -36,7 +36,7 @@ jobs:
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            clang-format pcregrep
+            clang-format git pcregrep
 
       - name: Checkout mender-zephyr-example
         uses: actions/checkout@v5

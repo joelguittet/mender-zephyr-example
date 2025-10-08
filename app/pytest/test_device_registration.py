@@ -1,5 +1,5 @@
-# @file      test_foo.py
-# @brief     Foo test file
+# @file      test_device_registration.py
+# @brief     Device registration test file
 #
 # Copyright joelguittet and mender-mcu-client contributors
 #
