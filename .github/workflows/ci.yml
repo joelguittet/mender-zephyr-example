@@ -36,7 +36,7 @@ jobs:
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            clang-format git pcregrep
+            ca-certificates clang-format git pcregrep
 
       - name: Checkout mender-zephyr-example
         uses: actions/checkout@v5
@@ -59,6 +59,7 @@ jobs:
         working-directory: mender-zephyr-example
         run: |
           ./.github/workflows/check_code_format.sh
+# TODO tester cidessus avec un always pour voir si on Execute tous les tests malgré tout en cas d'erreur multiples
 
   test:
     name: Execute tests on the targets
@@ -149,7 +150,7 @@ jobs:
       - name: Execute tests
         working-directory: mender-zephyr-example
         run: |
-          west twister -T app -v --inline-logs --device-testing --hardware-map /__w/mender-zephyr-example/map.yml -x=EXTRA_CONF_FILE=/__w/mender-zephyr-example/local.conf
+          west twister -T app -v --enable-slow --inline-logs --device-testing --hardware-map /__w/mender-zephyr-example/map.yml -x=EXTRA_CONF_FILE=/__w/mender-zephyr-example/local.conf
         env:
           MENDER_SERVER: "https://docker.mender.io"
           MENDER_USER: ${{ secrets.MENDER_USER }}
