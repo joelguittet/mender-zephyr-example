@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 
 mender = MenderManagement()
 
-def get_device_mac_address() -> str:
+def get_device_mac_address(dut: DeviceAdapter) -> str:
     output = dut.readlines_until(".*<inf>.*MAC address of the device '.*'", timeout=60)
     f = re.search(".*<inf>.*MAC address of the device '(.+?)'", output)
     if f:
@@ -38,7 +38,7 @@ def get_device_mac_address() -> str:
 
 def test_device_registration(dut: DeviceAdapter):
     """ Get the MAC address of the device. """
-    mac_address = get_device_mac_address()
+    mac_address = get_device_mac_address(dut)
     """ Ensure the device is not authorized to the mender server. """
     output = dut.readlines_until(".*<err>.*\[401\] Unauthorized: Unauthorized.*", timeout=60)
     match_no_lines(output, ["Mender client authenticated"])
