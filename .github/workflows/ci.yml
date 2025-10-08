@@ -78,6 +78,7 @@ jobs:
         run: |
           echo ${{ github.workspace }}
           echo $GITHUB_WORKSPACE
+          echo ${{ secrets.MENDER_USER }}"
 
 #      - name: Install tools
 #        run: |

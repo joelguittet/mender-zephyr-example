@@ -4,10 +4,11 @@ import time
 import requests
 from requests.auth import HTTPBasicAuth
 
+
 class MenderManagement:
     """
     Wrapper around Mender Management API (v1/v2).
-    Provides methods for device management and deployments.
+    Provides methods for device management, inventory, and deployments.
     """
 
     def __init__(self,
@@ -24,24 +25,49 @@ class MenderManagement:
         self.headers = None
         self.login()
 
-    # -----------------------------
-    # Authentication
-    # -----------------------------
+    # ============================================================
+    # AUTH
+    # ============================================================
     def login(self):
-        """Authenticate to Mender Management API and store JWT token."""
+        """Authenticate to Mender Management API using Basic Auth or JSON body."""
         url = f"{self.server}/api/management/v1/useradm/auth/login"
-        resp = requests.post(url,
-                             auth=HTTPBasicAuth(self.username, self.password),
-                             verify=self.ca_cert)
-        resp.raise_for_status()
-        self.token = resp.text.strip()
-        self.headers = {"Authorization": f"Bearer {self.token}"}
 
-    # -----------------------------
-    # Devices
-    # -----------------------------
+        try:
+            resp = requests.post(
+                url,
+                auth=HTTPBasicAuth(self.username, self.password),
+                verify=self.ca_cert,
+                timeout=10
+            )
+            if resp.status_code == 200 and resp.text.strip():
+                self.token = resp.text.strip()
+                self.headers = {"Authorization": f"Bearer {self.token}"}
+                print("✅ Logged in with Basic Auth")
+                return
+        except requests.RequestException:
+            pass
+
+        try:
+            resp = requests.post(
+                url,
+                json={"username": self.username, "password": self.password},
+                verify=self.ca_cert,
+                timeout=10
+            )
+            resp.raise_for_status()
+            if resp.text.strip():
+                self.token = resp.text.strip()
+                self.headers = {"Authorization": f"Bearer {self.token}"}
+                print("✅ Logged in with JSON body")
+                return
+        except requests.RequestException as e:
+            raise RuntimeError(f"❌ Login failed (Basic + JSON): {e}") from e
+
+    # ============================================================
+    # DEVICES
+    # ============================================================
     def list_devices(self):
-        """Return all devices."""
+        """Return all devices known by Mender."""
         url = f"{self.server}/api/management/v2/devauth/devices"
         r = requests.get(url, headers=self.headers, verify=self.ca_cert)
         r.raise_for_status()
@@ -55,9 +81,7 @@ class MenderManagement:
                 identity = json.loads(dev["identity_data"])
                 if identity.get("mac") == mac_address:
                     auth_sets = dev.get("auth_sets", [])
-                    if not auth_sets:
-                        raise RuntimeError(f"Device {dev['id']} has no auth sets")
-                    return dev, auth_sets[0]
+                    return dev, auth_sets[0] if auth_sets else None
             except (KeyError, json.JSONDecodeError):
                 continue
         return None, None
@@ -65,7 +89,7 @@ class MenderManagement:
     def accept_device(self, mac_address):
         """Accept device by MAC."""
         device, auth = self.get_device_by_mac(mac_address)
-        if not device:
+        if not device or not auth:
             raise ValueError(f"No device found with MAC {mac_address}")
 
         url = f"{self.server}/api/management/v2/devauth/devices/{device['id']}/auth/{auth['id']}/status"
@@ -74,51 +98,73 @@ class MenderManagement:
         r.raise_for_status()
         return True
 
-    def reject_device(self, mac_address):
-        """Reject (deny) a device by MAC."""
-        device, auth = self.get_device_by_mac(mac_address)
+    # ============================================================
+    # INVENTORY
+    # ============================================================
+    def get_device_inventory(self, device_id):
+        """
+        Get inventory attributes for a given device.
+        Returns a dict of key/value pairs.
+        """
+        url = f"{self.server}/api/management/v1/inventory/devices/{device_id}"
+        r = requests.get(url, headers=self.headers, verify=self.ca_cert)
+        r.raise_for_status()
+        data = r.json()
+        # Flatten inventory into { name: value } for convenience
+        return {item["name"]: item["value"] for item in data.get("attributes", [])}
+
+    def get_inventory_by_mac(self, mac_address):
+        """Shortcut: get inventory using MAC address lookup."""
+        device, _ = self.get_device_by_mac(mac_address)
         if not device:
             raise ValueError(f"No device found with MAC {mac_address}")
+        return self.get_device_inventory(device["id"])
 
-        url = f"{self.server}/api/management/v2/devauth/devices/{device['id']}/auth/{auth['id']}/status"
-        payload = {"status": "rejected"}
+    # ============================================================
+    # CONFIGURATION
+    # ============================================================
+    def get_device_configuration(self, device_id):
+        """Retrieve current configuration data for a device."""
+        url = f"{self.server}/api/management/v1/deviceconfig/configurations/{device_id}"
+        r = requests.get(url, headers=self.headers, verify=self.ca_cert)
+        if r.status_code == 404:
+            return {}
+        r.raise_for_status()
+        return r.json()
+
+    def set_device_configuration(self, device_id, config_dict):
+        """Set configuration key/values for a device."""
+        url = f"{self.server}/api/management/v1/deviceconfig/configurations/{device_id}"
+        payload = {"config": config_dict}
         r = requests.put(url, headers=self.headers, json=payload, verify=self.ca_cert)
         r.raise_for_status()
         return True
 
-    # -----------------------------
-    # Deployments
-    # -----------------------------
+    def verify_device_configuration(self, device_id, expected_config):
+        """Check if a device’s configuration matches expected key/values."""
+        current = self.get_device_configuration(device_id).get("config", {})
+        for key, val in expected_config.items():
+            if current.get(key) != val:
+                return False
+        return True
+
+    # ============================================================
+    # DEPLOYMENTS
+    # ============================================================
     def upload_artifact(self, filepath, description=None):
         """Upload a new artifact (deployment package)."""
         url = f"{self.server}/api/management/v1/deployments/artifacts"
-        files = {
-            "artifact": open(filepath, "rb"),
-        }
-        data = {}
-        if description:
-            data["description"] = description
-
+        files = {"artifact": open(filepath, "rb")}
+        data = {"description": description} if description else {}
         r = requests.post(url, headers=self.headers, files=files, data=data, verify=self.ca_cert)
         r.raise_for_status()
-        return r.json()
+        return r.json() if r.text else {}
 
     def create_deployment(self, name, artifact_name, device_ids):
         """Create a deployment for one or more devices."""
         url = f"{self.server}/api/management/v1/deployments/deployments"
-        payload = {
-            "name": name,
-            "artifact_name": artifact_name,
-            "devices": device_ids
-        }
+        payload = {"name": name, "artifact_name": artifact_name, "devices": device_ids}
         r = requests.post(url, headers=self.headers, json=payload, verify=self.ca_cert)
-        r.raise_for_status()
-        return r.json()
-
-    def get_deployments(self):
-        """Return list of all deployments."""
-        url = f"{self.server}/api/management/v1/deployments/deployments"
-        r = requests.get(url, headers=self.headers, verify=self.ca_cert)
         r.raise_for_status()
         return r.json()
 
@@ -139,4 +185,3 @@ class MenderManagement:
                 return state
             time.sleep(interval)
         raise TimeoutError(f"Deployment {deployment_id} did not complete within {timeout}s")
-
