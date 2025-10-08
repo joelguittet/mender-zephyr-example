@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
 import logging
 from twister_harness import Shell
 from twister_harness import DeviceAdapter
@@ -24,18 +25,33 @@ logger = logging.getLogger(__name__)
 
 mender = MenderManagement()
 
+def get_device_mac_address() -> str:
+    output = dut.readlines_until(".*<inf>.*MAC address of the device '.*'", timeout: 60)
+    f = re.search(".*<inf>.*MAC address of the device '(.+?)'", output)
+    if f:
+        mac_address = x.group(1)
+        print(f"✅ MAC address of the device is '{mac_address}'")
+        return mac_address
+    else:
+        raise AssertionError(f"🔴​​ MAC address of the device not found")
+    return None
+
 def test_device_registration(dut: DeviceAdapter):
-    # Get device
-    # TODO get MAC from command line
-    mac_address = "00:08:dc:01:02:03"
-    # TODO with timeout and not 'Mender client authenticated'
-    dut.readlines_until('.*<err>.*\[401\] Unauthorized: Unauthorized.*')
+    """ Get the MAC address of the device. """
+    mac_address = get_device_mac_address()
+    """ Ensure the device is not authorized to the mender server. """
+    output = dut.readlines_until(".*<err>.*\[401\] Unauthorized: Unauthorized.*", timeout: 60)
+    match_no_lines(output, ["Mender client authenticated"])
+    print("✅ Device doesn't succeed to authenticate")
     device, auth_id = mender.get_device_by_mac(mac_address)
-    assert device is not None, f"Device with MAC {mac_address} not found"
-    logger.info(f"Found device ID: {device['id']} status={device['status']}")
-    assert device['status'] == "pending", f"Device with MAC {mac_address} has not the expected status"
-    # Accept the device
+    assert device is not None, f"Device with MAC {mac_address} not found on mender server"
+    assert device['status'] == "pending", f"Device with MAC {mac_address} has unexpected status '{device['status']}'"
+    print("✅ Device has status 'pending' on the mender server")
+    """ Accept the device on the mender server. """
     mender.accept_device(mac_address)
-    # TODO with timeout and not Unauthorized
-    dut.readlines_until('Mender client authenticated')
-    dut.readlines_until('No deployment available')
+    output = dut.readlines_until("Mender client authenticated", timeout: 300)
+    match_no_lines(output, ["\[401\] Unauthorized: Unauthorized"])
+    device, auth_id = mender.get_device_by_mac(mac_address)
+    assert device is not None, f"Device with MAC {mac_address} not found on mender server"
+    assert device['status'] == "accepted", f"Device with MAC {mac_address} has unexpected status '{device['status']}'"
+    print("✅ Device has status 'accepted' on the mender server")

@@ -20,8 +20,15 @@ sample:
    # extra_overlay_confs:
     #  - debug.conf
 tests:
-    some.foo.test:
-        harness: pytest
-        tags: foo
-        platform_allow: >
-            nucleo_l4a6zg
+  mender-mcu-client:
+    harness: pytest
+    timeout: 600
+    slow: true
+    harness_config:
+      pytest_dut_scope: session
+    platform_allow:
+      - nucleo_l4a6zg
+    tags:
+      - testing
+      - pytest
+      - shell
