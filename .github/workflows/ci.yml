@@ -78,7 +78,7 @@ jobs:
         run: |
           echo ${{ github.workspace }}
           echo $GITHUB_WORKSPACE
-          echo ${{ secrets.MENDER_USER }}"
+          echo ${{ secrets.MENDER_USER }}
 
 #      - name: Install tools
 #        run: |
@@ -152,8 +152,8 @@ jobs:
           west twister -T app -v --inline-logs --device-testing --hardware-map /__w/mender-zephyr-example/map.yml -x=EXTRA_CONF_FILE=/__w/mender-zephyr-example/local.conf
         env:
           MENDER_SERVER: "https://docker.mender.io"
-          MENDER_USER: ${{ secrets.MENDER_USER }}"
-          MENDER_PASS: ${{ secrets.MENDER_PASS }}"
+          MENDER_USER: ${{ secrets.MENDER_USER }}
+          MENDER_PASS: ${{ secrets.MENDER_PASS }}
           MENDER_CA: "/__w/mender-zephyr-example/mender.crt"
 
       - name: Upload artifact
