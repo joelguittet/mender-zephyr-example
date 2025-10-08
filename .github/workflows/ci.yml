@@ -44,22 +44,25 @@ jobs:
           path: mender-zephyr-example
 
       - name: Check headers
+        if: ${{ always() }}
         working-directory: mender-zephyr-example
         run: |
           ./.github/workflows/check_headers.sh
       - name: Check include guards
+        if: ${{ always() }}
         working-directory: mender-zephyr-example
         run: |
           ./.github/workflows/check_include_guards.sh
       - name: Check equivalence tests
+        if: ${{ always() }}
         working-directory: mender-zephyr-example
         run: |
           ./.github/workflows/check_equivalence_tests.sh
       - name: Check code format
+        if: ${{ always() }}
         working-directory: mender-zephyr-example
         run: |
           ./.github/workflows/check_code_format.sh
-# TODO tester cidessus avec un always pour voir si on Execute tous les tests malgré tout en cas d'erreur multiples
 
   test:
     name: Execute tests on the targets
@@ -79,7 +82,6 @@ jobs:
         run: |
           echo ${{ github.workspace }}
           echo $GITHUB_WORKSPACE
-          echo ${{ secrets.MENDER_USER }}
 
 #      - name: Install tools
 #        run: |
