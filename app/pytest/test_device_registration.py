@@ -33,16 +33,16 @@ def get_device_mac_address(dut: DeviceAdapter) -> str:
         print(f"✅ MAC address of the device is '{mac_address}'")
         return mac_address
     else:
-        raise AssertionError(f"🔴​​ MAC address of the device not found")
+        raise AssertionError(f"🔴​​​ MAC address of the device not found")
     return None
 
 def test_device_registration(dut: DeviceAdapter):
     """ Get the MAC address of the device. """
     mac_address = get_device_mac_address(dut)
     """ Ensure the device is not authorized to the mender server. """
-    output = dut.readlines_until(".*<err>.*\[401\] Unauthorized: Unauthorized.*", timeout=60)
+    output = dut.readlines_until(".*<err>.*\[401\] Unauthorized.*", timeout=60)
     match_no_lines(output, ["Mender client authenticated"])
-    print("✅ Device doesn't succeed to authenticate")
+    print("✅ Device is not authenticated")
     device, auth_id = mender.get_device_by_mac(mac_address)
     assert device is not None, f"Device with MAC {mac_address} not found on mender server"
     assert device['status'] == "pending", f"Device with MAC {mac_address} has unexpected status '{device['status']}'"
@@ -50,7 +50,8 @@ def test_device_registration(dut: DeviceAdapter):
     """ Accept the device on the mender server. """
     mender.accept_device(mac_address)
     output = dut.readlines_until("Mender client authenticated", timeout=300)
-    match_no_lines(output, ["\[401\] Unauthorized: Unauthorized"])
+    match_no_lines(output, ["\[401\] Unauthorized"])
+    print("✅ Device is authenticated")
     device, auth_id = mender.get_device_by_mac(mac_address)
     assert device is not None, f"Device with MAC {mac_address} not found on mender server"
     assert device['status'] == "accepted", f"Device with MAC {mac_address} has unexpected status '{device['status']}'"
