@@ -27,9 +27,9 @@ mender = MenderManagement()
 
 def get_device_mac_address(dut: DeviceAdapter) -> str:
     output = dut.readlines_until(".*<inf>.*MAC address of the device '.*'", timeout=60)
-    f = re.search(".*<inf>.*MAC address of the device '(.+?)'", output[-1])
-    if f:
-        mac_address = x.group(1)
+    m = re.search(".*<inf>.*MAC address of the device '(.+?)'", output[-1])
+    if m:
+        mac_address = m.group(1)
         print(f"✅ MAC address of the device is '{mac_address}'")
         return mac_address
     else:
