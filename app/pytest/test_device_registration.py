@@ -19,6 +19,7 @@ import re
 import logging
 from twister_harness import Shell
 from twister_harness import DeviceAdapter
+from twister_harness.helpers.utils import match_no_lines
 from mender_management import MenderManagement
 
 logger = logging.getLogger(__name__)
