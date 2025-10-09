@@ -94,7 +94,14 @@ class MenderManagement:
         devices = self.list_devices()
         for dev in devices:
             try:
-                identity = json.loads(dev["identity_data"])
+                identity_data = dev.get("identity_data")
+                # Handle both JSON string and dict cases
+                if isinstance(identity_data, str):
+                    identity = json.loads(identity_data)
+                elif isinstance(identity_data, dict):
+                    identity = identity_data
+                else:
+                    continue
                 if identity.get("mac") == mac_address:
                     auth_sets = dev.get("auth_sets", [])
                     return dev, auth_sets[0] if auth_sets else None
