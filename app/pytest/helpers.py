@@ -24,7 +24,7 @@ class Helpers:
     Provides helper methods for device management.
     """
 
-    def get_device_mac_address(dut: DeviceAdapter) -> str:
+    def get_device_mac_address(self, dut: DeviceAdapter) -> str:
         output = dut.readlines_until(".*<inf>.*MAC address of the device '.*'", timeout=60)
         m = re.search(".*<inf>.*MAC address of the device '(.+?)'", output[-1])
         if m:
@@ -34,7 +34,7 @@ class Helpers:
         print(f"✅ MAC address of the device is '{mac_address}'")
         return mac_address
 
-    def assert_device_not_authenticated(dut: DeviceAdapter) -> None:
+    def assert_device_not_authenticated(self, dut: DeviceAdapter) -> None:
         try:
             output = dut.readlines_until(".*<err>.*\[401\] Unauthorized.*", timeout=300)
             match_no_lines(output, ["Mender client authenticated"])
@@ -42,7 +42,7 @@ class Helpers:
             raise AssertionError(f"🔴​​​ Device appear to be authenticated but it should not")
         print("✅ Device is not authenticated")
 
-    def assert_device_authenticated(dut: DeviceAdapter) -> None:
+    def assert_device_authenticated(self, dut: DeviceAdapter) -> None:
         try:
             output = dut.readlines_until("Mender client authenticated", timeout=300)
             match_no_lines(output, ["\[401\] Unauthorized"])

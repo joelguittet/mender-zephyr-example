@@ -141,6 +141,10 @@ jobs:
         env:
           PIP_ROOT_USER_ACTION: ignore
 
+      - name: Install Python tools
+        run: |
+          pip install pytest-dependency
+
       - name: Setup Zephyr project
         uses: zephyrproject-rtos/action-zephyr-setup@v1
         with:
