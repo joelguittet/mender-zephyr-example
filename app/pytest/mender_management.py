@@ -21,6 +21,8 @@ import time
 import requests
 from requests.auth import HTTPBasicAuth
 
+# TODO: uniformize API by mac or not, uniformoze the comments
+
 class MenderManagement:
     """
     Wrapper around Mender Management API (v1/v2).
@@ -145,8 +147,7 @@ class MenderManagement:
         r.raise_for_status()
         data = r.json()
         # Flatten inventory into { name: value } for convenience
-        #return {item["name"]: item["value"] for item in data.get("attributes", [])}
-        return data
+        return {item["name"]: item["value"] for item in data.get("attributes", [])}
 
     def get_inventory_by_mac(self, mac_address):
         """Shortcut: get inventory using MAC address lookup."""

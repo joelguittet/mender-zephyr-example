@@ -15,6 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import re
+import time
 import logging
 from twister_harness import DeviceAdapter, Shell
 from mender_management import MenderManagement
@@ -30,11 +32,33 @@ def test_device_inventory(dut: DeviceAdapter):
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
     """Ensure the device is authorized on the mender server."""
+    try:
+        helpers.assert_device_authenticated(dut)
+    except:
+        mender_management.accept_device(mac_address)
     helpers.assert_device_authenticated(dut)
     device, auth_id = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"Device with MAC {mac_address} not found on mender server"
     assert device['status'] == "accepted", f"Device with MAC {mac_address} has unexpected status '{device['status']}'"
     print("✅ Device has status 'accepted' on the mender server")
+    """Wait to let time to the device to push the inventory content."""
+    time.sleep(60)
     """Ensure of the device inventory content."""
     inventory = mender_management.get_device_inventory(device["id"])
-    print(inventory)
+    print(f"Device inventory: {inventory}")
+    expected_inventory = {}
+    expected_inventory['artifact_name'] = 'mender-nucleo-l4a6zg-zephyr-example-v0.1.0'
+    expected_inventory['rootfs-image.version'] = 'mender-nucleo-l4a6zg-zephyr-example-v0.1.0'
+    expected_inventory['device_type'] = 'mender-nucleo-l4a6zg-zephyr-example'
+    expected_inventory['latitude'] = '45.8325'
+    expected_inventory['longitude'] = '6.864722'
+    expected_inventory['mender-mcu-client'] = '0.12.1'
+    expected_inventory['zephyr-rtos'] = '4.2.99'
+    print(f"Device expected inventory: {expected_inventory}")
+    for key, val in expected_inventory.items():
+        print(f"TODO REM check {inventory.get(key)} for {val}") # TODO REM
+        m = re.search(val, inventory.get(key))
+        if m is None:
+            raise AssertionError(f"🔴​​​ Device inventory is invalid")
+    print("✅ Device inventory contains expected inventory items")
+ 

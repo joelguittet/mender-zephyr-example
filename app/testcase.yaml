@@ -21,7 +21,7 @@ tests:
     timeout: 600
     slow: true
     harness_config:
-      pytest_dut_scope: session
+      pytest_dut_scope: module
     platform_allow:
       - nucleo_l4a6zg
     tags:
