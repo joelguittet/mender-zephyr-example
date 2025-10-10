@@ -145,7 +145,8 @@ class MenderManagement:
         r.raise_for_status()
         data = r.json()
         # Flatten inventory into { name: value } for convenience
-        return {item["name"]: item["value"] for item in data.get("attributes", [])}
+        #return {item["name"]: item["value"] for item in data.get("attributes", [])}
+        return data
 
     def get_inventory_by_mac(self, mac_address):
         """Shortcut: get inventory using MAC address lookup."""

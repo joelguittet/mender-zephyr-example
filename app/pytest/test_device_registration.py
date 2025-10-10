@@ -16,10 +16,9 @@
 # limitations under the License.
 
 import logging
-import helpers
 from twister_harness import DeviceAdapter, Shell
-from twister_harness.helpers.utils import match_no_lines
 from mender_management import MenderManagement
+from . import helpers
 
 logger = logging.getLogger(__name__)
 
@@ -36,24 +35,15 @@ def test_device_registration(dut: DeviceAdapter):
     """Reset the device to force reconnection to the server."""
     shell.exec_command("kernel reboot")
     """Ensure the device is not authorized to the mender server."""
-    try:
-        output = dut.readlines_until(".*<err>.*\[401\] Unauthorized.*", timeout=300)
-        match_no_lines(output, ["Mender client authenticated"])
-    except (twister_harness.exceptions.TwisterHarnessTimeoutException, AssertionError):
-        raise AssertionError(f"🔴​​​ Device doesn't appear to be unauthorized")
-    print("✅ Device is not authenticated")
+    helpers.assert_device_not_authenticated(dut)
     device, auth_id = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"Device with MAC {mac_address} not found on mender server"
     assert device['status'] == "pending", f"Device with MAC {mac_address} has unexpected status '{device['status']}'"
     print("✅ Device has status 'pending' on the mender server")
     """Accept the device on the mender server."""
     mender_management.accept_device(mac_address)
-    try:
-        output = dut.readlines_until("Mender client authenticated", timeout=300)
-        match_no_lines(output, ["\[401\] Unauthorized"])
-    except (twister_harness.exceptions.TwisterHarnessTimeoutException, AssertionError):
-        raise AssertionError(f"🔴​​​ Device doesn't appear to be authenticated")
-    print("✅ Device is authenticated")
+    """Ensure the device is authorized on the mender server."""
+    helpers.assert_device_authenticated(dut)
     device, auth_id = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"Device with MAC {mac_address} not found on mender server"
     assert device['status'] == "accepted", f"Device with MAC {mac_address} has unexpected status '{device['status']}'"
