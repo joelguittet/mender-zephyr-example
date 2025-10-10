@@ -15,45 +15,46 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import re
 import logging
-from twister_harness import Shell
-from twister_harness import DeviceAdapter
+import helpers
+from twister_harness import DeviceAdapter, Shell
 from twister_harness.helpers.utils import match_no_lines
 from mender_management import MenderManagement
 
 logger = logging.getLogger(__name__)
 
-mender = MenderManagement()
-
-def get_device_mac_address(dut: DeviceAdapter) -> str:
-    output = dut.readlines_until(".*<inf>.*MAC address of the device '.*'", timeout=60)
-    m = re.search(".*<inf>.*MAC address of the device '(.+?)'", output[-1])
-    if m:
-        mac_address = m.group(1)
-        print(f"✅ MAC address of the device is '{mac_address}'")
-        return mac_address
-    else:
-        raise AssertionError(f"🔴​​​ MAC address of the device not found")
-    return None
+mender_management = MenderManagement()
 
 def test_device_registration(dut: DeviceAdapter):
-    """ Get the MAC address of the device. """
-    mac_address = get_device_mac_address(dut)
-    """ Ensure the device is not authorized to the mender server. """
-    output = dut.readlines_until(".*<err>.*\[401\] Unauthorized.*", timeout=60)
-    match_no_lines(output, ["Mender client authenticated"])
+    """Get the MAC address of the device."""
+    mac_address = helpers.get_device_mac_address(dut)
+    """Decomissioning of the device on the server (if it is already registered)."""
+    try:
+        mender_management.delete_device(mac_address)
+    except:
+        pass
+    """Reset the device to force reconnection to the server."""
+    shell.exec_command("kernel reboot")
+    """Ensure the device is not authorized to the mender server."""
+    try:
+        output = dut.readlines_until(".*<err>.*\[401\] Unauthorized.*", timeout=300)
+        match_no_lines(output, ["Mender client authenticated"])
+    except (twister_harness.exceptions.TwisterHarnessTimeoutException, AssertionError):
+        raise AssertionError(f"🔴​​​ Device doesn't appear to be unauthorized")
     print("✅ Device is not authenticated")
-    device, auth_id = mender.get_device_by_mac(mac_address)
+    device, auth_id = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"Device with MAC {mac_address} not found on mender server"
     assert device['status'] == "pending", f"Device with MAC {mac_address} has unexpected status '{device['status']}'"
     print("✅ Device has status 'pending' on the mender server")
-    """ Accept the device on the mender server. """
-    mender.accept_device(mac_address)
-    output = dut.readlines_until("Mender client authenticated", timeout=300)
-    match_no_lines(output, ["\[401\] Unauthorized"])
+    """Accept the device on the mender server."""
+    mender_management.accept_device(mac_address)
+    try:
+        output = dut.readlines_until("Mender client authenticated", timeout=300)
+        match_no_lines(output, ["\[401\] Unauthorized"])
+    except (twister_harness.exceptions.TwisterHarnessTimeoutException, AssertionError):
+        raise AssertionError(f"🔴​​​ Device doesn't appear to be authenticated")
     print("✅ Device is authenticated")
-    device, auth_id = mender.get_device_by_mac(mac_address)
+    device, auth_id = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"Device with MAC {mac_address} not found on mender server"
     assert device['status'] == "accepted", f"Device with MAC {mac_address} has unexpected status '{device['status']}'"
     print("✅ Device has status 'accepted' on the mender server")

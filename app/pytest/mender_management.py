@@ -121,6 +121,17 @@ class MenderManagement:
         r.raise_for_status()
         return True
 
+    def delete_device(self, mac_address):
+        """Delete device by MAC."""
+        device, auth = self.get_device_by_mac(mac_address)
+        if not device or not auth:
+            raise ValueError(f"No device found with MAC {mac_address}")
+
+        url = f"{self.server}/api/management/v2/devauth/devices/{device['id']}"
+        r = requests.delete(url, headers=self.headers, verify=self.ca_cert)
+        r.raise_for_status()
+        return True
+
     # ============================================================
     # INVENTORY
     # ============================================================
