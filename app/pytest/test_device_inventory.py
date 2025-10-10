@@ -18,7 +18,7 @@
 import re
 import time
 import logging
-from twister_harness import DeviceAdapter, Shell
+from twister_harness import DeviceAdapter
 from mender_management import MenderManagement
 from helpers import Helpers
 
@@ -36,7 +36,7 @@ def test_device_inventory(dut: DeviceAdapter):
         helpers.assert_device_authenticated(dut)
     except:
         mender_management.accept_device(mac_address)
-    helpers.assert_device_authenticated(dut)
+        helpers.assert_device_authenticated(dut)
     device, auth_id = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"Device with MAC {mac_address} not found on mender server"
     assert device['status'] == "accepted", f"Device with MAC {mac_address} has unexpected status '{device['status']}'"

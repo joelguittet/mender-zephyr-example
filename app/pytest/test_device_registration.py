@@ -26,7 +26,7 @@ mender_management = MenderManagement()
 helpers = Helpers()
 
 #@pytest.mark.dependency()
-def test_device_registration(dut: DeviceAdapter):
+def test_device_registration(shell: Shell, dut: DeviceAdapter):
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
     """Decomissioning of the device on the server (if it is already registered)."""
