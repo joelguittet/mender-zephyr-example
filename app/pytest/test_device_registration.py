@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 mender_management = MenderManagement()
 helpers = Helpers()
 
-@pytest.mark.dependency()
+#@pytest.mark.dependency()
 def test_device_registration(dut: DeviceAdapter):
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
