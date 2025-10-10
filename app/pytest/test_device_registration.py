@@ -15,17 +15,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
-import sys
 import logging
 from twister_harness import DeviceAdapter, Shell
 from mender_management import MenderManagement
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-import helpers
+from helpers import Helpers
 
 logger = logging.getLogger(__name__)
 
 mender_management = MenderManagement()
+helpers = Helpers()
 
 def test_device_registration(dut: DeviceAdapter):
     """Get the MAC address of the device."""
