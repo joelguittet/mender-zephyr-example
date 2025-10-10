@@ -15,10 +15,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import sys
 import logging
 from twister_harness import DeviceAdapter, Shell
 from mender_management import MenderManagement
-from . import helpers
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+import helpers
 
 logger = logging.getLogger(__name__)
 
