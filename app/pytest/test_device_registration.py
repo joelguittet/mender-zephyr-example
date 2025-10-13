@@ -25,8 +25,8 @@ logger = logging.getLogger(__name__)
 mender_management = MenderManagement()
 helpers = Helpers()
 
-#@pytest.mark.dependency()
-def test_device_registration(shell: Shell, dut: DeviceAdapter):
+@pytest.mark.dependency()
+def test_device_registration(dut: DeviceAdapter, shell: Shell):
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
     """Decomissioning of the device on the server (if it is already registered)."""
@@ -40,7 +40,7 @@ def test_device_registration(shell: Shell, dut: DeviceAdapter):
     helpers.assert_device_not_authenticated(dut)
     device, auth_id = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"Device with MAC {mac_address} not found on mender server"
-    assert device['status'] == "pending", f"Device with MAC {mac_address} has unexpected status '{device['status']}'"
+    assert device["status"] == "pending", f"Device with MAC {mac_address} has unexpected status '{device["status"]}'"
     print("✅ Device has status 'pending' on the mender server")
     """Accept the device on the mender server."""
     mender_management.accept_device(mac_address)
@@ -48,5 +48,5 @@ def test_device_registration(shell: Shell, dut: DeviceAdapter):
     helpers.assert_device_authenticated(dut)
     device, auth_id = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"Device with MAC {mac_address} not found on mender server"
-    assert device['status'] == "accepted", f"Device with MAC {mac_address} has unexpected status '{device['status']}'"
+    assert device["status"] == "accepted", f"Device with MAC {mac_address} has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
