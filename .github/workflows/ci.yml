@@ -72,10 +72,11 @@ jobs:
       volumes:
         - /dev:/dev
         - /home/testbench/mender-zephyr-example/local.conf:/__w/mender-zephyr-example/local.conf
-        - /home/testbench/mender-zephyr-example/mender.crt:/__w/mender-zephyr-example/mender.crt
-        - /home/testbench/mender-zephyr-example/mender.der:/__w/mender-zephyr-example/mender.der
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/map.yml
       options: --privileged
+
+      #/home/testbench/mender-zephyr-example/mender.crt:/__w/mender-zephyr-example/mender.crt
+        #/home/testbench/mender-zephyr-example/mender.der:/__w/mender-zephyr-example/mender.der
 
     steps:
       - name: TODO REM
@@ -131,7 +132,8 @@ jobs:
           export MENDER_IMAGE_TAG=v4.0.1
           docker compose up -d
           docker compose run --name create-user useradm create-user --username "${{ secrets.MENDER_USER }}" --password "${{ secrets.MENDER_PASS }}"
-# TODO retrieve mender.crt from this repo directly
+          openssl x509 -in /__w/mender-zephyr-example/mender-zephyr-example/mender-server/compose/certs/mender.crt -outform der -out /__w/mender-zephyr-example/mender.der
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
@@ -159,7 +161,7 @@ jobs:
           MENDER_SERVER: "https://docker.mender.io"
           MENDER_USER: ${{ secrets.MENDER_USER }}
           MENDER_PASS: ${{ secrets.MENDER_PASS }}
-          MENDER_CA: "/__w/mender-zephyr-example/mender.crt"
+          MENDER_CA: "/__w/mender-zephyr-example/mender-zephyr-example/mender-server/compose/certs/mender.crt"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
