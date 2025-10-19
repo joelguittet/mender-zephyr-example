@@ -122,14 +122,14 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: mendersoftware/mender-server
-          ref: v4.0.1
+          ref: v4.0.0
           submodules: recursive
           path: mender-server
 
       - name: Setup Mender server
         working-directory: mender-server
         run: |
-          export MENDER_IMAGE_TAG=v4.0.1
+          export MENDER_IMAGE_TAG=v4.0.0
           docker compose up -d
           docker compose run --name create-user useradm create-user --username "${{ secrets.MENDER_USER }}" --password "${{ secrets.MENDER_PASS }}"
           openssl x509 -in /__w/mender-zephyr-example/mender-zephyr-example/mender-server/compose/certs/mender.crt -outform der -out /__w/mender-zephyr-example/mender.der
@@ -180,4 +180,5 @@ jobs:
         working-directory: mender-server
         if: ${{ always() }}
         run: |
+          docker compose stop
           docker compose down -v --remove-orphans
