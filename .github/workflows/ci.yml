@@ -73,7 +73,7 @@ jobs:
         - /dev:/dev
         - /home/testbench/mender-zephyr-example/local.conf:/__w/mender-zephyr-example/local.conf
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/map.yml
-      options: "--privileged --user $(id -u $USER):$(id -g $USER)"
+      options: "--privileged --user $(id -u $USER)"
 
       #/home/testbench/mender-zephyr-example/mender.crt:/__w/mender-zephyr-example/mender.crt
         #/home/testbench/mender-zephyr-example/mender.der:/__w/mender-zephyr-example/mender.der
