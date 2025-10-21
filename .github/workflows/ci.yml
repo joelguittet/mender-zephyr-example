@@ -73,21 +73,12 @@ jobs:
         - /dev:/dev
         - /home/testbench/mender-zephyr-example/local.conf:/__w/mender-zephyr-example/local.conf
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/map.yml
-      options: "--privileged --user 1000"
+      options: --privileged
 
       #/home/testbench/mender-zephyr-example/mender.crt:/__w/mender-zephyr-example/mender.crt
         #/home/testbench/mender-zephyr-example/mender.der:/__w/mender-zephyr-example/mender.der
 
     steps:
-      - name: TODO REM
-        run: |
-          echo ${{ github.workspace }}
-          echo $GITHUB_WORKSPACE
-          id
-          ls -l /var/run/docker.sock
-          docker info || echo "Docker not reachable"
-          docker ps
-
       - name: Install tools
         run: |
           apt-get update
@@ -115,6 +106,14 @@ jobs:
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             mender-artifact
+      - name: TODO REM
+        run: |
+          echo ${{ github.workspace }}
+          echo $GITHUB_WORKSPACE
+          id
+          ls -l /var/run/docker.sock
+          docker info || echo "Docker not reachable"
+          docker ps
 
       - name: Checkout mender-zephyr-example
         uses: actions/checkout@v5
