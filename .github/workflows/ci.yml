@@ -105,7 +105,6 @@ jobs:
           echo '{
             "bip": "172.30.0.1/16"
           }' | sudo tee /etc/docker/daemon.json
-          sudo systemctl restart docker
 
       # Install mender-artifact
       # This tool is used to generate artifact for firmware update
