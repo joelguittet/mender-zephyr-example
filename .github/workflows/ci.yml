@@ -64,22 +64,9 @@ jobs:
         run: |
           ./.github/workflows/check_code_format.sh
 
-  test:
-    name: Execute tests on the targets
+  setup:
+    name: Setup Mender server
     runs-on: self-hosted
-    container:
-      image: ghcr.io/zephyrproject-rtos/ci:v0.28.4
-      volumes:
-        - /dev:/dev
-        - /var/run/docker.sock:/var/run/docker.sock
-        - /home/testbench/mender-zephyr-example/local.conf:/__w/mender-zephyr-example/local.conf
-        - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/map.yml
-      options: --privileged
-
-      #
-      #/home/testbench/mender-zephyr-example/mender.crt:/__w/mender-zephyr-example/mender.crt
-        #/home/testbench/mender-zephyr-example/mender.der:/__w/mender-zephyr-example/mender.der
-
     steps:
       # Install docker and related tools
       # This is used later to start mender-server
@@ -98,6 +85,61 @@ jobs:
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+
+      # Checkout mender-server
+      - name: Checkout mender-server
+        uses: actions/checkout@v5
+        with:
+          repository: mendersoftware/mender-server
+          ref: v4.0.0
+          submodules: recursive
+          path: mender-server
+
+      # Start mender-server
+      # mender-server username and password are setup so that test scripts can later connect to the server
+      - name: Setup Mender server
+        working-directory: mender-server
+        run: |
+          export MENDER_IMAGE_TAG=v4.0.0
+          docker compose up -d
+          docker compose run --name create-user useradm create-user --username "${{ secrets.MENDER_USER }}" --password "${{ secrets.MENDER_PASS }}"
+          openssl x509 -in /__w/mender-zephyr-example/mender-zephyr-example/mender-server/compose/certs/mender.crt -outform der -out /__w/mender-zephyr-example/mender.der
+
+  test:
+    name: Execute tests on the targets
+    runs-on: self-hosted
+    needs: setup
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci:v0.28.4
+      volumes:
+        - /dev:/dev
+        - /var/run/docker.sock:/var/run/docker.sock
+        - /home/testbench/mender-zephyr-example/local.conf:/__w/mender-zephyr-example/local.conf
+        - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/map.yml
+      options: --privileged
+
+      #
+      #/home/testbench/mender-zephyr-example/mender.crt:/__w/mender-zephyr-example/mender.crt
+        #/home/testbench/mender-zephyr-example/mender.der:/__w/mender-zephyr-example/mender.der
+
+    steps:
+      # Install docker and related tools
+      # This is used later to start mender-server
+      #- name: Install docker
+      #  run: |
+      #    apt-get update
+      #    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      #      ca-certificates curl
+      #    install -m 0755 -d /etc/apt/keyrings
+      #    curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+      #    chmod a+r /etc/apt/keyrings/docker.asc
+      #    echo \
+      #      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+      #      $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+      #      tee /etc/apt/sources.list.d/docker.list > /dev/null
+      #    apt-get update
+      #    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      #      docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
       # Configure docker network subnet so that it doesn't conflict with the host subnet
       # This is done to permit mender containers connecting to the mender-mongo instance
@@ -120,18 +162,18 @@ jobs:
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             mender-artifact
-      - name: TODO REM
-        run: |
-          echo ${{ github.workspace }}
-          echo $GITHUB_WORKSPACE
-          id
-          ls -l /var/run/docker.sock
-          docker info || echo "Docker not reachable"
-          docker ps
-          docker container ls -a
-          docker image ls
-          docker volume ls
-          ifconfig -a
+      #- name: TODO REM
+      #  run: |
+      #    echo ${{ github.workspace }}
+      #    echo $GITHUB_WORKSPACE
+      #    id
+      #    ls -l /var/run/docker.sock
+      #    docker info || echo "Docker not reachable"
+      ##    docker ps
+      #    docker container ls -a
+      #    docker image ls
+      #    docker volume ls
+      #    ifconfig -a
 
       # Checkout mender-zephyr-example
       - name: Checkout mender-zephyr-example
@@ -141,13 +183,13 @@ jobs:
           path: mender-zephyr-example
 
       # Checkout mender-server
-      - name: Checkout mender-server
-        uses: actions/checkout@v5
-        with:
-          repository: mendersoftware/mender-server
-          ref: v4.0.0
-          submodules: recursive
-          path: mender-server
+      #- name: Checkout mender-server
+      #  uses: actions/checkout@v5
+      #  with:
+      #    repository: mendersoftware/mender-server
+      #    ref: v4.0.0
+      #    submodules: recursive
+      #    path: mender-server
 
       # Start mender-server
       # mender-server username and password are setup so that test scripts can later connect to the server
@@ -159,17 +201,17 @@ jobs:
           docker compose run --name create-user useradm create-user --username "${{ secrets.MENDER_USER }}" --password "${{ secrets.MENDER_PASS }}"
           openssl x509 -in /__w/mender-zephyr-example/mender-zephyr-example/mender-server/compose/certs/mender.crt -outform der -out /__w/mender-zephyr-example/mender.der
 
-      - name: TODO REM
-        run: |
-          echo "--- Docker network status ---"
-          docker ps
-          docker network ls
-          docker network inspect mender_default | grep -E "Name|IPv4"
-          echo "--- Ping test ---"
-          docker exec mender-deviceauth ping -c3 mender-mongo || true
-          cat /etc/docker/daemon.json || true
-          docker exec -it mender-deviceauth-1 ping -c2 mender-mongo-1 || true
-          docker exec -it mender-deviceauth-1 nc -zv mender-mongo-1 27017 || true
+      #- name: TODO REM
+      #  run: |
+      #    echo "--- Docker network status ---"
+      #    docker ps
+      #    docker network ls
+      #    docker network inspect mender_default | grep -E "Name|IPv4"
+      #    echo "--- Ping test ---"
+      #    docker exec mender-deviceauth ping -c3 mender-mongo || true
+      #    cat /etc/docker/daemon.json || true
+      #    docker exec -it mender-deviceauth-1 ping -c2 mender-mongo-1 || true
+      #    docker exec -it mender-deviceauth-1 nc -zv mender-mongo-1 27017 || true
 
       # Setup Python
       - name: Setup Python
@@ -235,6 +277,19 @@ jobs:
         run: |
           rm -rf .west
 
+      # Stop mender-server
+      #- name: Cleanup Mender server
+      #  working-directory: mender-server
+      #  if: ${{ always() }}
+      #  run: |
+      #    docker compose stop
+      #    docker compose down -v --remove-orphans
+
+  teardown:
+    name: Setup Mender server
+    runs-on: self-hosted
+    needs: test
+    steps:
       # Stop mender-server
       - name: Cleanup Mender server
         working-directory: mender-server
