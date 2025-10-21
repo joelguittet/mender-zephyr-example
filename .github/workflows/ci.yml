@@ -80,7 +80,9 @@ jobs:
         #/home/testbench/mender-zephyr-example/mender.der:/__w/mender-zephyr-example/mender.der
 
     steps:
-      - name: Install tools
+      # Install docker and related tools
+      # This is used later to start mender-server
+      - name: Install docker
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -95,7 +97,18 @@ jobs:
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-# TODO uniformize the echo deb part above and below ?
+
+      # Configure docker network subnet so that it doesn't conflict with the host subnet
+      # This is done to permit mender containers connecting to the mender-mongo instance
+      - name: Configure Docker network subnet
+        run: |
+          echo '{
+            "bip": "172.30.0.1/16"
+          }' | sudo tee /etc/docker/daemon.json
+          sudo systemctl restart docker
+
+      # Install mender-artifact
+      # This tool is used to generate artifact for firmware update
       - name: Install mender-artifact
         run: |
           apt-get update
@@ -120,12 +133,14 @@ jobs:
           docker volume ls
           ifconfig -a
 
+      # Checkout mender-zephyr-example
       - name: Checkout mender-zephyr-example
         uses: actions/checkout@v5
         with:
           submodules: recursive
           path: mender-zephyr-example
 
+      # Checkout mender-server
       - name: Checkout mender-server
         uses: actions/checkout@v5
         with:
@@ -134,6 +149,8 @@ jobs:
           submodules: recursive
           path: mender-server
 
+      # Start mender-server
+      # mender-server username and password are setup so that test scripts can later connect to the server
       - name: Setup Mender server
         working-directory: mender-server
         run: |
@@ -154,6 +171,7 @@ jobs:
           docker exec -it mender-deviceauth-1 ping -c2 mender-mongo-1 || true
           docker exec -it mender-deviceauth-1 nc -zv mender-mongo-1 27017 || true
 
+      # Setup Python
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
@@ -161,10 +179,15 @@ jobs:
         env:
           PIP_ROOT_USER_ACTION: ignore
 
+      # Install additional Python tools
+      # The following tools are installed:
+      # pytest-dependency: is used to define dependencies between the test cases
       - name: Install Python tools
         run: |
           pip install pytest-dependency
 
+      # Setup Zephyr project
+      # Toolchains are installed to build the application for all supported boards
       - name: Setup Zephyr project
         uses: zephyrproject-rtos/action-zephyr-setup@v1
         with:
@@ -173,6 +196,19 @@ jobs:
         env:
           PIP_ROOT_USER_ACTION: ignore
 
+      # Execute tests using twister
+      # The following options are used:
+      # --allow-installed-plugin: allow using pytest-dependency
+      # --enable-slow: execute test with "slow: true" in the testcase.yml file
+      # --inline-logs: print logs to stdout
+      # --device-testing: test on devices
+      # --hardware-map: Hardware map file, specific to the testbench machine
+      # -x: Extra arguments, used to pass EXTRA_CONF_FILE to specify local.conf options, specific to the testbench machine
+      # The following environment variables are defined:
+      # - MENDER_SERVER: mender-server URL "https://docker.mender.io"
+      # - MENDER_USER: mender-server username previsouly defined
+      # - MENDER_PASS: mender-server password previsouly defined
+      # - MENDER_CA: mender-server certificate path to connect to the server
       - name: Execute tests
         working-directory: mender-zephyr-example
         run: |
@@ -183,6 +219,8 @@ jobs:
           MENDER_PASS: ${{ secrets.MENDER_PASS }}
           MENDER_CA: "/__w/mender-zephyr-example/mender-zephyr-example/mender-server/compose/certs/mender.crt"
 
+      # Upload artifacts
+      # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         if: ${{ always() }}
@@ -191,11 +229,13 @@ jobs:
           path: mender-zephyr-example/twister-out
           include-hidden-files: true
 
+      # Cleanup Zephyr build
       - name: Cleanup build
         if: ${{ always() }}
         run: |
           rm -rf .west
 
+      # Stop mender-server
       - name: Cleanup Mender server
         working-directory: mender-server
         if: ${{ always() }}
