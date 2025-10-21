@@ -94,7 +94,7 @@ jobs:
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
+# TODO uniformize the echo deb part above and below ?
       - name: Install mender-artifact
         run: |
           apt-get update
@@ -117,6 +117,7 @@ jobs:
           docker container ls -a
           docker image ls
           docker volume ls
+          ifconfig -a
 
       - name: Checkout mender-zephyr-example
         uses: actions/checkout@v5
