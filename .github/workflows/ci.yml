@@ -141,6 +141,16 @@ jobs:
           docker compose run --name create-user useradm create-user --username "${{ secrets.MENDER_USER }}" --password "${{ secrets.MENDER_PASS }}"
           openssl x509 -in /__w/mender-zephyr-example/mender-zephyr-example/mender-server/compose/certs/mender.crt -outform der -out /__w/mender-zephyr-example/mender.der
 
+      - name: TODO REM
+        run: |
+          echo "--- Docker network status ---"
+          docker ps
+          docker network ls
+          docker network inspect mender_default | grep -E "Name|IPv4"
+          echo "--- Ping test ---"
+          docker exec mender-deviceauth ping -c3 mender-mongo || true
+          cat /etc/docker/daemon.json
+
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
