@@ -71,11 +71,11 @@ jobs:
       image: ghcr.io/zephyrproject-rtos/ci:v0.28.4
       volumes:
         - /dev:/dev
-        - /var/run/docker.sock:/var/run/docker.sock
         - /home/testbench/mender-zephyr-example/local.conf:/__w/mender-zephyr-example/local.conf
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/map.yml
       options: --privileged
 
+      #- /var/run/docker.sock:/var/run/docker.sock
       #/home/testbench/mender-zephyr-example/mender.crt:/__w/mender-zephyr-example/mender.crt
         #/home/testbench/mender-zephyr-example/mender.der:/__w/mender-zephyr-example/mender.der
 
