@@ -150,7 +150,9 @@ jobs:
           docker network inspect mender_default | grep -E "Name|IPv4"
           echo "--- Ping test ---"
           docker exec mender-deviceauth ping -c3 mender-mongo || true
-          cat /etc/docker/daemon.json
+          cat /etc/docker/daemon.json || true
+          docker exec -it mender-deviceauth-1 ping -c2 mender-mongo-1 || true
+          docker exec -it mender-deviceauth-1 nc -zv mender-mongo-1 27017 || true
 
       - name: Setup Python
         uses: actions/setup-python@v6
