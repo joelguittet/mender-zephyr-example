@@ -32,17 +32,20 @@ jobs:
       image: ubuntu:24.04
 
     steps:
+      # Install tools
       - name: Install tools
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             ca-certificates clang-format git pcregrep
 
+      # Checkout mender-zephyr-example
       - name: Checkout mender-zephyr-example
         uses: actions/checkout@v5
         with:
           path: mender-zephyr-example
 
+      # Check code format
       - name: Check headers
         if: ${{ always() }}
         working-directory: mender-zephyr-example
@@ -68,27 +71,10 @@ jobs:
     name: Setup Mender server
     runs-on: self-hosted
     container:
-      image: ubuntu:24.04
+      image: docker/compose:1.29.2
+      options: --privileged
 
     steps:
-      # Install docker and related tools
-      # This is used later to start mender-server
-      - name: Install docker
-        run: |
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            ca-certificates curl
-          install -m 0755 -d /etc/apt/keyrings
-          curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-          chmod a+r /etc/apt/keyrings/docker.asc
-          echo \
-            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-            $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
-            tee /etc/apt/sources.list.d/docker.list > /dev/null
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
       # Checkout mender-server
       - name: Checkout mender-server
         uses: actions/checkout@v5
@@ -99,6 +85,7 @@ jobs:
           path: mender-server
 
       # Start mender-server
+      # This sometimes fails probably due to limited performances of the test machine - Server is restarted until it properly starts
       # mender-server username and password are setup so that test scripts can later connect to the server
       - name: Setup Mender server
         working-directory: mender-server
@@ -313,27 +300,10 @@ jobs:
     runs-on: self-hosted
     needs: tests
     container:
-      image: ubuntu:24.04
+      image: docker/compose:1.29.2
+      options: --privileged
 
-    steps:    
-      # Install docker and related tools
-      # This is used later to start mender-server
-      - name: Install docker
-        run: |
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            ca-certificates curl
-          install -m 0755 -d /etc/apt/keyrings
-          curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-          chmod a+r /etc/apt/keyrings/docker.asc
-          echo \
-            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-            $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
-            tee /etc/apt/sources.list.d/docker.list > /dev/null
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
+    steps:
       # Stop mender-server
       - name: Shutdown Mender server
         working-directory: mender-server
