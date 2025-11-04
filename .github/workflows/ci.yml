@@ -112,7 +112,7 @@ jobs:
           sleep 5
           i=1
           exited=$(docker compose ps -a | grep Exited | wc -l)
-          while [ $i -le 5] && [ $exited -ne 0 ]
+          while [ $i -le 5 ] && [ $exited -ne 0 ]
           do
             echo "An error occured while starting mender-server containers"
             echo "Restarting mender-server containers"
