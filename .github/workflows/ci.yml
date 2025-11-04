@@ -79,21 +79,21 @@ jobs:
 
     steps:
       # Install docker and related tools
-      - name: Install docker
-        run: |
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            ca-certificates curl
-          install -m 0755 -d /etc/apt/keyrings
-          curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-          chmod a+r /etc/apt/keyrings/docker.asc
-          echo \
-            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-            $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
-            tee /etc/apt/sources.list.d/docker.list > /dev/null
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      #- name: Install docker
+      #  run: |
+      #    apt-get update
+      #    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      #      ca-certificates curl
+      #    install -m 0755 -d /etc/apt/keyrings
+      #    curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+      #    chmod a+r /etc/apt/keyrings/docker.asc
+      #    echo \
+      #      "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+      #      $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+      #      tee /etc/apt/sources.list.d/docker.list > /dev/null
+      #    apt-get update
+      #    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+      #      docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
       # Checkout mender-server
       #- name: Checkout mender-server
@@ -136,7 +136,10 @@ jobs:
           fi
           echo "Setup mender-server username and password"
           docker compose run --name create-user useradm create-user --username "${{ secrets.MENDER_USER }}" --password "${{ secrets.MENDER_PASS }}"
-          openssl x509 -in /__w/mender-zephyr-example/mender-zephyr-example/mender-server/compose/certs/mender.crt -outform der -out /__w/mender-zephyr-example/mender.der
+          echo ${{ github.workspace }}
+          echo $GITHUB_WORKSPACE
+
+#openssl x509 -in /__w/mender-zephyr-example/mender-zephyr-example/mender-server/compose/certs/mender.crt -outform der -out /__w/mender-zephyr-example/mender.der
 
   tests:
     name: Execute tests on the targets
@@ -324,27 +327,27 @@ jobs:
     runs-on: self-hosted
     if: ${{ always() }}
     needs: tests
-    container:
-      image: ubuntu:24.04
-      options: --privileged
+    #container:
+    #  image: ubuntu:24.04
+    #  options: --privileged
 
     steps:
       # Install docker and related tools
-      - name: Install docker
-        run: |
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            ca-certificates curl
-          install -m 0755 -d /etc/apt/keyrings
-          curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-          chmod a+r /etc/apt/keyrings/docker.asc
-          echo \
-            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-            $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
-            tee /etc/apt/sources.list.d/docker.list > /dev/null
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+      #- name: Install docker
+     #   run: |
+     #     apt-get update
+     #     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+     #       ca-certificates curl
+     #     install -m 0755 -d /etc/apt/keyrings
+     #     curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
+     #     chmod a+r /etc/apt/keyrings/docker.asc
+     #     echo \
+     #       "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
+     #       $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
+     #       tee /etc/apt/sources.list.d/docker.list > /dev/null
+     #     apt-get update
+     #     DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+     #       docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
       # Stop mender-server
       - name: Shutdown Mender server
