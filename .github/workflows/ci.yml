@@ -126,7 +126,7 @@ jobs:
           docker compose run --name create-user useradm create-user --username "${{ secrets.MENDER_USER }}" --password "${{ secrets.MENDER_PASS }}"
           openssl x509 -in /__w/mender-zephyr-example/mender-zephyr-example/mender-server/compose/certs/mender.crt -outform der -out /__w/mender-zephyr-example/mender.der
 
-  test:
+  tests:
     name: Execute tests on the targets
     runs-on: self-hosted
     needs: setup
@@ -311,7 +311,7 @@ jobs:
   teardown:
     name: Stop Mender server
     runs-on: self-hosted
-    needs: setup
+    needs: tests
     container:
       image: ubuntu:24.04
 
