@@ -67,8 +67,6 @@ jobs:
   setup:
     name: Setup Mender server
     runs-on: self-hosted
-    container:
-      image: ubuntu:24.04
 
     steps:
       # Checkout mender-server
@@ -293,8 +291,6 @@ jobs:
   teardown:
     name: Stop Mender server
     runs-on: self-hosted
-    container:
-      image: ubuntu:24.04
 
     steps:
       # Stop mender-server
