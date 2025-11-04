@@ -71,7 +71,7 @@ jobs:
     name: Setup Mender server
     runs-on: self-hosted
     container:
-      image: docker/compose:1.29.2
+      image: docker/compose:debian-1.29.2
       options: --privileged
 
     steps:
@@ -300,7 +300,7 @@ jobs:
     runs-on: self-hosted
     needs: tests
     container:
-      image: docker/compose:1.29.2
+      image: docker/compose:debian-1.29.2
       options: --privileged
 
     steps:
