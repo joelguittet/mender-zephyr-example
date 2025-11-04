@@ -311,6 +311,7 @@ jobs:
   teardown:
     name: Stop Mender server
     runs-on: self-hosted
+    needs: setup
     container:
       image: ubuntu:24.04
 
