@@ -68,25 +68,7 @@ jobs:
     name: Setup Mender server
     runs-on: self-hosted
     steps:
-       # Install docker and related tools
-       # This is used later to start mender-server
-      - name: Install docker
-        run: |
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            ca-certificates curl
-          install -m 0755 -d /etc/apt/keyrings
-          curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
-          chmod a+r /etc/apt/keyrings/docker.asc
-          echo \
-            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.asc] https://download.docker.com/linux/ubuntu \
-            $(. /etc/os-release && echo "${UBUNTU_CODENAME:-$VERSION_CODENAME}") stable" | \
-            tee /etc/apt/sources.list.d/docker.list > /dev/null
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-
-      - name: TODO REM
+       - name: TODO REM
         run: |
           echo ${{ github.workspace }}
           echo $GITHUB_WORKSPACE
