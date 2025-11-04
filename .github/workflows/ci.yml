@@ -98,7 +98,6 @@ jobs:
         with:
           repository: mendersoftware/mender-server
           ref: v4.0.0
-          submodules: recursive
           path: mender-server
 
       # Start mender-server
@@ -213,7 +212,6 @@ jobs:
       #  with:
       #    repository: mendersoftware/mender-server
       #    ref: v4.0.0
-      #    submodules: recursive
       #    path: mender-server
 
       # Start mender-server
