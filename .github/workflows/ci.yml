@@ -71,11 +71,6 @@ jobs:
       image: ubuntu:24.04
 
     steps:
-       - name: TODO REM
-         run: |
-          echo ${{ github.workspace }}
-          echo $GITHUB_WORKSPACE
-
       # Checkout mender-server
       - name: Checkout mender-server
         uses: actions/checkout@v5
