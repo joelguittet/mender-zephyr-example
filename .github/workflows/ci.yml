@@ -67,6 +67,9 @@ jobs:
         run: |
           ./.github/workflows/check_code_format.sh
 
+# TODO check if setup and teardown can be executed on host without container
+# Or ask for docker/compose to be updated ?
+
   setup:
     name: Setup Mender server
     runs-on: self-hosted
@@ -93,11 +96,17 @@ jobs:
             docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
 
       # Checkout mender-server
+      #- name: Checkout mender-server
+      #  uses: actions/checkout@v5
+      #  with:
+      #    repository: mendersoftware/mender-server
+      #    ref: v4.0.0
+      #    path: mender-server
       - name: Checkout mender-server
         uses: actions/checkout@v5
         with:
-          repository: mendersoftware/mender-server
-          ref: v4.0.0
+          repository: joelguittet/mender-server
+          ref: 85b127538d794895fe2b2e03a38185c917a2fcfd
           path: mender-server
 
       # Start mender-server
@@ -107,7 +116,7 @@ jobs:
         working-directory: mender-server
         run: |
           echo "Starting mender-server containers"
-          export MENDER_IMAGE_TAG=v4.0.0
+          export MENDER_IMAGE_TAG=v4.0.1
           docker compose up -d
           sleep 5
           i=1
