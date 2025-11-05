@@ -27,6 +27,12 @@ on:
     - cron: '0 0 1 * *'
   workflow_dispatch:
 
+# Define concurrency so that the jobs of the workflow are not mixed between
+# several executions in case it is launched again while one is still running
+concurrency:
+  group: device-testing
+  cancel-in-progress: false
+
 jobs:
   setup:
     name: Setup Mender server
@@ -121,10 +127,11 @@ jobs:
 
       # Install additional Python tools
       # The following tools are installed:
+      # esptool: is used to flash esp32_devkitc/esp32/procpu board
       # pytest-dependency: is used to define dependencies between the test cases
       - name: Install Python tools
         run: |
-          pip install pytest-dependency
+          pip install esptool pytest-dependency
 
       # FIXME: use action-zephyr-setup from zephyrproject-rtos when my pull-request is merged
       # Setup Zephyr project
