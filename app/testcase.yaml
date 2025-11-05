@@ -25,6 +25,7 @@ tests:
       pytest_dut_scope: function
     platform_allow:
       - nucleo_l4a6zg
+      - esp32_devkitc/esp32/procpu
     tags:
       - testing
       - pytest
