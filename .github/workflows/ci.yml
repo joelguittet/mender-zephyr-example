@@ -109,7 +109,7 @@ jobs:
           name: mender-certs
           path: ${{ github.workspace }}/mender-server/compose/certs
 
-  tests:
+  test:
     name: Execute tests on the targets
     runs-on: self-hosted
     needs: setup
@@ -219,7 +219,7 @@ jobs:
     name: Stop Mender server
     runs-on: self-hosted
     if: ${{ always() }}
-    needs: tests
+    needs: test
 
     steps:
       # Stop mender-server
