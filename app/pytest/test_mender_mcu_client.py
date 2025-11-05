@@ -86,7 +86,23 @@ def test_device_inventory(dut: DeviceAdapter):
             raise AssertionError(f"🔴​​​ Device inventory is invalid")
     print("✅ Device inventory contains expected inventory items")
 
-@pytest.mark.dependency(depends=['test_device_inventory'])
+@pytest.mark.dependency(depends=['test_device_registration'])
+def test_device_configuration(dut: DeviceAdapter):
+    """Get the MAC address of the device."""
+    mac_address = helpers.get_device_mac_address(dut)
+    """Ensure the device is authorized on the mender server."""
+    helpers.assert_device_authenticated(dut)
+    device, auth = mender_management.get_device_by_mac(mac_address)
+    assert device is not None, f"Device with MAC {mac_address} not found on mender server"
+    assert device["status"] == "accepted", f"Device with MAC {mac_address} has unexpected status '{device["status"]}'"
+    print("✅ Device has status 'accepted' on the mender server")
+    """Wait to let time to the device to push the configuration content."""
+    time.sleep(60)
+    """Ensure of the device configuration content."""
+    configuration = mender_management.get_device_configuration(device)
+    print(f"Device configuration: {configuration}")
+
+@pytest.mark.dependency(depends=['test_device_inventory', 'test_device_configuration'])
 def test_device_decomissioning(dut: DeviceAdapter):
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
@@ -98,10 +114,7 @@ def test_device_decomissioning(dut: DeviceAdapter):
     print("✅ Device has status 'accepted' on the mender server")
     """Decomissioning of the device on the server."""
     mender_management.delete_device(device)
-    """Ensure the device is not authorized to the mender server."""
+    """Ensure the device is not found on the mender server."""
+    """The device can be 'pending' if it has reached the mender server just after being deleted."""
     helpers.assert_device_not_authenticated(dut)
-    device, auth = mender_management.get_device_by_mac(mac_address)
-    assert device is not None, f"Device with MAC {mac_address} not found on mender server"
-    assert device["status"] == "pending", f"Device with MAC {mac_address} has unexpected status '{device["status"]}'"
-    print("✅ Device has status 'pending' on the mender server")
     print("✅ Device decomissioning done successfully on the mender server")
