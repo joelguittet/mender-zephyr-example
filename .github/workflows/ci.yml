@@ -72,6 +72,7 @@ jobs:
     runs-on: self-hosted
 
     steps:
+      # FIXME: use mender-server from mendersoftware when my pull-request is merged
       # Checkout mender-server
       #- name: Checkout mender-server
       #  uses: actions/checkout@v5
@@ -98,7 +99,15 @@ jobs:
           echo "Setup mender-server username and password"
           docker compose run --name create-user useradm create-user --username "${{ secrets.MENDER_USER }}" --password "${{ secrets.MENDER_PASS }}"
           echo "Convert mender-server certificate to der format"
-          openssl x509 -in ${{ github.workspace }}/mender-server/compose/certs/mender.crt -outform der -out ${{ github.workspace }}/mender.der
+          openssl x509 -in ${{ github.workspace }}/mender-server/compose/certs/mender.crt -outform der -out ${{ github.workspace }}/mender-server/compose/certs/mender.der
+
+      # Upload mender-certs artifacts
+      # This step is used to save mender certificates so they can be used for tests
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mender-certs
+          path: ${{ github.workspace }}/mender-server/compose/certs
 
   tests:
     name: Execute tests on the targets
@@ -113,6 +122,13 @@ jobs:
       options: --privileged
 
     steps:
+      # Download mender-certs artifacts
+      # This step is used to retrieve mender certificates so they can be used for tests
+      - uses: actions/download-artifact@v4
+        with:
+          name: mender-certs
+          path: ${{ github.workspace }}
+
       # Install mender-artifact
       # This tool is used to generate artifact for firmware update
       - name: Install mender-artifact
@@ -149,10 +165,11 @@ jobs:
         run: |
           pip install pytest-dependency
 
+      # FIXME: use action-zephyr-setup from zephyrproject-rtos when my pull-request is merged
       # Setup Zephyr project
       # Toolchains are installed to build the application for all supported boards
       - name: Setup Zephyr project
-        uses: joelguittet/action-zephyr-setup@6ce29de11ba07433ed0b282ec391a1f0265dec89
+        uses: joelguittet/action-zephyr-setup@e871f5e44890baae3a737e68f63246a128a19245
         with:
           app-path: mender-zephyr-example
           toolchains: arm-zephyr-eabi:xtensa-espressif_esp32_zephyr-elf
@@ -182,7 +199,7 @@ jobs:
           MENDER_PASS: ${{ secrets.MENDER_PASS }}
           MENDER_CA: "/__w/mender-zephyr-example/mender-zephyr-example/mender-server/compose/certs/mender.crt"
 
-      # Upload artifacts
+      # Upload twister artifacts
       # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
       - name: Upload artifact
         uses: actions/upload-artifact@v4
