@@ -1,5 +1,5 @@
-# @file      ci.yml
-# @brief     Used to perform code format checking and Sonarcloud analysis
+# @file      hardware-map.yml
+# @brief     Used to generate map on the test machine
 #
 # Copyright joelguittet and mender-mcu-client contributors
 #
@@ -16,8 +16,10 @@
 # limitations under the License.
 
 name: hardware-map
+
 on:
-  workflow_dispatch
+  workflow_dispatch:
+
 jobs:
   generate-hardware-map:
     name: Generate hardware map
@@ -40,8 +42,8 @@ jobs:
       # FIXME: use action-zephyr-setup from zephyrproject-rtos when my pull-request is merged
       # Setup Zephyr project
       # Toolchains are installed to build the application for all supported boards
-      #- name: Setup Zephyr project
-      #  uses: joelguittet/action-zephyr-setup@ab7afc453a32d6a3ab1abc99d85c592ec5d8e848
+      - name: Setup Zephyr project
+        uses: joelguittet/action-zephyr-setup@ab7afc453a32d6a3ab1abc99d85c592ec5d8e848
       #  with:
       #    app-path: mender-zephyr-example
       #    toolchains: arm-zephyr-eabi:xtensa-espressif_esp32_zephyr-elf

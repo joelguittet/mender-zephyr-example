@@ -1,5 +1,5 @@
-# @file      ci.yml
-# @brief     Used to perform code format checking and Sonarcloud analysis
+# @file      device-testing.yml
+# @brief     Used to perform devide testing using twister
 #
 # Copyright joelguittet and mender-mcu-client contributors
 #
@@ -15,7 +15,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-name: ci
+name: device-testing
+
 on:
   push:
     branches:
@@ -24,49 +25,9 @@ on:
     types: [opened, synchronize, reopened]
   schedule:
     - cron: '0 0 1 * *'
+  workflow_dispatch:
+
 jobs:
-  check:
-    name: Check code format
-    runs-on: self-hosted
-    container:
-      image: ubuntu:24.04
-
-    steps:
-      # Install tools
-      - name: Install tools
-        run: |
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            ca-certificates clang-format git pcregrep
-
-      # Checkout mender-zephyr-example
-      - name: Checkout mender-zephyr-example
-        uses: actions/checkout@v5
-        with:
-          path: mender-zephyr-example
-
-      # Check code format
-      - name: Check headers
-        if: ${{ always() }}
-        working-directory: mender-zephyr-example
-        run: |
-          ./.github/workflows/check_headers.sh
-      - name: Check include guards
-        if: ${{ always() }}
-        working-directory: mender-zephyr-example
-        run: |
-          ./.github/workflows/check_include_guards.sh
-      - name: Check equivalence tests
-        if: ${{ always() }}
-        working-directory: mender-zephyr-example
-        run: |
-          ./.github/workflows/check_equivalence_tests.sh
-      - name: Check code format
-        if: ${{ always() }}
-        working-directory: mender-zephyr-example
-        run: |
-          ./.github/workflows/check_code_format.sh
-
   setup:
     name: Setup Mender server
     runs-on: self-hosted
