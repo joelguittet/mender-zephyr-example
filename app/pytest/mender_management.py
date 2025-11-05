@@ -94,9 +94,9 @@ class MenderManagement:
     def get_device_by_mac(self, mac_address):
         """Return a single device and auth_set by MAC address."""
         devices = self.list_devices()
-        for dev in devices:
+        for device in devices:
             try:
-                identity_data = dev.get("identity_data")
+                identity_data = device.get("identity_data")
                 # Handle both JSON string and dict cases
                 if isinstance(identity_data, str):
                     identity = json.loads(identity_data)
@@ -105,30 +105,24 @@ class MenderManagement:
                 else:
                     continue
                 if identity.get("mac") == mac_address:
-                    auth_sets = dev.get("auth_sets", [])
-                    return dev, auth_sets[0] if auth_sets else None
+                    auth_sets = device.get("auth_sets", [])
+                    return device, auth_sets[0] if auth_sets else None
             except (KeyError, json.JSONDecodeError):
                 continue
         return None, None
 
-    def accept_device(self, mac_address):
-        """Accept device by MAC."""
-        device, auth = self.get_device_by_mac(mac_address)
-        if not device or not auth:
-            raise ValueError(f"No device found with MAC {mac_address}")
-
+    def accept_device(self, device):
+        """Accept device."""
+        auth_sets = device.get("auth_sets", [])
+        auth = auth_sets[0] if auth_sets else None
         url = f"{self.server}/api/management/v2/devauth/devices/{device['id']}/auth/{auth['id']}/status"
         payload = {"status": "accepted"}
         r = requests.put(url, headers=self.headers, json=payload, verify=self.ca_cert)
         r.raise_for_status()
         return True
 
-    def delete_device(self, mac_address):
-        """Delete device by MAC."""
-        device, auth = self.get_device_by_mac(mac_address)
-        if not device or not auth:
-            raise ValueError(f"No device found with MAC {mac_address}")
-
+    def delete_device(self, device):
+        """Delete device."""
         url = f"{self.server}/api/management/v2/devauth/devices/{device['id']}"
         r = requests.delete(url, headers=self.headers, verify=self.ca_cert)
         r.raise_for_status()
@@ -137,52 +131,43 @@ class MenderManagement:
     # ============================================================
     # INVENTORY
     # ============================================================
-    def get_device_inventory(self, device_id):
+    def get_device_inventory(self, device):
         """
         Get inventory attributes for a given device.
         Returns a dict of key/value pairs.
         """
-        url = f"{self.server}/api/management/v1/inventory/devices/{device_id}"
+        url = f"{self.server}/api/management/v1/inventory/devices/{device['id']}"
         r = requests.get(url, headers=self.headers, verify=self.ca_cert)
         r.raise_for_status()
         data = r.json()
         # Flatten inventory into { name: value } for convenience
         return {item["name"]: item["value"] for item in data.get("attributes", [])}
 
-    def get_inventory_by_mac(self, mac_address):
-        """Shortcut: get inventory using MAC address lookup."""
-        device, _ = self.get_device_by_mac(mac_address)
-        if not device:
-            raise ValueError(f"No device found with MAC {mac_address}")
-        return self.get_device_inventory(device["id"])
-
     # ============================================================
     # CONFIGURATION
     # ============================================================
-    def get_device_configuration(self, device_id):
+    def get_device_configuration(self, device):
         """Retrieve current configuration data for a device."""
-        url = f"{self.server}/api/management/v1/deviceconfig/configurations/{device_id}"
+        url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device['id']}"
         r = requests.get(url, headers=self.headers, verify=self.ca_cert)
-        if r.status_code == 404:
-            return {}
         r.raise_for_status()
         return r.json()
 
-    def set_device_configuration(self, device_id, config_dict):
+    def set_device_configuration(self, device, config):
         """Set configuration key/values for a device."""
-        url = f"{self.server}/api/management/v1/deviceconfig/configurations/{device_id}"
-        payload = {"config": config_dict}
+        url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device['id']}"
+        payload = {item["name"]: item["value"] for item in config}
         r = requests.put(url, headers=self.headers, json=payload, verify=self.ca_cert)
         r.raise_for_status()
         return True
 
-    def verify_device_configuration(self, device_id, expected_config):
-        """Check if a device’s configuration matches expected key/values."""
-        current = self.get_device_configuration(device_id).get("config", {})
-        for key, val in expected_config.items():
-            if current.get(key) != val:
-                return False
-        return True
+    def deploy_device_configuration(self, device):
+        """Deploy configuration key/values for a device."""
+        url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device['id']}/deploy"
+        payload = {"retries": 0}
+        r = requests.post(url, headers=self.headers, json=payload, verify=self.ca_cert)
+        r.raise_for_status()
+        return r.json()
 
     # ============================================================
     # DEPLOYMENTS
