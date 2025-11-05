@@ -72,8 +72,8 @@ jobs:
           name: hardware-map
           path: map.yml
 
-      # Cleanup Zephyr build
-      #- name: Cleanup build
-      #  if: ${{ always() }}
-      #  run: |
-      #    rm -rf .west
+      # Cleanup Zephyr environment
+      - name: Cleanup build
+        if: ${{ always() }}
+        run: |
+          rm -rf .west

@@ -170,8 +170,8 @@ jobs:
           path: mender-zephyr-example/twister-out
           include-hidden-files: true
 
-      # Cleanup Zephyr build
-      - name: Cleanup build
+      # Cleanup Zephyr environment
+      - name: Cleanup Zephyr environment
         if: ${{ always() }}
         run: |
           rm -rf .west
