@@ -31,6 +31,13 @@ jobs:
       options: --privileged
 
     steps:
+      # Checkout mender-zephyr-example
+      - name: Checkout mender-zephyr-example
+        uses: actions/checkout@v5
+        with:
+          submodules: recursive
+          path: mender-zephyr-example
+
       # Setup Python
       - name: Setup Python
         uses: actions/setup-python@v6
@@ -44,8 +51,8 @@ jobs:
       # Toolchains are installed to build the application for all supported boards
       - name: Setup Zephyr project
         uses: joelguittet/action-zephyr-setup@ab7afc453a32d6a3ab1abc99d85c592ec5d8e848
-      #  with:
-      #    app-path: mender-zephyr-example
+        with:
+          app-path: mender-zephyr-example
       #    toolchains: arm-zephyr-eabi:xtensa-espressif_esp32_zephyr-elf
       #  env:
       #    PIP_ROOT_USER_ACTION: ignore
