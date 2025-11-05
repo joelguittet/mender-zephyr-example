@@ -179,7 +179,7 @@ jobs:
   teardown:
     name: Stop Mender server
     runs-on: self-hosted
-    if: ${{ always() && needs.setup.result != 'canceled' }}
+    if: ${{ always() && !contains(needs.setup.result, 'cancelled') }}
     needs: [setup, device-testing]
 
     steps:
