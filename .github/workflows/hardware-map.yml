@@ -53,15 +53,13 @@ jobs:
         uses: joelguittet/action-zephyr-setup@ab7afc453a32d6a3ab1abc99d85c592ec5d8e848
         with:
           app-path: mender-zephyr-example
-      #    toolchains: arm-zephyr-eabi:xtensa-espressif_esp32_zephyr-elf
-      #  env:
-      #    PIP_ROOT_USER_ACTION: ignore
+        env:
+          PIP_ROOT_USER_ACTION: ignore
 
       # Generate hardware map using twister
       # The following options is used:
       # --generate-hardware-map: generate hardware map
       - name: Generate hardware map
-        #working-directory: mender-zephyr-example
         run: |
           west twister --generate-hardware-map map.yml
 
