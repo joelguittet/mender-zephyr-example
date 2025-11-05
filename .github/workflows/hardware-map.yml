@@ -1,0 +1,70 @@
+# @file      ci.yml
+# @brief     Used to perform code format checking and Sonarcloud analysis
+#
+# Copyright joelguittet and mender-mcu-client contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: hardware-map
+on:
+  workflow_dispatch
+jobs:
+  generate-hardware-map:
+    name: Generate hardware map
+    runs-on: self-hosted
+    container:
+      image: ghcr.io/zephyrproject-rtos/ci:v0.28.4
+      volumes:
+        - /dev:/dev
+      options: --privileged
+
+    steps:
+      # Setup Python
+      - name: Setup Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: 3.12
+        env:
+          PIP_ROOT_USER_ACTION: ignore
+
+      # FIXME: use action-zephyr-setup from zephyrproject-rtos when my pull-request is merged
+      # Setup Zephyr project
+      # Toolchains are installed to build the application for all supported boards
+      #- name: Setup Zephyr project
+      #  uses: joelguittet/action-zephyr-setup@ab7afc453a32d6a3ab1abc99d85c592ec5d8e848
+      #  with:
+      #    app-path: mender-zephyr-example
+      #    toolchains: arm-zephyr-eabi:xtensa-espressif_esp32_zephyr-elf
+      #  env:
+      #    PIP_ROOT_USER_ACTION: ignore
+
+      # Generate hardware map using twister
+      # The following options is used:
+      # --generate-hardware-map: generate hardware map
+      - name: Generate hardware map
+        #working-directory: mender-zephyr-example
+        run: |
+          west twister --generate-hardware-map map.yml
+
+      # Upload hardware-map artifact
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hardware-map
+          path: map.yml
+
+      # Cleanup Zephyr build
+      #- name: Cleanup build
+      #  if: ${{ always() }}
+      #  run: |
+      #    rm -rf .west

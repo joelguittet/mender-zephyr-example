@@ -48,6 +48,7 @@ def test_device_registration(dut: DeviceAdapter):
     assert device is not None, f"Device with MAC {mac_address} not found on mender server"
     assert device["status"] == "accepted", f"Device with MAC {mac_address} has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
+    print("✅ Device registration done successfully on the mender server")
 
 @pytest.mark.dependency(depends=['test_device_registration'])
 def test_device_inventory(dut: DeviceAdapter):
@@ -80,7 +81,6 @@ def test_device_inventory(dut: DeviceAdapter):
     expected_inventory["zephyr-rtos"] = "[0-9]+.[0-9]+.[0-9]+"
     print(f"Device expected inventory: {expected_inventory}")
     for key, val in expected_inventory.items():
-        print(f"TODO REM check {inventory.get(key)} for {val}") # TODO REM
         m = re.search(val, inventory.get(key))
         if m is None:
             raise AssertionError(f"🔴​​​ Device inventory is invalid")
@@ -90,7 +90,10 @@ def test_device_inventory(dut: DeviceAdapter):
 def test_device_decomissioning(dut: DeviceAdapter):
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
+    """Ensure the device is authorized on the mender server."""
+    helpers.assert_device_authenticated(dut)
     """Decomissioning of the device on the server."""
     mender_management.delete_device(mac_address)
     """Ensure the device is not authorized to the mender server."""
     helpers.assert_device_not_authenticated(dut)
+    print("✅ Device decomissioning done successfully on the mender server")

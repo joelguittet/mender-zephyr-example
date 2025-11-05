@@ -101,7 +101,7 @@ jobs:
           echo "Convert mender-server certificate to der format"
           openssl x509 -in ${{ github.workspace }}/mender-server/compose/certs/mender.crt -outform der -out ${{ github.workspace }}/mender-server/compose/certs/mender.der
 
-      # Upload mender-certs artifacts
+      # Upload mender-certs artifact
       # This step is used to save mender certificates so they can be used for tests
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -109,7 +109,7 @@ jobs:
           name: mender-certs
           path: ${{ github.workspace }}/mender-server/compose/certs
 
-  test:
+  device-testing:
     name: Execute tests on the targets
     runs-on: self-hosted
     needs: setup
@@ -122,7 +122,7 @@ jobs:
       options: --privileged
 
     steps:
-      # Download mender-certs artifacts
+      # Download mender-certs artifact
       # This step is used to retrieve mender certificates so they can be used for tests
       - uses: actions/download-artifact@v4
         with:
@@ -169,7 +169,7 @@ jobs:
       # Setup Zephyr project
       # Toolchains are installed to build the application for all supported boards
       - name: Setup Zephyr project
-        uses: joelguittet/action-zephyr-setup@e871f5e44890baae3a737e68f63246a128a19245
+        uses: joelguittet/action-zephyr-setup@ab7afc453a32d6a3ab1abc99d85c592ec5d8e848
         with:
           app-path: mender-zephyr-example
           toolchains: arm-zephyr-eabi:xtensa-espressif_esp32_zephyr-elf
@@ -199,7 +199,7 @@ jobs:
           MENDER_PASS: ${{ secrets.MENDER_PASS }}
           MENDER_CA: "/__w/mender-zephyr-example/mender-zephyr-example/mender-server/compose/certs/mender.crt"
 
-      # Upload twister artifacts
+      # Upload test-results artifact
       # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -219,7 +219,7 @@ jobs:
     name: Stop Mender server
     runs-on: self-hosted
     if: ${{ always() }}
-    needs: test
+    needs: device-testing
 
     steps:
       # Stop mender-server
