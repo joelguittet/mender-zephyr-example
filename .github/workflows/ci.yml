@@ -152,7 +152,7 @@ jobs:
       # Setup Zephyr project
       # Toolchains are installed to build the application for all supported boards
       - name: Setup Zephyr project
-        uses: zephyrproject-rtos/action-zephyr-setup@v1
+        uses: zephyrproject-rtos/action-zephyr-setup@712109c34b246b1bbca906880c7d5b45b2c94e95
         with:
           app-path: mender-zephyr-example
           toolchains: arm-zephyr-eabi:xtensa-espressif_esp32_zephyr-elf
