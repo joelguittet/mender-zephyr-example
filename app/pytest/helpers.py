@@ -45,7 +45,7 @@ class Helpers:
     def assert_device_authenticated(self, dut: DeviceAdapter) -> None:
         try:
             output = dut.readlines_until("Mender client authenticated", timeout=300)
-            match_no_lines(output[-1:], ["\[401\] Unauthorized"])
+            match_no_lines(output[-1:], [r"\[401\] Unauthorized"])
         except (twister_harness.exceptions.TwisterHarnessTimeoutException, AssertionError):
             raise AssertionError(f"🔴​​​ Device doesn't appear to be authenticated but it should")
         print("✅ Device is authenticated")

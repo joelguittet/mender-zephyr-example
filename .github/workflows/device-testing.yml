@@ -51,7 +51,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: joelguittet/mender-server
-          ref: 85b127538d794895fe2b2e03a38185c917a2fcfd
+          ref: 84b7b677df4bc94246ab90a69565e5b082e1d36f
           path: mender-server
 
       # Start mender-server
@@ -132,12 +132,15 @@ jobs:
       - name: Install Python tools
         run: |
           pip install esptool pytest-dependency
+          groups
+          esptool
 
-      # FIXME: use action-zephyr-setup from zephyrproject-rtos when my pull-request is merged
       # Setup Zephyr project
-      # Toolchains are installed to build the application for all supported boards
+      # Toolchains are installed to build the application for all supported boards:
+      # arm-zephyr-eabi: to support frdm_mcxn947/mcxn947/cpu0 , nrf7002dk/nrf5340/cpuapp and nucleo_l4a6zg boards
+      # xtensa-espressif_esp32_zephyr-elf: to support esp32_devkitc/esp32/procpu board
       - name: Setup Zephyr project
-        uses: joelguittet/action-zephyr-setup@ab7afc453a32d6a3ab1abc99d85c592ec5d8e848
+        uses: zephyrproject-rtos/action-zephyr-setup@8354324d917cd398fb48d5fdd759cd61e147f084
         with:
           app-path: mender-zephyr-example
           toolchains: arm-zephyr-eabi:xtensa-espressif_esp32_zephyr-elf

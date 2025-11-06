@@ -46,11 +46,10 @@ jobs:
         env:
           PIP_ROOT_USER_ACTION: ignore
 
-      # FIXME: use action-zephyr-setup from zephyrproject-rtos when my pull-request is merged
       # Setup Zephyr project
       # Toolchains are installed to build the application for all supported boards
       - name: Setup Zephyr project
-        uses: joelguittet/action-zephyr-setup@ab7afc453a32d6a3ab1abc99d85c592ec5d8e848
+        uses: zephyrproject-rtos/action-zephyr-setup@8354324d917cd398fb48d5fdd759cd61e147f084
         with:
           app-path: mender-zephyr-example
         env:
