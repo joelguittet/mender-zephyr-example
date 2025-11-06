@@ -125,6 +125,7 @@ jobs:
         env:
           PIP_ROOT_USER_ACTION: ignore
 
+      # TODO: check if required at the end, seems already satisfied according to the log
       # Install additional Python tools
       # The following tools are installed:
       # esptool: is used to flash esp32_devkitc/esp32/procpu board
@@ -133,7 +134,10 @@ jobs:
         run: |
           pip install esptool pytest-dependency
           groups
-          esptool
+          echo "now set dialout"
+          usermod -a -G dialout $USER
+          echo "now set dialout DONE"
+          groups
 
       # Setup Zephyr project
       # Toolchains are installed to build the application for all supported boards:
