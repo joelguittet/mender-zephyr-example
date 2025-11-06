@@ -135,7 +135,7 @@ jobs:
           pip install esptool pytest-dependency
           groups
           echo "now set dialout"
-          usermod -a -G dialout $USER
+          usermod -a -G dialout root
           echo "now set dialout DONE"
           groups
 
