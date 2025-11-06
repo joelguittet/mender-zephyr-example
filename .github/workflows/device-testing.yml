@@ -138,6 +138,10 @@ jobs:
           usermod -a -G dialout root
           echo "now set dialout DONE"
           groups
+          echo "now print serial"
+          ls -l /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0
+          echo "all serials"
+          ls -l /dev/serial/by-id
 
       # Setup Zephyr project
       # Toolchains are installed to build the application for all supported boards:
