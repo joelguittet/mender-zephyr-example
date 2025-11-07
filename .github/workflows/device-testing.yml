@@ -128,27 +128,27 @@ jobs:
       # TODO: check if required at the end, seems already satisfied according to the log
       # Install additional Python tools
       # The following tools are installed:
-      # esptool: is used to flash esp32_devkitc/esp32/procpu board
+      # esptool: is used to flash esp32-devkitc board
       # pytest-dependency: is used to define dependencies between the test cases
-      - name: Install Python tools
-        run: |
-          pip install esptool pytest-dependency
-          groups
-          echo "now set dialout"
-          usermod -a -G dialout root
-          echo "now set dialout DONE"
-          groups
-          echo "now print serial"
-          ls -l /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0
-          echo "all serials"
-          ls -l /dev/serial/by-id
-          echo "esptool"
-          esptool --port /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0 chip_id
+      #- name: Install Python tools
+      #  run: |
+      #    pip install esptool pytest-dependency
+      #    groups
+      #    echo "now set dialout"
+      #    usermod -a -G dialout root
+      #    echo "now set dialout DONE"
+      #    groups
+      #    echo "now print serial"
+      #    ls -l /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0
+      #    echo "all serials"
+      #    ls -l /dev/serial/by-id
+      #    echo "esptool"
+      #    esptool --port /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0 chip_id
 
       # Setup Zephyr project
       # Toolchains are installed to build the application for all supported boards:
-      # arm-zephyr-eabi: to support frdm_mcxn947/mcxn947/cpu0 , nrf7002dk/nrf5340/cpuapp and nucleo_l4a6zg boards
-      # xtensa-espressif_esp32_zephyr-elf: to support esp32_devkitc/esp32/procpu board
+      # arm-zephyr-eabi: to support frdm-mcxn947, nrf7002-dk and nucleo-l4a6zg boards
+      # xtensa-espressif_esp32_zephyr-elf: to support esp32-devkitc
       - name: Setup Zephyr project
         uses: zephyrproject-rtos/action-zephyr-setup@8354324d917cd398fb48d5fdd759cd61e147f084
         with:
@@ -159,8 +159,8 @@ jobs:
 
       # Fetch blobs
       # The following blobs are fetch:
-      # hal_espressif: to support esp32_devkitc/esp32/procpu board
-      # nrf_wifi: to support nrf7002dk/nrf5340/cpuapp board
+      # hal_espressif: to support esp32-devkitc board
+      # nrf_wifi: to support nrf7002-dk board
       - name: Fetch blobs
         working-directory: mender-zephyr-example
         run: |
