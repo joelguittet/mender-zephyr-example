@@ -26,6 +26,9 @@
 LOG_MODULE_REGISTER(mender_zephyr_example, LOG_LEVEL_INF);
 
 #include <zephyr/kernel.h>
+#ifdef CONFIG_MCUMGR_GRP_IMG
+#include <zephyr/mgmt/mcumgr/grp/img_mgmt/img_mgmt.h>
+#endif /* CONFIG_MCUMGR_GRP_IMG */
 #include <zephyr/net/net_if.h>
 #include <zephyr/net/net_mgmt.h>
 #ifdef CONFIG_WIFI
@@ -141,6 +144,7 @@ print_dhcpv4_addr(struct net_if *iface, struct net_if_addr *if_addr, void *user_
         return;
     }
 
+    LOG_INF("Network interface connected");
     LOG_INF("IPv4 address: %s", net_addr_ntop(AF_INET, &if_addr->address.in_addr, hr_addr, NET_IPV4_ADDR_LEN));
     LOG_INF("Lease time: %u seconds", iface->config.dhcpv4.lease_time);
     netmask = net_if_ipv4_get_netmask_by_addr(iface, &if_addr->address.in_addr);
@@ -539,7 +543,22 @@ hello_world_module_cb(char *id, char *artifact_name, char *type, cJSON *meta_dat
 int
 main(void) {
 
+    /* Print version of the device */
+#ifdef CONFIG_MCUMGR_GRP_IMG
+    struct image_version image_version;
+    img_mgmt_my_version(&image_version);
+    LOG_INF("Running project '%s' version '%d.%d.%d+%d'",
+            PROJECT_NAME,
+            image_version.iv_major,
+            image_version.iv_minor,
+            image_version.iv_revision,
+            image_version.iv_build_num);
+#else
+    LOG_INF("Running project '%s' version '%s'", PROJECT_NAME, APP_VERSION_STRING);
+#endif /* CONFIG_MCUMGR_GRP_IMG */
+
     /* Initialize network */
+    LOG_INF("Initialization of network interface");
     struct net_if *iface = net_if_get_default();
     assert(NULL != iface);
     net_mgmt_init_event_callback(&mgmt_cb, net_event_handler, NET_EVENT_IPV4_ADDR_ADD);
@@ -600,12 +619,19 @@ main(void) {
              linkaddr->addr[5]);
     LOG_INF("MAC address of the device '%s'", mac_address);
 
-    /* Retrieve running version of the device */
-    LOG_INF("Running project '%s' version '%s'", PROJECT_NAME, APP_VERSION_STRING);
-
     /* Compute artifact name */
     char artifact_name[128];
+#ifdef CONFIG_MCUMGR_GRP_IMG
+    snprintf(artifact_name,
+             sizeof(artifact_name),
+             "%s-v%d.%d.%d",
+             CONFIG_EXAMPLE_ARTIFACT_NAME_PREFIX,
+             image_version.iv_major,
+             image_version.iv_minor,
+             image_version.iv_revision);
+#else
     snprintf(artifact_name, sizeof(artifact_name), "%s-v%s", CONFIG_EXAMPLE_ARTIFACT_NAME_PREFIX, APP_VERSION_STRING);
+#endif /* CONFIG_MCUMGR_GRP_IMG */
 
     /* Retrieve device type */
     char *device_type = CONFIG_EXAMPLE_DEVICE_TYPE;
