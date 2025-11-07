@@ -103,11 +103,10 @@ class MenderManagement:
                 else:
                     continue
                 if identity.get("mac") == mac_address:
-                    auth_sets = device.get("auth_sets", [])
-                    return device, auth_sets[0] if auth_sets else None
+                    return device
             except (KeyError, json.JSONDecodeError):
                 continue
-        return None, None
+        return None
 
     def accept_device(self, device):
         """Accept device."""
@@ -154,7 +153,7 @@ class MenderManagement:
     def set_device_configuration(self, device, configuration):
         """Set configuration key/values for a device."""
         url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device['id']}"
-        payload = {configuration}
+        payload = configuration
         r = requests.put(url, headers=self.headers, json=payload, verify=self.ca_cert)
         r.raise_for_status()
         return True

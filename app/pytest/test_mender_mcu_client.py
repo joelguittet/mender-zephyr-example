@@ -38,7 +38,7 @@ def test_device_registration(dut: DeviceAdapter):
     mac_address = helpers.get_device_mac_address(dut)
     """Ensure the device is not authorized to the mender server."""
     helpers.assert_device_not_authenticated(dut)
-    device, auth = mender_management.get_device_by_mac(mac_address)
+    device = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"Device with MAC {mac_address} not found on mender server"
     assert device["status"] == "pending", f"Device with MAC {mac_address} has unexpected status '{device["status"]}'"
     print("✅ Device has status 'pending' on the mender server")
@@ -46,7 +46,7 @@ def test_device_registration(dut: DeviceAdapter):
     mender_management.accept_device(device)
     """Ensure the device is authorized on the mender server."""
     helpers.assert_device_authenticated(dut)
-    device, auth = mender_management.get_device_by_mac(mac_address)
+    device = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"Device with MAC {mac_address} not found on mender server"
     assert device["status"] == "accepted", f"Device with MAC {mac_address} has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
@@ -58,7 +58,7 @@ def test_device_inventory(dut: DeviceAdapter):
     mac_address = helpers.get_device_mac_address(dut)
     """Ensure the device is authorized on the mender server."""
     helpers.assert_device_authenticated(dut)
-    device, auth = mender_management.get_device_by_mac(mac_address)
+    device = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"Device with MAC {mac_address} not found on mender server"
     assert device["status"] == "accepted", f"Device with MAC {mac_address} has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
@@ -94,7 +94,7 @@ def test_device_configuration(dut: DeviceAdapter):
     mac_address = helpers.get_device_mac_address(dut)
     """Ensure the device is authorized on the mender server."""
     helpers.assert_device_authenticated(dut)
-    device, auth = mender_management.get_device_by_mac(mac_address)
+    device = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"Device with MAC {mac_address} not found on mender server"
     assert device["status"] == "accepted", f"Device with MAC {mac_address} has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
@@ -127,7 +127,7 @@ def test_device_decomissioning(dut: DeviceAdapter):
     mac_address = helpers.get_device_mac_address(dut)
     """Ensure the device is authorized on the mender server."""
     helpers.assert_device_authenticated(dut)
-    device, auth = mender_management.get_device_by_mac(mac_address)
+    device = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"Device with MAC {mac_address} not found on mender server"
     assert device["status"] == "accepted", f"Device with MAC {mac_address} has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
