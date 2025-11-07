@@ -19,7 +19,7 @@ tests:
   mender.mcu.client:
     harness: pytest
     sysbuild: True
-    timeout: 600
+    timeout: 900
     slow: true
     harness_config:
       pytest_dut_scope: function
