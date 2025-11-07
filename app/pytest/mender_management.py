@@ -21,8 +21,6 @@ import time
 import requests
 from requests.auth import HTTPBasicAuth
 
-# TODO: uniformize API by mac or not, uniformoze the comments
-
 class MenderManagement:
     """
     Wrapper around Mender Management API (v1/v2).
