@@ -19,6 +19,8 @@ import re
 import time
 import pytest
 import logging
+import random
+import uuid
 from pathlib import Path
 from twister_harness import DeviceAdapter, Shell
 from twister_harness.helpers.utils import find_in_config
@@ -64,7 +66,7 @@ def test_device_inventory(dut: DeviceAdapter):
     time.sleep(60)
     """Ensure of the device inventory content."""
     inventory = mender_management.get_device_inventory(device)
-    print(f"Device inventory: {inventory}")
+    print(f"Device reported inventory: {inventory}")
     expected_inventory = {}
     expected_inventory["artifact_name"] = f"{find_in_config(
         Path(dut.device_config.app_build_dir) / "zephyr" / ".config",
@@ -98,9 +100,26 @@ def test_device_configuration(dut: DeviceAdapter):
     print("✅ Device has status 'accepted' on the mender server")
     """Wait to let time to the device to push the configuration content."""
     time.sleep(60)
+    """Print the device configuration content."""
+    configuration = mender_management.get_device_configuration(device)
+    print(f"Device reported configuration: {configuration['reported']}")
+    """Generate a random configuration content with several uuids."""
+    expected_configuration = {f"uuid{index+1}": str(uuid.uuid4()) for index in range(random.randint(4, 8))}
+    """Set device configuration."""
+    mender_management.set_device_configuration(device, expected_configuration)
+    mender_management.deploy_device_configuration(device)
+    """Wait to let time to the device to download and push the configuration content."""
+    time.sleep(600)
     """Ensure of the device configuration content."""
     configuration = mender_management.get_device_configuration(device)
-    print(f"Device configuration: {configuration}")
+    print(f"Device reported configuration: {configuration['reported']}")
+    print(f"Device expected configuration: {expected_configuration}")
+    if configuration.len() != expected_configuration.len():
+        raise AssertionError(f"🔴​​​ Device configuration is invalid")
+    for key, val in expected_configuration.items():
+        if configuration.get(key) != val:
+            raise AssertionError(f"🔴​​​ Device configuration is invalid")
+    print("✅ Device configuration contains expected configuration items")
 
 @pytest.mark.dependency(depends=['test_device_inventory', 'test_device_configuration'])
 def test_device_decomissioning(dut: DeviceAdapter):

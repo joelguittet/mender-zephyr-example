@@ -154,7 +154,7 @@ class MenderManagement:
     def set_device_configuration(self, device, configuration):
         """Set configuration key/values for a device."""
         url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device['id']}"
-        payload = {item["name"]: item["value"] for item in configuration}
+        payload = {configuration}
         r = requests.put(url, headers=self.headers, json=payload, verify=self.ca_cert)
         r.raise_for_status()
         return True
