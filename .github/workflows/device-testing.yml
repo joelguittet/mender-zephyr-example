@@ -125,26 +125,6 @@ jobs:
         env:
           PIP_ROOT_USER_ACTION: ignore
 
-      # TODO: check if required at the end, seems already satisfied according to the log
-      # Install additional Python tools
-      # The following tools are installed:
-      # esptool: is used to flash esp32-devkitc board
-      # pytest-dependency: is used to define dependencies between the test cases
-      #- name: Install Python tools
-      #  run: |
-      #    pip install esptool pytest-dependency
-      #    groups
-      #    echo "now set dialout"
-      #    usermod -a -G dialout root
-      #    echo "now set dialout DONE"
-      #    groups
-      #    echo "now print serial"
-      #    ls -l /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0
-      #    echo "all serials"
-      #    ls -l /dev/serial/by-id
-      #    echo "esptool"
-      #    esptool --port /dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0 chip_id
-
       # Setup Zephyr project
       # Toolchains are installed to build the application for all supported boards:
       # arm-zephyr-eabi: to support frdm-mcxn947, nrf7002-dk and nucleo-l4a6zg boards
@@ -175,7 +155,7 @@ jobs:
       # --device-testing: test on devices
       # --flash-before: flash before opening console, useful for boards sharing the same serial port for flashing and console
       # --hardware-map: Hardware map file, specific to the testbench machine
-      # -x: Extra arguments, used to pass EXTRA_CONF_FILE to specify local.conf options, specific to the testbench machine
+      # -x: Extra arguments, used to pass EXTRA_CONF_FILE to specify local.conf options, specific to the testbench machine and mcumgr.conf so that the version of the binary is retrieved from mcuboot header
       # The following environment variables are defined:
       # - MENDER_SERVER: mender-server URL "https://docker.mender.io"
       # - MENDER_USER: mender-server username previsouly defined
@@ -184,7 +164,7 @@ jobs:
       - name: Execute tests
         working-directory: mender-zephyr-example
         run: |
-          west twister -T app -v --allow-installed-plugin --enable-slow --inline-logs --device-testing --flash-before --hardware-map /__w/mender-zephyr-example/mender-zephyr-example/map.yml -x=EXTRA_CONF_FILE=/__w/mender-zephyr-example/mender-zephyr-example/local.conf
+          west twister -T app -v --allow-installed-plugin --enable-slow --inline-logs --device-testing --flash-before --hardware-map /__w/mender-zephyr-example/mender-zephyr-example/map.yml -x=EXTRA_CONF_FILE="/__w/mender-zephyr-example/mender-zephyr-example/local.conf;mcumgr.conf"
         env:
           MENDER_SERVER: "https://docker.mender.io"
           MENDER_USER: ${{ secrets.MENDER_USER }}
