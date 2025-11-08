@@ -114,7 +114,7 @@ def test_device_configuration(dut: DeviceAdapter):
     configuration = mender_management.get_device_configuration(device)
     print(f"Device reported configuration: {configuration['reported']}")
     print(f"Device expected configuration: {expected_configuration}")
-    if configuration.len() != expected_configuration.len():
+    if len(configuration) != len(expected_configuration):
         raise AssertionError(f"🔴​​​ Device configuration is invalid")
     for key, val in expected_configuration.items():
         if configuration.get(key) != val:
