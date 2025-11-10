@@ -150,8 +150,11 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
     print("✅ Device has status 'accepted' on the mender server")
     """Create a new firmware update."""
     expected_version = "0.0.2+0"
-    key_file = find_in_config(Path(dut.device_config.app_build_dir) / "mcuboot" / "zephyr" / ".config", "CONFIG_BOOT_SIGNATURE_KEY_FILE")
-    artifact = helpers.create_mender_artifact(dut.device_config.app_build_dir, key_file, expected_version)
+    key_file = find_in_config(Path(dut.device_config.build_dir) / "mcuboot" / "zephyr" / ".config", "CONFIG_BOOT_SIGNATURE_KEY_FILE")
+    device_type = find_in_config(Path(dut.device_config.app_build_dir) / "zephyr" / ".config", "CONFIG_EXAMPLE_DEVICE_TYPE")
+    artifact_name_prefix = find_in_config(Path(dut.device_config.app_build_dir) / "zephyr" / ".config", "CONFIG_EXAMPLE_ARTIFACT_NAME_PREFIX")
+    artifact = helpers.create_mender_artifact(dut.device_config.app_build_dir, key_file, device_type, artifact_name_prefix, expected_version)
+    print(f"artifact file path is '{artifact}'") # TODO REM
 
 
 

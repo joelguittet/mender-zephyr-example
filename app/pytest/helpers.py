@@ -15,7 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import re
+import os, re, subprocess
 from pathlib import Path
 from twister_harness import DeviceAdapter
 from twister_harness.helpers.utils import match_no_lines
@@ -52,14 +52,13 @@ class Helpers:
             raise AssertionError(f"🔴​​​ Device doesn't appear to be authenticated but it should")
         print("✅ Device is authenticated")
 
-    def create_mender_artifact(build_dir: Path, key_file: Path, version: str) -> Path:
-        output_bin = Path(build_dir) / "test_{}.signed.bin".format(version.replace('.', '_').replace('+', '_'))
-        west_sign_with_imgtool(
-            build_dir=Path(build_dir),
-            output_bin=output_bin,
-            key_file=Path(key_file),
-            version=version
-        )
-        assert output_bin.is_file()
-        # TODO mender -artifact call
-        return output_bin
+    def create_mender_artifact(self, build_dir: Path, key_file: Path, device_type: str, artifact_name_prefix: str, version: str) -> Path:
+        # Sign binary using west sign
+        cmd = f"west sign --tool imgtool --build-dir {build_dir} -- --key {key_file} --version {version}"
+        subprocess.run(cmd, shell=True, check=True)
+        # Create artifact using mender-artifact
+        zephyr_signed_bin = Path(build_dir) / "zephyr" / "zephyr.signed.bin"
+        artifact_file = Path(build_dir) / "zephyr" / f"{artifact_name_prefix}-v{version}.mender"
+        cmd = f"mender-artifact write rootfs-image --compression none --device-type {device_type} --artifact-name {artifact_name_prefix}-v{version} --output-path {artifact_file} --file {zephyr_signed_bin}"
+        subprocess.run(cmd, shell=True, check=True)
+        return artifact_file
