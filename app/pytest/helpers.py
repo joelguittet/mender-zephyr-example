@@ -15,11 +15,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os, re, subprocess
+import re, subprocess
 from pathlib import Path
 from twister_harness import DeviceAdapter
 from twister_harness.helpers.utils import match_no_lines
-from west_sign_wrapper import west_sign_with_imgtool
 
 class Helpers:
     """
