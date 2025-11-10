@@ -21,6 +21,7 @@ import time
 import requests
 from requests.auth import HTTPBasicAuth
 
+
 class MenderManagement:
     """
     Wrapper around Mender Management API (v1/v2).

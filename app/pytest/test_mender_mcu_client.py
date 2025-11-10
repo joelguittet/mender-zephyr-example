@@ -16,7 +16,13 @@
 # limitations under the License.
 
 
-import datetime, logging, pytest, time, random, re, uuid
+import datetime
+import logging
+import pytest
+import time
+import random
+import re
+import uuid
 from pathlib import Path
 from twister_harness import DeviceAdapter, Shell
 from twister_harness.helpers.utils import find_in_config
@@ -27,6 +33,7 @@ logger = logging.getLogger(__name__)
 
 mender_management = MenderManagement()
 helpers = Helpers()
+
 
 @pytest.mark.dependency()
 def test_device_registration(dut: DeviceAdapter):
@@ -48,6 +55,7 @@ def test_device_registration(dut: DeviceAdapter):
     print("✅ Device has status 'accepted' on the mender server")
     print("✅ Device registration done successfully on the mender server")
 
+
 @pytest.mark.dependency(depends=["test_device_registration"])
 def test_device_inventory(dut: DeviceAdapter):
     """Get the MAC address of the device."""
@@ -59,7 +67,6 @@ def test_device_inventory(dut: DeviceAdapter):
     assert device["status"] == "accepted", f"Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
 
-
     """Print the device inventory content."""
     inventory = mender_management.get_device_inventory(device)
     print(f"Device reported inventory BEFORE TREAT 1: '{inventory}'")
@@ -68,7 +75,7 @@ def test_device_inventory(dut: DeviceAdapter):
     if inventory.get("updated_ts"):
         diff = datetime.fromisoformat(inventory.get("updated_ts")) - now
         print(f"FOUND updated_ts and diff='{diff}'")
-        
+
     """Wait to let time to the device to push the inventory content."""
     time.sleep(60)
     """Print the device inventory content."""
@@ -82,9 +89,8 @@ def test_device_inventory(dut: DeviceAdapter):
 
     inventory = {item["name"]: item["value"] for item in inventory.get("attributes", [])}
 
-
     """Ensure of the device inventory content."""
-    #inventory = mender_management.get_device_inventory(device)
+    # inventory = mender_management.get_device_inventory(device)
     print(f"Device reported inventory: '{inventory}'")
     expected_inventory = {}
     expected_inventory["artifact_name"] = f"{find_in_config(
@@ -104,8 +110,9 @@ def test_device_inventory(dut: DeviceAdapter):
     for key, val in expected_inventory.items():
         m = re.search(val, inventory.get(key))
         if m is None:
-            raise AssertionError(f"🔴​​​ Device inventory is invalid")
+            raise AssertionError("🔴​​​ Device inventory is invalid")
     print("✅ Device inventory contains expected inventory items")
+
 
 @pytest.mark.dependency(depends=["test_device_registration"])
 def test_device_configuration(dut: DeviceAdapter):
@@ -135,8 +142,9 @@ def test_device_configuration(dut: DeviceAdapter):
     print(f"Device reported configuration: '{configuration["reported"]}'")
     print(f"Device expected configuration: '{expected_configuration}'")
     if configuration["reported"] != expected_configuration:
-        raise AssertionError(f"🔴​​​ Device configuration is invalid")
+        raise AssertionError("🔴​​​ Device configuration is invalid")
     print("✅ Device configuration contains expected configuration items")
+
 
 @pytest.mark.dependency(depends=["test_device_registration"])
 def test_device_valid_firmware_update(dut: DeviceAdapter):
@@ -154,9 +162,7 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
     device_type = find_in_config(Path(dut.device_config.app_build_dir) / "zephyr" / ".config", "CONFIG_EXAMPLE_DEVICE_TYPE")
     artifact_name_prefix = find_in_config(Path(dut.device_config.app_build_dir) / "zephyr" / ".config", "CONFIG_EXAMPLE_ARTIFACT_NAME_PREFIX")
     artifact = helpers.create_mender_artifact(dut.device_config.app_build_dir, key_file, device_type, artifact_name_prefix, expected_version)
-    print(f"artifact file path is '{artifact}'") # TODO REM
-
-
+    print(f"artifact file path is '{artifact}'")
 
 
 @pytest.mark.dependency(depends=["test_device_inventory", "test_device_configuration", "test_device_valid_firmware_update"])

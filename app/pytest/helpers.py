@@ -15,10 +15,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import re, subprocess
+import re
+import subprocess
 from pathlib import Path
 from twister_harness import DeviceAdapter
 from twister_harness.helpers.utils import match_no_lines
+
 
 class Helpers:
     """
@@ -31,7 +33,7 @@ class Helpers:
         if m:
             mac_address = m.group(1)
         else:
-            raise AssertionError(f"🔴​​​ MAC address of the device not found")
+            raise AssertionError("🔴​​​ MAC address of the device not found")
         print(f"✅ MAC address of the device is '{mac_address}'")
         return mac_address
 
@@ -40,7 +42,7 @@ class Helpers:
             output = dut.readlines_until(r".*<err>.*\[401\] Unauthorized.*|.*<inf>.*Mender client authenticated.*", timeout=300)
             match_no_lines(output[-1:], ["Mender client authenticated"])
         except (twister_harness.exceptions.TwisterHarnessTimeoutException, AssertionError):
-            raise AssertionError(f"🔴​​​ Device appear to be authenticated but it should not")
+            raise AssertionError("🔴​​​ Device appear to be authenticated but it should not")
         print("✅ Device is not authenticated")
 
     def assert_device_authenticated(self, dut: DeviceAdapter) -> None:
@@ -48,14 +50,14 @@ class Helpers:
             output = dut.readlines_until("Mender client authenticated", timeout=300)
             match_no_lines(output[-1:], [r"\[401\] Unauthorized"])
         except (twister_harness.exceptions.TwisterHarnessTimeoutException, AssertionError):
-            raise AssertionError(f"🔴​​​ Device doesn't appear to be authenticated but it should")
+            raise AssertionError("🔴​​​ Device doesn't appear to be authenticated but it should")
         print("✅ Device is authenticated")
 
     def create_mender_artifact(self, build_dir: Path, key_file: Path, device_type: str, artifact_name_prefix: str, version: str) -> Path:
-        # Sign binary using west sign
+        # Sign binary using west sign
         cmd = f"west sign --tool imgtool --build-dir {build_dir} -- --key {key_file} --version {version}"
         subprocess.run(cmd, shell=True, check=True)
-        # Create artifact using mender-artifact
+        # Create artifact using mender-artifact
         zephyr_signed_bin = Path(build_dir) / "zephyr" / "zephyr.signed.bin"
         artifact_file = Path(build_dir) / "zephyr" / f"{artifact_name_prefix}-v{version}.mender"
         cmd = f"mender-artifact write rootfs-image --compression none --device-type {device_type} --artifact-name {artifact_name_prefix}-v{version} --output-path {artifact_file} --file {zephyr_signed_bin}"
