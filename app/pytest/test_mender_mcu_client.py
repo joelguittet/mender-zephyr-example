@@ -22,7 +22,7 @@ import time
 import random
 import re
 import uuid
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from twister_harness import DeviceAdapter, Shell
 from twister_harness.helpers.utils import find_in_config
@@ -70,7 +70,8 @@ def test_device_inventory(dut: DeviceAdapter):
     def get_device_inventory():
         inventory = mender_management.get_device_inventory(device)
         if inventory.get("updated_ts"):
-            return inventory
+            if datetime.fromisoformat(inventory.get("updated_ts")) > datetime.now() - timedelta(seconds=10):
+                return inventory
         return None
     inventory = helpers.run_until(get_device_inventory, 60, 5)
     if inventory == None:

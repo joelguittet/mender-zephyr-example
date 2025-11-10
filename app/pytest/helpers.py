@@ -65,7 +65,7 @@ class Helpers:
         subprocess.run(cmd, shell=True, check=True)
         return artifact_file
 
-    def run_until(f, timeout: int, interval: int):
+    def run_until(self, f, timeout: int, interval: int):
         start_time = time.time()
         while time.time() - start_time < timeout:
             result = f()
