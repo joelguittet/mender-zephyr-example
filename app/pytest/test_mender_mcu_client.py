@@ -16,13 +16,13 @@
 # limitations under the License.
 
 
-import datetime
 import logging
 import pytest
 import time
 import random
 import re
 import uuid
+from datetime import datetime
 from pathlib import Path
 from twister_harness import DeviceAdapter, Shell
 from twister_harness.helpers.utils import find_in_config
@@ -66,31 +66,20 @@ def test_device_inventory(dut: DeviceAdapter):
     assert device is not None, f"Device with MAC '{mac_address}' not found on mender server"
     assert device["status"] == "accepted", f"Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
-
-    """Print the device inventory content."""
-    inventory = mender_management.get_device_inventory(device)
-    print(f"Device reported inventory BEFORE TREAT 1: '{inventory}'")
-    now = datetime.datetime.now()
-    print(now)
-    if inventory.get("updated_ts"):
-        diff = datetime.fromisoformat(inventory.get("updated_ts")) - now
-        print(f"FOUND updated_ts and diff='{diff}'")
-
-    """Wait to let time to the device to push the inventory content."""
-    time.sleep(60)
-    """Print the device inventory content."""
-    inventory = mender_management.get_device_inventory(device)
-    print(f"Device reported inventory BEFORE TREAT 2: '{inventory}'")
-    now = datetime.datetime.now()
-    print(now)
-    if inventory.get("updated_ts"):
-        diff = datetime.fromisoformat(inventory.get("updated_ts")) - now
-        print(f"FOUND updated_ts and diff='{diff}'")
-
-    inventory = {item["name"]: item["value"] for item in inventory.get("attributes", [])}
-
+    """Wait until the device inventory is updated."""
+    inventory_found = False
+    start_time = datetime.now()
+    while datetime.now() - start_time < 60:
+        inventory = mender_management.get_device_inventory(device)
+        if inventory.get("updated_ts"):
+            if datetime.now() - datetime.fromisoformat(inventory.get("updated_ts")) < 15:
+                inventory_found = True
+                break
+        time.sleep(10)
+    if inventory_found == False:
+        raise AssertionError("🔴​​​ Device inventory not found")
     """Ensure of the device inventory content."""
-    # inventory = mender_management.get_device_inventory(device)
+    inventory = {item["name"]: item["value"] for item in inventory.get("attributes", [])}
     print(f"Device reported inventory: '{inventory}'")
     expected_inventory = {}
     expected_inventory["artifact_name"] = f"{find_in_config(
