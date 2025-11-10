@@ -136,9 +136,7 @@ class MenderManagement:
         url = f"{self.server}/api/management/v1/inventory/devices/{device['id']}"
         r = requests.get(url, headers=self.headers, verify=self.ca_cert)
         r.raise_for_status()
-        data = r.json()
-        # Flatten inventory into { name: value } for convenience
-        return {item["name"]: item["value"] for item in data.get("attributes", [])}
+        return r.json()
 
     # ============================================================
     # CONFIGURATION
