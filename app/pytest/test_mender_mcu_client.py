@@ -67,16 +67,13 @@ def test_device_inventory(dut: DeviceAdapter):
     assert device["status"] == "accepted", f"Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
     """Wait until the device inventory is updated."""
-    inventory_found = False
-    start_time = datetime.now()
-    while datetime.now() - start_time < 60:
+    def get_device_inventory():
         inventory = mender_management.get_device_inventory(device)
         if inventory.get("updated_ts"):
-            if datetime.now() - datetime.fromisoformat(inventory.get("updated_ts")) < 15:
-                inventory_found = True
-                break
-        time.sleep(10)
-    if inventory_found == False:
+            return inventory
+        return None
+    inventory = helpers.run_until(get_device_inventory, 60, 5)
+    if inventory == None:
         raise AssertionError("🔴​​​ Device inventory not found")
     """Ensure of the device inventory content."""
     inventory = {item["name"]: item["value"] for item in inventory.get("attributes", [])}

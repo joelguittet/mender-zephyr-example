@@ -51,7 +51,7 @@ jobs:
         uses: actions/checkout@v5
         with:
           repository: joelguittet/mender-server
-          ref: 84b7b677df4bc94246ab90a69565e5b082e1d36f
+          ref: 04294e2b475732ea9ec0fbbcecb995e83603750e
           path: mender-server
 
       # Start mender-server

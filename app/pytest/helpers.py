@@ -17,6 +17,7 @@
 
 import re
 import subprocess
+import time
 from pathlib import Path
 from twister_harness import DeviceAdapter
 from twister_harness.helpers.utils import match_no_lines
@@ -63,3 +64,12 @@ class Helpers:
         cmd = f"mender-artifact write rootfs-image --compression none --device-type {device_type} --artifact-name {artifact_name_prefix}-v{version} --output-path {artifact_file} --file {zephyr_signed_bin}"
         subprocess.run(cmd, shell=True, check=True)
         return artifact_file
+
+    def run_until(f, timeout: int, interval: int):
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            result = f()
+            if result != None:
+                return result
+            time.sleep(interval)
+        return None
