@@ -16,8 +16,10 @@
 # limitations under the License.
 
 import re
+from pathlib import Path
 from twister_harness import DeviceAdapter
 from twister_harness.helpers.utils import match_no_lines
+from west_sign_wrapper import west_sign_with_imgtool
 
 class Helpers:
     """
@@ -49,3 +51,15 @@ class Helpers:
         except (twister_harness.exceptions.TwisterHarnessTimeoutException, AssertionError):
             raise AssertionError(f"🔴​​​ Device doesn't appear to be authenticated but it should")
         print("✅ Device is authenticated")
+
+    def create_mender_artifact(build_dir: Path, key_file: Path, version: str) -> Path:
+        output_bin = Path(build_dir) / "test_{}.signed.bin".format(version.replace('.', '_').replace('+', '_'))
+        west_sign_with_imgtool(
+            build_dir=Path(build_dir),
+            output_bin=output_bin,
+            key_file=Path(key_file),
+            version=version
+        )
+        assert output_bin.is_file()
+        # TODO mender -artifact call
+        return output_bin

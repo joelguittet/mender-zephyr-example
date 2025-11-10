@@ -35,50 +35,57 @@ def test_device_registration(dut: DeviceAdapter):
     """Ensure the device is not authorized to the mender server."""
     helpers.assert_device_not_authenticated(dut)
     device = mender_management.get_device_by_mac(mac_address)
-    assert device is not None, f"Device with MAC {mac_address} not found on mender server"
-    assert device["status"] == "pending", f"Device with MAC {mac_address} has unexpected status '{device["status"]}'"
+    assert device is not None, f"Device with MAC '{mac_address}' not found on mender server"
+    assert device["status"] == "pending", f"Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
     print("✅ Device has status 'pending' on the mender server")
     """Accept the device on the mender server."""
     mender_management.accept_device(device)
     """Ensure the device is authorized on the mender server."""
     helpers.assert_device_authenticated(dut)
     device = mender_management.get_device_by_mac(mac_address)
-    assert device is not None, f"Device with MAC {mac_address} not found on mender server"
-    assert device["status"] == "accepted", f"Device with MAC {mac_address} has unexpected status '{device["status"]}'"
+    assert device is not None, f"Device with MAC '{mac_address}' not found on mender server"
+    assert device["status"] == "accepted", f"Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
     print("✅ Device registration done successfully on the mender server")
 
-@pytest.mark.dependency(depends=['test_device_registration'])
+@pytest.mark.dependency(depends=["test_device_registration"])
 def test_device_inventory(dut: DeviceAdapter):
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
     """Ensure the device is authorized on the mender server."""
     helpers.assert_device_authenticated(dut)
     device = mender_management.get_device_by_mac(mac_address)
-    assert device is not None, f"Device with MAC {mac_address} not found on mender server"
-    assert device["status"] == "accepted", f"Device with MAC {mac_address} has unexpected status '{device["status"]}'"
+    assert device is not None, f"Device with MAC '{mac_address}' not found on mender server"
+    assert device["status"] == "accepted", f"Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
 
 
     """Print the device inventory content."""
     inventory = mender_management.get_device_inventory(device)
-    print(f"Device reported inventory BEFORE TREAT 1: {inventory}")
+    print(f"Device reported inventory BEFORE TREAT 1: '{inventory}'")
     now = datetime.datetime.now()
     print(now)
+    if inventory.get("updated_ts"):
+        diff = datetime.fromisoformat(inventory.get("updated_ts")) - now
+        print(f"FOUND updated_ts and diff='{diff}'")
+        
     """Wait to let time to the device to push the inventory content."""
     time.sleep(60)
     """Print the device inventory content."""
     inventory = mender_management.get_device_inventory(device)
-    print(f"Device reported inventory BEFORE TREAT 2: {inventory}")
+    print(f"Device reported inventory BEFORE TREAT 2: '{inventory}'")
     now = datetime.datetime.now()
     print(now)
-    
+    if inventory.get("updated_ts"):
+        diff = datetime.fromisoformat(inventory.get("updated_ts")) - now
+        print(f"FOUND updated_ts and diff='{diff}'")
+
     inventory = {item["name"]: item["value"] for item in inventory.get("attributes", [])}
 
 
     """Ensure of the device inventory content."""
     #inventory = mender_management.get_device_inventory(device)
-    print(f"Device reported inventory: {inventory}")
+    print(f"Device reported inventory: '{inventory}'")
     expected_inventory = {}
     expected_inventory["artifact_name"] = f"{find_in_config(
         Path(dut.device_config.app_build_dir) / "zephyr" / ".config",
@@ -93,29 +100,30 @@ def test_device_inventory(dut: DeviceAdapter):
     expected_inventory["longitude"] = "6.864722"
     expected_inventory["mender-mcu-client"] = "[0-9]+.[0-9]+.[0-9]+"
     expected_inventory["zephyr-rtos"] = "[0-9]+.[0-9]+.[0-9]+"
-    print(f"Device expected inventory: {expected_inventory}")
+    print(f"Device expected inventory: '{expected_inventory}'")
     for key, val in expected_inventory.items():
         m = re.search(val, inventory.get(key))
         if m is None:
             raise AssertionError(f"🔴​​​ Device inventory is invalid")
     print("✅ Device inventory contains expected inventory items")
 
-@pytest.mark.dependency(depends=['test_device_registration'])
+@pytest.mark.dependency(depends=["test_device_registration"])
 def test_device_configuration(dut: DeviceAdapter):
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
     """Ensure the device is authorized on the mender server."""
     helpers.assert_device_authenticated(dut)
     device = mender_management.get_device_by_mac(mac_address)
-    assert device is not None, f"Device with MAC {mac_address} not found on mender server"
-    assert device["status"] == "accepted", f"Device with MAC {mac_address} has unexpected status '{device["status"]}'"
+    assert device is not None, f"Device with MAC '{mac_address}' not found on mender server"
+    assert device["status"] == "accepted", f"Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
     """Wait to let time to the device to push the configuration content."""
     time.sleep(60)
     """Print the device configuration content."""
     configuration = mender_management.get_device_configuration(device)
-    print(f"Device reported configuration: {configuration['reported']}")
+    print(f"Device reported configuration: '{configuration["reported"]}'")
     """Generate a random configuration content with several uuids."""
+    """Generating such configuration ensure very easily the previous one was different."""
     expected_configuration = {f"uuid{index+1}": str(uuid.uuid4()) for index in range(random.randint(4, 8))}
     """Set device configuration."""
     mender_management.set_device_configuration(device, expected_configuration)
@@ -124,21 +132,39 @@ def test_device_configuration(dut: DeviceAdapter):
     time.sleep(600)
     """Ensure of the device configuration content."""
     configuration = mender_management.get_device_configuration(device)
-    print(f"Device reported configuration: {configuration['reported']}")
-    print(f"Device expected configuration: {expected_configuration}")
-    if configuration['reported'] != expected_configuration:
+    print(f"Device reported configuration: '{configuration["reported"]}'")
+    print(f"Device expected configuration: '{expected_configuration}'")
+    if configuration["reported"] != expected_configuration:
         raise AssertionError(f"🔴​​​ Device configuration is invalid")
     print("✅ Device configuration contains expected configuration items")
 
-@pytest.mark.dependency(depends=['test_device_inventory', 'test_device_configuration'])
+@pytest.mark.dependency(depends=["test_device_registration"])
+def test_device_valid_firmware_update(dut: DeviceAdapter):
+    """Get the MAC address of the device."""
+    mac_address = helpers.get_device_mac_address(dut)
+    """Ensure the device is authorized on the mender server."""
+    helpers.assert_device_authenticated(dut)
+    device = mender_management.get_device_by_mac(mac_address)
+    assert device is not None, f"Device with MAC '{mac_address}' not found on mender server"
+    assert device["status"] == "accepted", f"Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
+    print("✅ Device has status 'accepted' on the mender server")
+    """Create a new firmware update."""
+    expected_version = "0.0.2+0"
+    key_file = find_in_config(Path(dut.device_config.app_build_dir) / "mcuboot" / "zephyr" / ".config", "CONFIG_BOOT_SIGNATURE_KEY_FILE")
+    artifact = helpers.create_mender_artifact(dut.device_config.app_build_dir, key_file, expected_version)
+
+
+
+
+@pytest.mark.dependency(depends=["test_device_inventory", "test_device_configuration", "test_device_valid_firmware_update"])
 def test_device_decomissioning(dut: DeviceAdapter):
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
     """Ensure the device is authorized on the mender server."""
     helpers.assert_device_authenticated(dut)
     device = mender_management.get_device_by_mac(mac_address)
-    assert device is not None, f"Device with MAC {mac_address} not found on mender server"
-    assert device["status"] == "accepted", f"Device with MAC {mac_address} has unexpected status '{device["status"]}'"
+    assert device is not None, f"Device with MAC '{mac_address}' not found on mender server"
+    assert device["status"] == "accepted", f"Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
     """Decomissioning of the device on the server."""
     mender_management.delete_device(device)
