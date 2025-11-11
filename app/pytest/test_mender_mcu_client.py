@@ -73,6 +73,7 @@ def test_device_inventory(dut: DeviceAdapter):
             if datetime.fromisoformat(inventory.get("updated_ts")) > datetime.now(timezone.utc) - timedelta(seconds=10):
                 return inventory
         return None
+    # TODO rename run_until ? integrate the check with the date compared to now ? check with config/fw update tests
     inventory = helpers.run_until(get_device_inventory, 60, 5)
     if inventory == None:
         raise AssertionError("🔴​​​ Device inventory not found")
@@ -121,9 +122,15 @@ def test_device_configuration(dut: DeviceAdapter):
     expected_configuration = {f"uuid{index+1}": str(uuid.uuid4()) for index in range(random.randint(4, 8))}
     """Set device configuration."""
     mender_management.set_device_configuration(device, expected_configuration)
-    mender_management.deploy_device_configuration(device)
+    deployment = mender_management.deploy_device_configuration(device)
+    # TODO temp
+    print(f"DEPLOYMENT='{deployment}'")
     """Wait to let time to the device to download and push the configuration content."""
     time.sleep(600)
+
+    # TODO rework here, integrate as done for inventory
+    # TODO check above comment about run_until
+
     """Ensure of the device configuration content."""
     configuration = mender_management.get_device_configuration(device)
     print(f"Device reported configuration: '{configuration["reported"]}'")
@@ -144,7 +151,9 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
     assert device["status"] == "accepted", f"Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
     """Create a new firmware update."""
-    expected_version = "0.0.2+0"
+    expected_version = "0.2.0+0"
+    # Key file is optional and will be empty in case signature is not enabled
+    # This is the case on esp32-devkitc board for which only the Espressif port of mcuboot supports signature verification
     key_file = find_in_config(Path(dut.device_config.build_dir) / "mcuboot" / "zephyr" / ".config", "CONFIG_BOOT_SIGNATURE_KEY_FILE")
     device_type = find_in_config(Path(dut.device_config.app_build_dir) / "zephyr" / ".config", "CONFIG_EXAMPLE_DEVICE_TYPE")
     artifact_name_prefix = find_in_config(Path(dut.device_config.app_build_dir) / "zephyr" / ".config", "CONFIG_EXAMPLE_ARTIFACT_NAME_PREFIX")

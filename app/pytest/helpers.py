@@ -55,8 +55,10 @@ class Helpers:
         print("✅ Device is authenticated")
 
     def create_mender_artifact(self, build_dir: Path, key_file: Path, device_type: str, artifact_name_prefix: str, version: str) -> Path:
-        # Sign binary using west sign
-        cmd = f"west sign --tool imgtool --build-dir {build_dir} -- --key {key_file} --version {version}"
+        # Sign binary using west sign (key file is optional)
+        cmd = f"west sign --tool imgtool --build-dir {build_dir} -- --version {version}"
+        if key_file.is_file():
+            cmd.append(f" --key {key_file}")
         subprocess.run(cmd, shell=True, check=True)
         # Create artifact using mender-artifact
         zephyr_signed_bin = Path(build_dir) / "zephyr" / "zephyr.signed.bin"
