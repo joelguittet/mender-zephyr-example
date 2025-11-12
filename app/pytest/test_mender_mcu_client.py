@@ -113,9 +113,13 @@ def test_device_configuration(dut: DeviceAdapter):
     assert device["status"] == "accepted", f"Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
     """Wait to let time to the device to push the configuration content."""
+    configuration = mender_management.get_device_configuration(device)
+    # TODO work in progress...
+    print(f"CONFIG BEFORE WIAT= '{configuration}'")
     time.sleep(60)
     """Print the device configuration content."""
     configuration = mender_management.get_device_configuration(device)
+    print(f"CONFIG AFTER WIAT= '{configuration}'")
     print(f"Device reported configuration: '{configuration["reported"]}'")
     """Generate a random configuration content with several uuids."""
     """Generating such configuration ensure very easily the previous one was different."""
@@ -125,14 +129,20 @@ def test_device_configuration(dut: DeviceAdapter):
     deployment = mender_management.deploy_device_configuration(device)
     # TODO temp
     print(f"DEPLOYMENT='{deployment}'")
+    deployment_status = mender_management.get_deployment_status(deployment["deployment_id"])
+    print(f"DEPLOYMENT STATUS BEFORE ='{deployment_status}'")
     """Wait to let time to the device to download and push the configuration content."""
     time.sleep(600)
+    deployment_status = mender_management.get_deployment_status(deployment["deployment_id"])
+    print(f"DEPLOYMENT STATUS AFTER ='{deployment_status}'")
+
 
     # TODO rework here, integrate as done for inventory
     # TODO check above comment about run_until
 
     """Ensure of the device configuration content."""
     configuration = mender_management.get_device_configuration(device)
+    print(f"CONFIG UPDATED= '{configuration}'") # TODO REM
     print(f"Device reported configuration: '{configuration["reported"]}'")
     print(f"Device expected configuration: '{expected_configuration}'")
     if configuration["reported"] != expected_configuration:
