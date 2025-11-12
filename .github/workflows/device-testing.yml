@@ -62,12 +62,6 @@ jobs:
         working-directory: mender-server
         run: |
           echo "Starting mender-server containers"
-          cat > docker-compose.override.yml <<'EOF'
-          version: "3.9"
-          services:
-            client:
-              profiles: ["disabled"]
-          EOF
           export MENDER_IMAGE_TAG=v4.0.1
           docker compose up -d
           echo "Setup mender-server username and password"
