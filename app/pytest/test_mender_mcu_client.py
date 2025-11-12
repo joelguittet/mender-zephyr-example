@@ -121,11 +121,13 @@ def test_device_configuration(dut: DeviceAdapter):
     def get_device_configuration():
         configuration = mender_management.get_device_configuration(device)
         if configuration.get("updated_ts"):
+            print(f"CONFIG FOUND={configuration}") # TODO REM
             return configuration, configuration.get("updated_ts")
         return None, None
-    configuration = helpers.run_until_data_refreshed(get_device_configuration, 600, 60)
+    configuration = helpers.run_until_data_refreshed(get_device_configuration, 600, 10)
     if configuration is None:
         raise AssertionError("🔴​​​ Device configuration not found")
+    print(f"CONFIG FOUND END={configuration}") # TODO REM
     deployment_status = mender_management.get_deployment_status(deployment["deployment_id"])
     print(f"DEPLOYMENT STATUS AFTER ='{deployment_status}'") # TODO REM
     # TODO assert deployment_status...
@@ -157,6 +159,13 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
     artifact_name_prefix = find_in_config(Path(dut.device_config.app_build_dir) / "zephyr" / ".config", "CONFIG_EXAMPLE_ARTIFACT_NAME_PREFIX")
     artifact = helpers.create_mender_artifact(dut.device_config.app_build_dir, key_file, device_type, artifact_name_prefix, expected_version)
     print(f"artifact file path is '{artifact}'")
+    """Deploy artifact to the device."""
+    mender_management.upload_artifact(artifact)
+    deployment = mender_management.deploy_device_configuration(device)
+    print(f"DEPLO1={deployment}")
+    time.sleep(600)
+    deployment = mender_management.deploy_device_configuration(device)
+    print(f"DEPLO2={deployment}")
 
 
 @pytest.mark.dependency(depends=["test_device_inventory", "test_device_configuration", "test_device_valid_firmware_update"])
