@@ -55,12 +55,18 @@ jobs:
           path: mender-server
 
       # Start mender-server
+      # Disable demonstration 'client' service, this avoid to pull about 1.3GB, this container is not used
       # mender-server username and password are setup so that test scripts can later connect to the server
       # mender-server certificate is converted to der format to be integrated in the devices
       - name: Setup Mender server
         working-directory: mender-server
         run: |
           echo "Starting mender-server containers"
+          cat <<EOF
+          services:
+            client:
+              profiles: ["disabled"]
+          EOF > docker-compose.override.yml
           export MENDER_IMAGE_TAG=v4.0.1
           docker compose up -d
           echo "Setup mender-server username and password"
