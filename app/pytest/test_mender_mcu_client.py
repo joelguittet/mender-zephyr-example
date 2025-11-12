@@ -129,6 +129,7 @@ def test_device_configuration(dut: DeviceAdapter):
     deployment_status = mender_management.get_deployment_status(deployment["deployment_id"])
     print(f"DEPLOYMENT STATUS AFTER ='{deployment_status}'") # TODO REM
     # TODO assert deployment_status...
+    print("✅ Device configuration deployment done successfuly")
     """Ensure of the device configuration content."""
     print(f"Device reported configuration: '{configuration["reported"]}'")
     print(f"Device expected configuration: '{expected_configuration}'")

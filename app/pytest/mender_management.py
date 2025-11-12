@@ -187,7 +187,7 @@ class MenderManagement:
 
     def get_deployment_status(self, deployment_id):
         """Get status of a deployment."""
-        url = f"{self.server}/api/management/v1/deployments/deployments/{deployment_id}"
+        url = f"{self.server}/api/management/v1/deployments/deployments/{deployment_id}/devices/list"
         r = requests.get(url, headers=self.headers, verify=self.ca_cert)
         r.raise_for_status()
         return r.json()
