@@ -22,7 +22,6 @@ import time
 import random
 import re
 import uuid
-from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from twister_harness import DeviceAdapter, Shell
 from twister_harness.helpers.utils import find_in_config
@@ -69,14 +68,11 @@ def test_device_inventory(dut: DeviceAdapter):
     """Wait until the device inventory is updated."""
     def get_device_inventory():
         inventory = mender_management.get_device_inventory(device)
-        print(f"TEMP DEV INVENTORYinventory: '{inventory}'") # TODO REM
         if inventory.get("updated_ts"):
-            if datetime.fromisoformat(inventory.get("updated_ts")) > datetime.now(timezone.utc) - timedelta(seconds=10):
-                return inventory
-        return None
-    # TODO rename run_until ? integrate the check with the date compared to now ? check with config/fw update tests
-    inventory = helpers.run_until(get_device_inventory, 60, 5)
-    if inventory == None:
+            return inventory, inventory.get("updated_ts")
+        return None, None
+    inventory = helpers.run_until_data_refreshed(get_device_inventory, 60, 10)
+    if inventory is None:
         raise AssertionError("🔴​​​ Device inventory not found")
     """Ensure of the device inventory content."""
     inventory = {item["name"]: item["value"] for item in inventory.get("attributes", [])}
@@ -113,37 +109,27 @@ def test_device_configuration(dut: DeviceAdapter):
     assert device is not None, f"Device with MAC '{mac_address}' not found on mender server"
     assert device["status"] == "accepted", f"Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
-    """Wait to let time to the device to push the configuration content."""
-    configuration = mender_management.get_device_configuration(device)
-    # TODO work in progress...
-    print(f"CONFIG BEFORE WIAT= '{configuration}'")
-    time.sleep(60)
-    """Print the device configuration content."""
-    configuration = mender_management.get_device_configuration(device)
-    print(f"CONFIG AFTER WIAT= '{configuration}'")
-    print(f"Device reported configuration: '{configuration["reported"]}'")
+    # """Wait to let time to the device to push the configuration content."""
+    # time.sleep(60) # configuration = mender_management.get_device_configuration(device) # TODO REM ??
     """Generate a random configuration content with several uuids."""
     """Generating such configuration ensure very easily the previous one was different."""
     expected_configuration = {f"uuid{index+1}": str(uuid.uuid4()) for index in range(random.randint(4, 8))}
     """Set device configuration."""
     mender_management.set_device_configuration(device, expected_configuration)
     deployment = mender_management.deploy_device_configuration(device)
-    # TODO temp
-    print(f"DEPLOYMENT='{deployment}'")
+    """Wait until the device configuration is updated."""
+    def get_device_configuration():
+        configuration = mender_management.get_device_configuration(device)
+        if configuration.get("updated_ts"):
+            return configuration, configuration.get("updated_ts")
+        return None, None
+    configuration = helpers.run_until_data_refreshed(get_device_configuration, 600, 60)
+    if configuration is None:
+        raise AssertionError("🔴​​​ Device configuration not found")
     deployment_status = mender_management.get_deployment_status(deployment["deployment_id"])
-    print(f"DEPLOYMENT STATUS BEFORE ='{deployment_status}'")
-    """Wait to let time to the device to download and push the configuration content."""
-    time.sleep(600)
-    deployment_status = mender_management.get_deployment_status(deployment["deployment_id"])
-    print(f"DEPLOYMENT STATUS AFTER ='{deployment_status}'")
-
-
-    # TODO rework here, integrate as done for inventory
-    # TODO check above comment about run_until
-
+    print(f"DEPLOYMENT STATUS AFTER ='{deployment_status}'") # TODO REM
+    # TODO assert deployment_status...
     """Ensure of the device configuration content."""
-    configuration = mender_management.get_device_configuration(device)
-    print(f"CONFIG UPDATED= '{configuration}'") # TODO REM
     print(f"Device reported configuration: '{configuration["reported"]}'")
     print(f"Device expected configuration: '{expected_configuration}'")
     if configuration["reported"] != expected_configuration:

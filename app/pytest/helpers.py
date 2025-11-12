@@ -19,6 +19,7 @@ import os
 import re
 import subprocess
 import time
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from twister_harness import DeviceAdapter
 from twister_harness.helpers.utils import match_no_lines
@@ -68,11 +69,13 @@ class Helpers:
         subprocess.run(cmd, shell=True, check=True)
         return artifact_file
 
-    def run_until(self, f, timeout: int, interval: int):
+    def run_until_data_refreshed(self, f, timeout: int, interval: int):
         start_time = time.time()
         while time.time() - start_time < timeout:
-            result = f()
-            if result != None:
-                return result
+            data, updated_ts = f()
+            if data is not None and updated_ts is not None:
+                delta = interval * 1.5
+                if datetime.fromisoformat(updated_ts) > datetime.now(timezone.utc) - timedelta(seconds=delta):
+                    return data
             time.sleep(interval)
         return None
