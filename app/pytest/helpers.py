@@ -15,6 +15,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
 import re
 import subprocess
 import time
@@ -57,7 +58,7 @@ class Helpers:
     def create_mender_artifact(self, build_dir: Path, key_file: Path, device_type: str, artifact_name_prefix: str, version: str) -> Path:
         # Sign binary using west sign (key file is optional)
         cmd = f"west sign --tool imgtool --build-dir {build_dir} -- --version {version}"
-        if key_file.is_file():
+        if os.path.exists(key_file):
             cmd.append(f" --key {key_file}")
         subprocess.run(cmd, shell=True, check=True)
         # Create artifact using mender-artifact
