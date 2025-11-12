@@ -69,6 +69,7 @@ def test_device_inventory(dut: DeviceAdapter):
     """Wait until the device inventory is updated."""
     def get_device_inventory():
         inventory = mender_management.get_device_inventory(device)
+        print(f"TEMP DEV INVENTORYinventory: '{inventory}'") # TODO REM
         if inventory.get("updated_ts"):
             if datetime.fromisoformat(inventory.get("updated_ts")) > datetime.now(timezone.utc) - timedelta(seconds=10):
                 return inventory
