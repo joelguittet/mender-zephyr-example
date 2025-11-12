@@ -543,20 +543,6 @@ hello_world_module_cb(char *id, char *artifact_name, char *type, cJSON *meta_dat
 int
 main(void) {
 
-    /* Print version of the device */
-#ifdef CONFIG_MCUMGR_GRP_IMG
-    struct image_version image_version;
-    img_mgmt_my_version(&image_version);
-    LOG_INF("Running project '%s' version '%d.%d.%d+%d'",
-            PROJECT_NAME,
-            image_version.iv_major,
-            image_version.iv_minor,
-            image_version.iv_revision,
-            image_version.iv_build_num);
-#else
-    LOG_INF("Running project '%s' version '%s'", PROJECT_NAME, APP_VERSION_STRING);
-#endif /* CONFIG_MCUMGR_GRP_IMG */
-
     /* Initialize network */
     LOG_INF("Initialization of network interface");
     struct net_if *iface = net_if_get_default();
@@ -618,6 +604,20 @@ main(void) {
              linkaddr->addr[4],
              linkaddr->addr[5]);
     LOG_INF("MAC address of the device '%s'", mac_address);
+
+    /* Print version of the device */
+#ifdef CONFIG_MCUMGR_GRP_IMG
+    struct image_version image_version;
+    img_mgmt_my_version(&image_version);
+    LOG_INF("Running project '%s' version '%d.%d.%d+%d'",
+            PROJECT_NAME,
+            image_version.iv_major,
+            image_version.iv_minor,
+            image_version.iv_revision,
+            image_version.iv_build_num);
+#else
+    LOG_INF("Running project '%s' version '%s'", PROJECT_NAME, APP_VERSION_STRING);
+#endif /* CONFIG_MCUMGR_GRP_IMG */
 
     /* Compute artifact name */
     char artifact_name[128];
