@@ -187,12 +187,12 @@ class MenderManagement:
 
     def get_deployment_status(self, deployment_id):
         """Get status of a deployment."""
-        url = f"{self.server}/api/management/v1/deployments/deployments/{deployment_id}/devices/list"
+        url = f"{self.server}/api/management/v1/deployments/deployments/{deployment_id}"
         r = requests.get(url, headers=self.headers, verify=self.ca_cert)
         r.raise_for_status()
         return r.json()
 
-    def wait_for_deployment_success(self, deployment_id, timeout=600, interval=10):
+    def wait_for_deployment_success(self, deployment_id, timeout=600, interval=10): # TODO REM ?
         """Wait until deployment completes or fails."""
         t0 = time.time()
         while time.time() - t0 < timeout:

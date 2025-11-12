@@ -117,6 +117,19 @@ def test_device_configuration(dut: DeviceAdapter):
     """Set device configuration."""
     mender_management.set_device_configuration(device, expected_configuration)
     deployment = mender_management.deploy_device_configuration(device)
+
+    print(f"DEPLOYMENT IS ='{deployment}'") # TODO REM
+
+    # TODO: Instead we should wait until the deployment is done
+    deployment_status = mender_management.get_deployment_status(deployment["deployment_id"])
+    print(f"DEPLOYMENT STATUS AFTER ='{deployment_status}'") # TODO REM
+
+    time.sleep(600) # TODO REM and loop
+
+
+    deployment_status = mender_management.get_deployment_status(deployment["deployment_id"])
+    print(f"DEPLOYMENT STATUS AFTER ='{deployment_status}'") # TODO REM
+
     """Wait until the device configuration is updated."""
     def get_device_configuration():
         configuration = mender_management.get_device_configuration(device)
@@ -160,12 +173,15 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
     artifact = helpers.create_mender_artifact(dut.device_config.app_build_dir, key_file, device_type, artifact_name_prefix, expected_version)
     print(f"artifact file path is '{artifact}'")
     """Deploy artifact to the device."""
-    mender_management.upload_artifact(artifact)
-    deployment = mender_management.deploy_device_configuration(device)
-    print(f"DEPLO1={deployment}")
-    time.sleep(600)
-    deployment = mender_management.deploy_device_configuration(device)
-    print(f"DEPLO2={deployment}")
+    upload = mender_management.upload_artifact(artifact)
+    print(f"upload is '{upload}'")
+    #deployment = mender_management.create_deployment("", upload, [device])
+    #print(f"DEPLO1={deployment}")
+    #deployment_status = mender_management.get_deployment_status(deployment["deployment_id"])
+    #print(f"DEPLOYMENT STATUS 1 ='{deployment_status}'") # TODO REM
+    #time.sleep(600)
+    #deployment_status = mender_management.get_deployment_status(deployment["deployment_id"])
+    #print(f"DEPLOYMENT STATUS 2 ='{deployment_status}'") # TODO REM
 
 
 @pytest.mark.dependency(depends=["test_device_inventory", "test_device_configuration", "test_device_valid_firmware_update"])
