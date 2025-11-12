@@ -62,13 +62,14 @@ jobs:
         working-directory: mender-server
         run: |
           echo "Starting mender-server containers"
-          cat <<EOF
+          cat > docker-compose.override.yml <<'EOF'
+          version: "3.9"
           services:
             client:
               profiles: ["disabled"]
-          EOF > docker-compose.override.yml
+          EOF
           export MENDER_IMAGE_TAG=v4.0.1
-          docker compose up -d
+          docker compose up -d --profile default
           echo "Setup mender-server username and password"
           docker compose run --name create-user useradm create-user --username "${{ secrets.MENDER_USER }}" --password "${{ secrets.MENDER_PASS }}"
           echo "Convert mender-server certificate to der format"
