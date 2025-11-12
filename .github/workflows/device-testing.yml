@@ -69,7 +69,7 @@ jobs:
               profiles: ["disabled"]
           EOF
           export MENDER_IMAGE_TAG=v4.0.1
-          docker compose up -d --profile default
+          docker compose up -d
           echo "Setup mender-server username and password"
           docker compose run --name create-user useradm create-user --username "${{ secrets.MENDER_USER }}" --password "${{ secrets.MENDER_PASS }}"
           echo "Convert mender-server certificate to der format"
