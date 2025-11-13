@@ -22,6 +22,7 @@ import time
 import random
 import re
 import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 from twister_harness import DeviceAdapter, Shell
 from twister_harness.helpers.utils import find_in_config
@@ -128,6 +129,8 @@ def test_device_configuration(dut: DeviceAdapter):
     def get_device_configuration():
         configuration = mender_management.get_device_configuration(device)
         if configuration.get("updated_ts"):
+            nowtime = datetime.now(timezone.utc)
+            print(f"DEV CONFIG at {nowtime} = '{configuration}'")
             return configuration, configuration.get("updated_ts")
         return None, None
     configuration = helpers.run_until_data_refreshed(get_device_configuration)
