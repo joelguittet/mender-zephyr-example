@@ -133,6 +133,7 @@ def test_device_configuration(dut: DeviceAdapter):
     configuration = helpers.run_until_data_available(get_device_configuration)
     if configuration is None:
         raise AssertionError("🔴​​​ Device configuration not found")
+    print(f"deployment={deployment} received config={configuration}") # TODO REM
     """Ensure of the device configuration content."""
     print(f"Device reported configuration: '{configuration["reported"]}'")
     print(f"Device expected configuration: '{expected_configuration}'")
