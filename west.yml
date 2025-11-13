@@ -53,3 +53,4 @@ manifest:
     - name: mender-mcu-client
       remote: joelguittet
       revision: 0.12.1
+      path: modules/lib/mender-mcu-client
