@@ -191,16 +191,17 @@ class MenderManagement:
         params = {"id": deployment_id}
         r = requests.get(url, headers=self.headers, params=params, verify=self.ca_cert)
         r.raise_for_status()
-        return r.json()
+        for item in r.json():
+            if item.get("id") == deployment_id:
+                return item
+        return None
 
     def wait_for_deployment(self, deployment_id, timeout=600, interval=10):
         """Wait until deployment completes or fails."""
         start_time = time.time()
         while time.time() - start_time < timeout:
             deployment_status = self.get_deployment_status(deployment_id)
-            for item in deployment_status:
-                if item.get("id") == deployment_id:
-                    if item.get("status") in ("finished", "success", "failure", "aborted"):
-                        return deployment_status
+            if deployment_status.get("status") in ("finished", "success", "failure", "aborted"):
+                return deployment_status
             time.sleep(interval)
         raise TimeoutError(f"🔴​​​ Deployment '{deployment_id}' did not complete")
