@@ -80,7 +80,7 @@ class Helpers:
             time.sleep(interval)
         return None
 
-    def run_until_data_available(self, f, timeout=600, interval=10): # TODO to be removed ?
+    def run_until_data_available(self, f, timeout=600, interval=10):
         start_time = time.time()
         while time.time() - start_time < timeout:
             data = f()
