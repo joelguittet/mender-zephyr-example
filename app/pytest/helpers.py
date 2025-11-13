@@ -69,7 +69,7 @@ class Helpers:
         subprocess.run(cmd, shell=True, check=True)
         return artifact_file
 
-    def run_until_data_refreshed(self, f, timeout: int, interval: int):
+    def run_until_data_refreshed(self, f, timeout=600, interval=10):
         start_time = time.time()
         while time.time() - start_time < timeout:
             data, updated_ts = f()
@@ -80,7 +80,7 @@ class Helpers:
             time.sleep(interval)
         return None
 
-    def run_until_data_available(self, f, timeout: int, interval: int):
+    def run_until_data_available(self, f, timeout=600, interval=10): # TODO to be removed ?
         start_time = time.time()
         while time.time() - start_time < timeout:
             data = f()

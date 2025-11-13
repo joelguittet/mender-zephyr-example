@@ -204,4 +204,4 @@ class MenderManagement:
             if deployment_status.get("status") in ("finished", "success", "failure", "aborted"):
                 return deployment_status
             time.sleep(interval)
-        raise TimeoutError(f"🔴​​​ Deployment '{deployment_id}' did not complete")
+        return None

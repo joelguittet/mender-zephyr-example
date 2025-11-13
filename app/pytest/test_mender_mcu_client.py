@@ -71,7 +71,7 @@ def test_device_inventory(dut: DeviceAdapter):
         if inventory.get("updated_ts"):
             return inventory, inventory.get("updated_ts")
         return None, None
-    inventory = helpers.run_until_data_refreshed(get_device_inventory, 60, 10)
+    inventory = helpers.run_until_data_refreshed(get_device_inventory)
     if inventory is None:
         raise AssertionError("🔴​​​ Device inventory not found")
     """Ensure of the device inventory content."""
@@ -124,10 +124,16 @@ def test_device_configuration(dut: DeviceAdapter):
     if deployment_status["status"] not in ("finished", "success"):
         raise AssertionError("🔴​​​ Deployment did not complete successfully")
     print("✅ Device configuration deployment done successfuly")
-    """Ensure of the device configuration content."""
-    configuration = mender_management.get_device_configuration(device)
+    """Wait until the device configuration is updated."""
+    def get_device_configuration():
+        configuration = mender_management.get_device_configuration(device)
+        if configuration.get("updated_ts"):
+            return configuration, configuration.get("updated_ts")
+        return None, None
+    configuration = helpers.run_until_data_refreshed(get_device_configuration)
     if configuration is None:
         raise AssertionError("🔴​​​ Device configuration not found")
+    """Ensure of the device configuration content."""
     print(f"Device reported configuration: '{configuration["reported"]}'")
     print(f"Device expected configuration: '{expected_configuration}'")
     if configuration["reported"] != expected_configuration:
