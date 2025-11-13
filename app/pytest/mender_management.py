@@ -198,7 +198,9 @@ class MenderManagement:
         start_time = time.time()
         while time.time() - start_time < timeout:
             deployment_status = self.get_deployment_status(deployment_id)
-            if deployment_status.get("status") in ("finished", "success", "failure", "aborted"):
-                return deployment_status
+            for item in deployment_status:
+                if item.get("id") == deployment_id:
+                    if item.get("status") in ("finished", "success", "failure", "aborted"):
+                        return deployment_status
             time.sleep(interval)
         raise TimeoutError(f"🔴​​​ Deployment '{deployment_id}' did not complete")
