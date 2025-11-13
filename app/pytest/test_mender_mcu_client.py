@@ -68,10 +68,10 @@ def test_device_inventory(dut: DeviceAdapter):
     """Wait until the device inventory is updated."""
     def get_device_inventory():
         inventory = mender_management.get_device_inventory(device)
-        if inventory.get("attributes"):
-            return inventory
-        return None
-    inventory = helpers.run_until_data_available(get_device_inventory, 60, 10)
+        if inventory.get("updated_ts"):
+            return inventory, inventory.get("updated_ts")
+        return None, None
+    inventory = helpers.run_until_data_refreshed(get_device_inventory, 60, 10)
     if inventory is None:
         raise AssertionError("🔴​​​ Device inventory not found")
     """Ensure of the device inventory content."""
@@ -93,6 +93,8 @@ def test_device_inventory(dut: DeviceAdapter):
     expected_inventory["zephyr-rtos"] = "[0-9]+.[0-9]+.[0-9]+"
     print(f"Device expected inventory: '{expected_inventory}'")
     for key, val in expected_inventory.items():
+        if inventory.get(key) is None:
+            raise AssertionError("🔴​​​ Device inventory is invalid")
         m = re.search(val, inventory.get(key))
         if m is None:
             raise AssertionError("🔴​​​ Device inventory is invalid")

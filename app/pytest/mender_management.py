@@ -179,7 +179,7 @@ class MenderManagement:
 
     def create_deployment(self, name, artifact_name, device_ids):
         """Create a deployment for one or more devices."""
-        url = f"{self.server}/api/management/v1/deployments/deployments"
+        url = f"{self.server}/api/management/v1/deployments/deployments" # TODO move to v2 ??? need to change payload
         payload = {"name": name, "artifact_name": artifact_name, "devices": device_ids}
         r = requests.post(url, headers=self.headers, json=payload, verify=self.ca_cert)
         r.raise_for_status()
@@ -187,8 +187,9 @@ class MenderManagement:
 
     def get_deployment_status(self, deployment_id):
         """Get status of a deployment."""
-        url = f"{self.server}/api/management/v1/deployments/deployments/{deployment_id}"
-        r = requests.get(url, headers=self.headers, verify=self.ca_cert)
+        url = f"{self.server}/api/management/v2/deployments/deployments"
+        params = {"id": deployment_id}
+        r = requests.get(url, headers=self.headers, params=params, verify=self.ca_cert)
         r.raise_for_status()
         return r.json()
 
