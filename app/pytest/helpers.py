@@ -79,3 +79,12 @@ class Helpers:
                     return data
             time.sleep(interval)
         return None
+
+    def run_until_data_available(self, f, timeout: int, interval: int):
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            data = f()
+            if data is not None:
+                return data
+            time.sleep(interval)
+        return None

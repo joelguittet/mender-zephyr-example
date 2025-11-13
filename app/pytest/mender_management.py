@@ -192,13 +192,12 @@ class MenderManagement:
         r.raise_for_status()
         return r.json()
 
-    def wait_for_deployment_success(self, deployment_id, timeout=600, interval=10): # TODO REM ?
+    def wait_for_deployment(self, deployment_id, timeout=600, interval=10):
         """Wait until deployment completes or fails."""
-        t0 = time.time()
-        while time.time() - t0 < timeout:
-            status = self.get_deployment_status(deployment_id)
-            state = status.get("status")
-            if state in ("finished", "success", "failure", "aborted"):
-                return state
+        start_time = time.time()
+        while time.time() - start_time < timeout:
+            deployment_status = self.get_deployment_status(deployment_id)
+            if deployment_status.get("status") in ("finished", "success", "failure", "aborted"):
+                return deployment_status
             time.sleep(interval)
-        raise TimeoutError(f"Deployment {deployment_id} did not complete within {timeout}s")
+        raise TimeoutError(f"🔴​​​ Deployment '{deployment_id}' did not complete")
