@@ -118,7 +118,7 @@ def test_device_configuration(dut: DeviceAdapter):
     mender_management.set_device_configuration(device, expected_configuration)
     deployment = mender_management.deploy_device_configuration(device)
     """"Wait for deployment completes or fails."""
-    deployment_status = mender_management.wait_for_deployment(deployment["deployment_id"])
+    deployment_status = mender_management.wait_for_deployment(deployment)
     if deployment_status is None:
         raise AssertionError("🔴​​​ Deployment status not found")
     if deployment_status["status"] not in ("finished", "success"):
@@ -127,13 +127,12 @@ def test_device_configuration(dut: DeviceAdapter):
     """Wait until the device configuration is updated."""
     def get_device_configuration():
         configuration = mender_management.get_device_configuration(device)
-        if configuration.get("deployment_id") == deployment["deployment_id"]:
-            return configuration
-        return None
-    configuration = helpers.run_until_data_available(get_device_configuration)
+        if configuration.get("reported_ts"):
+            return configuration, configuration.get("reported_ts")
+        return None, None
+    configuration = helpers.run_until_data_refreshed(get_device_configuration)
     if configuration is None:
         raise AssertionError("🔴​​​ Device configuration not found")
-    print(f"deployment={deployment} received config={configuration}") # TODO REM
     """Ensure of the device configuration content."""
     print(f"Device reported configuration: '{configuration["reported"]}'")
     print(f"Device expected configuration: '{expected_configuration}'")
