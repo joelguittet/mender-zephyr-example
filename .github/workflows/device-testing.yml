@@ -1,5 +1,5 @@
 # @file      device-testing.yml
-# @brief     Used to perform devide testing using twister
+# @brief     Used to perform device testing using twister
 #
 # Copyright joelguittet and mender-mcu-client contributors
 #
@@ -80,7 +80,6 @@ jobs:
       #    path: ${{ github.workspace }}/mender-server/compose/certs
 
   device-testing:
-    # FIXME: remove mender crt/der binding
     name: Execute tests on the targets
     runs-on: self-hosted
     needs: setup
@@ -90,8 +89,6 @@ jobs:
         - /dev:/dev
         - /home/testbench/mender-zephyr-example/local.conf:/__w/mender-zephyr-example/mender-zephyr-example/local.conf
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/mender-zephyr-example/map.yml
-        - /home/testbench/mender-zephyr-example/mender.crt.yml:/__w/mender-zephyr-example/mender-zephyr-example/mender.crt
-        - /home/testbench/mender-zephyr-example/mender.der:/__w/mender-zephyr-example/mender-zephyr-example/mender.der
       options: --privileged
 
     steps:
