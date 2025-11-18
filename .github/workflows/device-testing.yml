@@ -50,10 +50,10 @@ jobs:
       - name: Checkout mender-server
         uses: actions/checkout@v5
         with:
-          #repository: joelguittet/mender-server
-          #ref: 59232993063ab8a00679fe7811718054dbf60546
-          repository: mendersoftware/mender-server
-          ref: ca977e24dbfc168e552679de97c4df6aa0169720
+          repository: joelguittet/mender-server
+          ref: 59232993063ab8a00679fe7811718054dbf60546
+          #repository: mendersoftware/mender-server
+          #ref: ca977e24dbfc168e552679de97c4df6aa0169720
           path: mender-server
 
       # Start mender-server
