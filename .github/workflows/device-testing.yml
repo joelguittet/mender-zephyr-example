@@ -57,7 +57,7 @@ jobs:
           path: mender-server
 
       # Start mender-server
-      # Disable demonstration 'client' service, this avoid to pull about 1.3GB, this container is not used
+      # FIXME: Disable demonstration 'client' service, this avoid to pull about 1.3GB, this container is not used
       # mender-server username and password are setup so that test scripts can later connect to the server
       # mender-server certificate is converted to der format to be integrated in the devices
       - name: Setup Mender server
@@ -71,15 +71,16 @@ jobs:
           echo "Convert mender-server certificate to der format"
           openssl x509 -in ${{ github.workspace }}/mender-server/compose/certs/mender.crt -outform der -out ${{ github.workspace }}/mender-server/compose/certs/mender.der
 
-      # Upload mender-certs artifact
+      # FIXME: Upload mender-certs artifact
       # This step is used to save mender certificates so they can be used for tests
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: mender-certs
-          path: ${{ github.workspace }}/mender-server/compose/certs
+      #- name: Upload artifact
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: mender-certs
+      #    path: ${{ github.workspace }}/mender-server/compose/certs
 
   device-testing:
+    # FIXME: remove mender crt/der binding
     name: Execute tests on the targets
     runs-on: self-hosted
     needs: setup
@@ -89,15 +90,17 @@ jobs:
         - /dev:/dev
         - /home/testbench/mender-zephyr-example/local.conf:/__w/mender-zephyr-example/mender-zephyr-example/local.conf
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/mender-zephyr-example/map.yml
+        - /home/testbench/mender-zephyr-example/mender.crt.yml:/__w/mender-zephyr-example/mender-zephyr-example/mender.crt
+        - /home/testbench/mender-zephyr-example/mender.der:/__w/mender-zephyr-example/mender-zephyr-example/mender.der
       options: --privileged
 
     steps:
-      # Download mender-certs artifact
+      # FIXME: Download mender-certs artifact
       # This step is used to retrieve mender certificates so they can be used for tests
-      - uses: actions/download-artifact@v4
-        with:
-          name: mender-certs
-          path: ${{ github.workspace }}
+      #- uses: actions/download-artifact@v4
+      #  with:
+      #    name: mender-certs
+      #    path: ${{ github.workspace }}
 
       # Install mender-artifact
       # This tool is used to generate artifact for firmware update
@@ -174,15 +177,15 @@ jobs:
           MENDER_PASS: ${{ secrets.MENDER_PASS }}
           MENDER_CA: "/__w/mender-zephyr-example/mender-zephyr-example/mender-server/compose/certs/mender.crt"
 
-      # Upload test-results artifact
+      # FIXME: Upload test-results artifact
       # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        if: ${{ always() }}
-        with:
-          name: test-results
-          path: mender-zephyr-example/twister-out
-          include-hidden-files: true
+      #- name: Upload artifact
+      #  uses: actions/upload-artifact@v4
+      #  if: ${{ always() }}
+      #  with:
+      #    name: test-results
+      #    path: mender-zephyr-example/twister-out
+      #    include-hidden-files: true
 
       # Cleanup Zephyr environment
       - name: Cleanup Zephyr environment
