@@ -98,6 +98,10 @@ jobs:
       #  with:
       #    name: mender-certs
       #    path: ${{ github.workspace }}
+      - name: REMOVE ME TODO
+        run: |
+          ls -l
+          cat mender.*
 
       # Install mender-artifact
       # This tool is used to generate artifact for firmware update
