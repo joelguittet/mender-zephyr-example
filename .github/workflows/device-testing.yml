@@ -205,4 +205,4 @@ jobs:
       - name: Shutdown Mender server
         working-directory: mender-server
         run: |
-          docker compose down -v --remove-orphans
+          echo NO! # docker compose down -v --remove-orphans
