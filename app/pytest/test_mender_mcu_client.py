@@ -160,7 +160,7 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
     """Deploy artifact to the device."""
     artifact = mender_management.upload_artifact(artifact)
     print(f"upload is '{artifact}'")# TODO REM
-    deployment = mender_management.deploy_device_firmware("Deployment", artifact, [device])
+    deployment = mender_management.deploy_device_firmware("Deploy name test", f"{artifact_name_prefix}-v0.2.0+0", [device])
     print(f"DEPLOY={deployment}")# TODO REM
     """"Wait for deployment completes or fails."""
     deployment_status = mender_management.wait_for_deployment(deployment)
