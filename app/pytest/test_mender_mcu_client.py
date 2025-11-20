@@ -72,8 +72,7 @@ def test_device_inventory(dut: DeviceAdapter):
             return inventory, inventory.get("updated_ts")
         return None, None
     inventory = helpers.run_until_data_refreshed(get_device_inventory)
-    if inventory is None:
-        raise AssertionError("🔴​​​ Device inventory not found")
+    assert inventory is not None, "🔴​​​ Device inventory not found"
     """Ensure of the device inventory content."""
     inventory = {item["name"]: item["value"] for item in inventory.get("attributes", [])}
     print(f"Device reported inventory: '{inventory}'")
@@ -93,11 +92,9 @@ def test_device_inventory(dut: DeviceAdapter):
     expected_inventory["zephyr-rtos"] = "[0-9]+.[0-9]+.[0-9]+"
     print(f"Device expected inventory: '{expected_inventory}'")
     for key, val in expected_inventory.items():
-        if inventory.get(key) is None:
-            raise AssertionError("🔴​​​ Device inventory is invalid")
+        assert inventory.get(key) is not None, "🔴​​​ Device inventory is invalid"
         m = re.search(val, inventory.get(key))
-        if m is None:
-            raise AssertionError("🔴​​​ Device inventory is invalid")
+        assert m is not None, "🔴​​​ Device inventory is invalid"
     print("✅ Device inventory contains expected inventory items")
 
 
@@ -119,8 +116,7 @@ def test_device_configuration(dut: DeviceAdapter):
     deployment = mender_management.deploy_device_configuration(device)
     """"Wait for deployment completes or fails."""
     deployment_status = mender_management.wait_for_deployment(deployment)
-    if deployment_status is None:
-        raise AssertionError("🔴​​​ Deployment status not found")
+    assert deployment_status is not None, "🔴​​​ Deployment status not found"
     if deployment_status["status"] not in ("finished", "success"):
         raise AssertionError("🔴​​​ Deployment did not complete successfully")
     print("✅ Device configuration deployment done successfuly")
@@ -131,8 +127,7 @@ def test_device_configuration(dut: DeviceAdapter):
             return configuration, configuration.get("reported_ts")
         return None, None
     configuration = helpers.run_until_data_refreshed(get_device_configuration)
-    if configuration is None:
-        raise AssertionError("🔴​​​ Device configuration not found")
+    assert configuration is not None, "🔴​​​ Device configuration not found"
     """Ensure of the device configuration content."""
     print(f"Device reported configuration: '{configuration["reported"]}'")
     print(f"Device expected configuration: '{expected_configuration}'")

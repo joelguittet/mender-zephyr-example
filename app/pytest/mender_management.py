@@ -201,7 +201,7 @@ class MenderManagement:
         start_time = time.time()
         while time.time() - start_time < timeout:
             deployment_status = self.get_deployment_status(deployment)
-            if deployment_status.get("status") in ("finished", "success", "failure", "aborted"):
+            if deployment_status is not None and deployment_status.get("status") in ("finished", "success", "failure", "aborted"):
                 return deployment_status
             time.sleep(interval)
         return None
