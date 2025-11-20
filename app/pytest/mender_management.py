@@ -179,9 +179,10 @@ class MenderManagement:
 
     def deploy_device_firmware(self, name, artifact_name, device_ids):
         """Create a deployment for one or more devices."""
-        url = f"{self.server}/api/management/v1/deployments/deployments" # TODO move to v2 ??? need to change payload
+        url = f"{self.server}/api/management/v1/deployments/deployments"
         payload = {"name": name, "artifact_name": artifact_name, "devices": device_ids}
         r = requests.post(url, headers=self.headers, json=payload, verify=self.ca_cert)
+        print(f"DEBUG={r.text}") # TODO REM
         r.raise_for_status()
         return r.json()
 
