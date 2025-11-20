@@ -39,19 +39,10 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      # FIXME: use mender-server from mendersoftware when my pull-request is merged
       # Checkout mender-server
-      #- name: Checkout mender-server
-      #  uses: actions/checkout@v5
-      #  with:
-      #    repository: mendersoftware/mender-server
-      #    ref: v4.0.1
-      #    path: mender-server
       - name: Checkout mender-server
         uses: actions/checkout@v5
         with:
-          #repository: joelguittet/mender-server
-          #ref: cd5f5e6447dd6503f43352c48d37ed21a3350985
           repository: mendersoftware/mender-server
           ref: 8d34064338d1a1ffbe83f710e97f9f007b779354
           path: mender-server
@@ -205,4 +196,4 @@ jobs:
       - name: Shutdown Mender server
         working-directory: mender-server
         run: |
-          echo NO! # docker compose down -v --remove-orphans
+          docker compose down -v --remove-orphans
