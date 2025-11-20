@@ -177,7 +177,7 @@ class MenderManagement:
         r.raise_for_status()
         return r.json() if r.text else {}
 
-    def create_deployment(self, name, artifact_name, device_ids):
+    def deploy_device_firmware(self, name, artifact_name, device_ids):
         """Create a deployment for one or more devices."""
         url = f"{self.server}/api/management/v1/deployments/deployments" # TODO move to v2 ??? need to change payload
         payload = {"name": name, "artifact_name": artifact_name, "devices": device_ids}

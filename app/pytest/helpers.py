@@ -40,6 +40,16 @@ class Helpers:
         print(f"✅ MAC address of the device is '{mac_address}'")
         return mac_address
 
+    def get_device_firmware_version(self, dut: DeviceAdapter) -> str:
+        output = dut.readlines_until(".*<inf>.*Running project 'mender-zephyr-example' version '.*'", timeout=60)
+        m = re.search(".*<inf>.*Running project 'mender-zephyr-example' version '(.+?)'", output[-1])
+        if m:
+            fw_version = m.group(1)
+        else:
+            raise AssertionError("🔴​​​ Firmware version of the device not found")
+        print(f"✅ Firmware version of the device is '{fw_version}'")
+        return fw_version
+
     def assert_device_not_authenticated(self, dut: DeviceAdapter) -> None:
         try:
             output = dut.readlines_until(r".*<err>.*\[401\] Unauthorized.*|.*<inf>.*Mender client authenticated.*", timeout=300)
