@@ -115,7 +115,7 @@ def test_device_configuration(dut: DeviceAdapter):
     mender_management.set_device_configuration(device, expected_configuration)
     deployment = mender_management.deploy_device_configuration(device)
     """"Wait for deployment completes or fails."""
-    deployment_status = mender_management.wait_for_deployment(None, deployment)
+    deployment_status = mender_management.wait_for_deployment(deployment=deployment)
     assert deployment_status is not None, "🔴​​​ Deployment status not found"
     if deployment_status["status"] not in ("finished", "success"):
         raise AssertionError("🔴​​​ Deployment did not complete successfully")
@@ -164,7 +164,7 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
     mender_management.upload_artifact(artifact)
     mender_management.deploy_device_firmware(deployment_name, artifact_name, [device])
     """"Wait for deployment completes or fails."""
-    deployment_status = mender_management.wait_for_deployment(deployment_name, None)
+    deployment_status = mender_management.wait_for_deployment(name=deployment_name)
     assert deployment_status is not None, "🔴​​​ Deployment status not found"
     if deployment_status["status"] not in ("finished", "success"):
         raise AssertionError("🔴​​​ Deployment did not complete successfully")
