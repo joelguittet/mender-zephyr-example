@@ -185,7 +185,7 @@ class MenderManagement:
         r = requests.post(url, headers=self.headers, json=payload, verify=self.ca_cert)
         print(f"DEBUG={r.text}") # TODO REM
         r.raise_for_status()
-        return r.json()
+        return r.json() if r.text else {}
 
     def get_deployment_status(self, deployment):
         """Get status of a deployment."""
