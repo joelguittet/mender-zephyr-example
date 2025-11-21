@@ -181,21 +181,27 @@ class MenderManagement:
         """Create a deployment for one or more devices."""
         url = f"{self.server}/api/management/v1/deployments/deployments"
         payload = {"name": name, "artifact_name": artifact_name, "devices": [device["id"] for device in devices]}
-        print(f"PAYLOAD={payload}") # TODO REM
         r = requests.post(url, headers=self.headers, json=payload, verify=self.ca_cert)
-        print(f"DEBUG={r.text}") # TODO REM
         r.raise_for_status()
         return r.json() if r.text else {}
 
-    def get_deployment_status(self, deployment):
+    def get_deployment_status(self, name=None, deployment=None):
         """Get status of a deployment."""
         url = f"{self.server}/api/management/v2/deployments/deployments"
-        params = {"id": deployment["deployment_id"]}
+        params = {}
+        if name is not None:
+            params["name"] = name
+        if deployment is not None and deployment.get("deployment_id") is not None:
+            params["id"] = deployment["deployment_id"]
         r = requests.get(url, headers=self.headers, params=params, verify=self.ca_cert)
         r.raise_for_status()
         for item in r.json():
-            if item.get("id") == deployment["deployment_id"]:
-                return item
+            if name is not None:
+                if item.get("name") == name:
+                    return item
+            if deployment is not None and deployment.get("deployment_id") is not None:
+                if item.get("id") == deployment["deployment_id"]:
+                    return item
         return None
 
     def wait_for_deployment(self, deployment, timeout=600, interval=30):
