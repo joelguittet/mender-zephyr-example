@@ -624,11 +624,12 @@ main(void) {
 #ifdef CONFIG_MCUMGR_GRP_IMG
     snprintf(artifact_name,
              sizeof(artifact_name),
-             "%s-v%d.%d.%d",
+             "%s-v%d.%d.%d+%d",
              CONFIG_EXAMPLE_ARTIFACT_NAME_PREFIX,
              image_version.iv_major,
              image_version.iv_minor,
-             image_version.iv_revision);
+             image_version.iv_revision,
+             image_version.iv_build_num);
 #else
     snprintf(artifact_name, sizeof(artifact_name), "%s-v%s", CONFIG_EXAMPLE_ARTIFACT_NAME_PREFIX, APP_VERSION_STRING);
 #endif /* CONFIG_MCUMGR_GRP_IMG */
