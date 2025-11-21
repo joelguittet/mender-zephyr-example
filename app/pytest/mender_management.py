@@ -185,7 +185,7 @@ class MenderManagement:
         r.raise_for_status()
         return r.json() if r.text else {}
 
-    def get_deployment_status(self, name=None, deployment=None):
+    def get_deployment_status(self, name, deployment):
         """Get status of a deployment."""
         url = f"{self.server}/api/management/v2/deployments/deployments"
         params = {}
