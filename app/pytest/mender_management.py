@@ -181,6 +181,7 @@ class MenderManagement:
         """Create a deployment for one or more devices."""
         url = f"{self.server}/api/management/v1/deployments/deployments"
         payload = {"name": name, "artifact_name": artifact_name, "devices": device_ids}
+        print(f"PAYLOAD={payload}") # TODO REM
         r = requests.post(url, headers=self.headers, json=payload, verify=self.ca_cert)
         print(f"DEBUG={r.text}") # TODO REM
         r.raise_for_status()
