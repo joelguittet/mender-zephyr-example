@@ -113,7 +113,7 @@ class MenderManagement:
         """Accept device."""
         auth_sets = device.get("auth_sets", [])
         auth = auth_sets[0] if auth_sets else None
-        url = f"{self.server}/api/management/v2/devauth/devices/{device['id']}/auth/{auth['id']}/status"
+        url = f"{self.server}/api/management/v2/devauth/devices/{device["id"]}/auth/{auth["id"]}/status"
         payload = {"status": "accepted"}
         r = requests.put(url, headers=self.headers, json=payload, verify=self.ca_cert)
         r.raise_for_status()
@@ -121,7 +121,7 @@ class MenderManagement:
 
     def delete_device(self, device):
         """Delete device."""
-        url = f"{self.server}/api/management/v2/devauth/devices/{device['id']}"
+        url = f"{self.server}/api/management/v2/devauth/devices/{device["id"]}"
         r = requests.delete(url, headers=self.headers, verify=self.ca_cert)
         r.raise_for_status()
         return True
@@ -134,7 +134,7 @@ class MenderManagement:
         Get inventory attributes for a given device.
         Returns a dict of key/value pairs.
         """
-        url = f"{self.server}/api/management/v1/inventory/devices/{device['id']}"
+        url = f"{self.server}/api/management/v1/inventory/devices/{device["id"]}"
         r = requests.get(url, headers=self.headers, verify=self.ca_cert)
         r.raise_for_status()
         return r.json()
@@ -144,14 +144,14 @@ class MenderManagement:
     # ============================================================
     def get_device_configuration(self, device):
         """Retrieve current configuration data for a device."""
-        url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device['id']}"
+        url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device["id"]}"
         r = requests.get(url, headers=self.headers, verify=self.ca_cert)
         r.raise_for_status()
         return r.json()
 
     def set_device_configuration(self, device, configuration):
         """Set configuration key/values for a device."""
-        url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device['id']}"
+        url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device["id"]}"
         payload = configuration
         r = requests.put(url, headers=self.headers, json=payload, verify=self.ca_cert)
         r.raise_for_status()
@@ -159,7 +159,7 @@ class MenderManagement:
 
     def deploy_device_configuration(self, device):
         """Deploy configuration key/values for a device."""
-        url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device['id']}/deploy"
+        url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device["id"]}/deploy"
         payload = {"retries": 0}
         r = requests.post(url, headers=self.headers, json=payload, verify=self.ca_cert)
         r.raise_for_status()
@@ -177,10 +177,10 @@ class MenderManagement:
         r.raise_for_status()
         return r.json() if r.text else {}
 
-    def deploy_device_firmware(self, name, artifact_name, device_ids):
+    def deploy_device_firmware(self, name, artifact_name, devices):
         """Create a deployment for one or more devices."""
         url = f"{self.server}/api/management/v1/deployments/deployments"
-        payload = {"name": name, "artifact_name": artifact_name, "devices": device_ids}
+        payload = {"name": name, "artifact_name": artifact_name, "devices": [device["id"] for device in devices]}
         print(f"PAYLOAD={payload}") # TODO REM
         r = requests.post(url, headers=self.headers, json=payload, verify=self.ca_cert)
         print(f"DEBUG={r.text}") # TODO REM
