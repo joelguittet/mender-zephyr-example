@@ -115,7 +115,7 @@ def test_device_configuration(dut: DeviceAdapter):
     mender_management.set_device_configuration(device, expected_configuration)
     deployment = mender_management.deploy_device_configuration(device)
     """"Wait for deployment completes or fails."""
-    deployment_status = mender_management.wait_for_deployment(deployment)
+    deployment_status = mender_management.wait_for_deployment(deployment=deployment)
     assert deployment_status is not None, "🔴​​​ Deployment status not found"
     if deployment_status["status"] not in ("finished", "success"):
         raise AssertionError("🔴​​​ Deployment did not complete successfully")
@@ -143,6 +143,7 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
     """Get the firmware version of the device."""
     fw_version = helpers.get_device_firmware_version(dut)
     assert fw_version == "0.1.0+0", f"🔴​​​ Device has invalid firmware version '{fw_version}'"
+    print("✅ Device has expected firmware version")
     """Ensure the device is authorized on the mender server."""
     helpers.assert_device_authenticated(dut)
     device = mender_management.get_device_by_mac(mac_address)
@@ -152,27 +153,26 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
     """Create a new firmware update."""
     # Key file is optional and will be empty in case signature is not enabled
     # This is the case on esp32-devkitc board for which only the Espressif port of mcuboot supports signature verification
+    expected_version = "0.2.0+0"
     key_file = find_in_config(Path(dut.device_config.build_dir) / "mcuboot" / "zephyr" / ".config", "CONFIG_BOOT_SIGNATURE_KEY_FILE")
     device_type = find_in_config(Path(dut.device_config.app_build_dir) / "zephyr" / ".config", "CONFIG_EXAMPLE_DEVICE_TYPE")
     artifact_name_prefix = find_in_config(Path(dut.device_config.app_build_dir) / "zephyr" / ".config", "CONFIG_EXAMPLE_ARTIFACT_NAME_PREFIX")
-    artifact = helpers.create_mender_artifact(dut.device_config.app_build_dir, key_file, device_type, artifact_name_prefix, "0.2.0+0")
-    print(f"artifact file path is '{artifact}'")
+    artifact = helpers.create_mender_artifact(dut.device_config.app_build_dir, key_file, device_type, artifact_name_prefix, expected_version)
+    deployment_name = f"{artifact_name_prefix}-v{expected_version}"
+    artifact_name = f"{artifact_name_prefix}-v{expected_version}"
     """Deploy artifact to the device."""
-    artifact = mender_management.upload_artifact(artifact)
-    print(f"upload is '{artifact}'")# TODO REM
-    deployment = mender_management.deploy_device_firmware("Deploy name test", f"{artifact_name_prefix}-v0.2.0+0", [device])
-    print(f"DEPLOY={deployment}")# TODO REM
+    mender_management.upload_artifact(artifact)
+    mender_management.deploy_device_firmware(deployment_name, artifact_name, [device])
     """"Wait for deployment completes or fails."""
-    deployment_status = mender_management.wait_for_deployment(deployment)
+    deployment_status = mender_management.wait_for_deployment(name=deployment_name)
     assert deployment_status is not None, "🔴​​​ Deployment status not found"
     if deployment_status["status"] not in ("finished", "success"):
         raise AssertionError("🔴​​​ Deployment did not complete successfully")
     print("✅ Device firmware deployment done successfuly")
-    
-    # TODO will not work because need a reset
     """Get the firmware version of the device."""
     fw_version = helpers.get_device_firmware_version(dut)
-    assert fw_version == "0.2.0+0", f"🔴​​​ Device has invalid firmware version '{fw_version}'"
+    assert fw_version == expected_version, f"🔴​​​ Device has invalid firmware version '{fw_version}'"
+    print("✅ Device has expected firmware version")
 
 
 @pytest.mark.dependency(depends=["test_device_inventory", "test_device_configuration", "test_device_valid_firmware_update"])
