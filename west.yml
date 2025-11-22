@@ -28,14 +28,10 @@ manifest:
   projects:
     - name: zephyr
       remote: zephyrproject-rtos
-      #revision: v4.3.0
-      revision: a5bacc757ca9083281d0ae41932212bf652794d8
-      #revision: 1e855434e13cc93e9457f4e24ed78666e77a1fdf
-      #revision: 7837f5e5091f6cc740ee1a8b0d0c84af8975bfd7
-      #revision: v4.2.0
+      revision: v4.3.0
       import:
         # By using name-allowlist we can clone only the modules that are
-        # strictly needed by the application.
+        # strictly needed by the application
         name-allowlist:
           - cmsis_6
           - hal_espressif # required for esp32-devkitc board
