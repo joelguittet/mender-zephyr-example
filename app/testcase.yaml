@@ -17,14 +17,32 @@
 
 tests:
   mender.mcu.client:
-    harness: pytest
     sysbuild: True
     timeout: 900
     slow: true
+    harness: pytest
     harness_config:
       pytest_dut_scope: function
+      pytest_root:
+        - "pytest/test_mender_mcu_client.py"
     platform_allow:
       - esp32_devkitc/esp32/procpu
+      - nucleo_l4a6zg
+    tags:
+      - testing
+      - pytest
+      - shell
+  mender.mcu.client.troubleshoot:
+    sysbuild: True
+    timeout: 900
+    slow: true
+    extra_args: EXTRA_CONF_FILE="troubleshoot.conf"
+    harness: pytest
+    harness_config:
+      pytest_dut_scope: function
+      pytest_root:
+        - "pytest/test_mender_mcu_client_troubleshoot.py"
+    platform_allow:
       - nucleo_l4a6zg
     tags:
       - testing

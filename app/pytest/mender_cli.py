@@ -1,5 +1,5 @@
-# @file      mender_management.py
-# @brief     Mender management API wrapper
+# @file      mender_cli.py
+# @brief     mender-cli wrapper
 #
 # Copyright joelguittet and mender-mcu-client contributors
 #
