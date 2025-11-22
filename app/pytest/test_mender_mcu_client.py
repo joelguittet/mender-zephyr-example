@@ -25,11 +25,13 @@ import uuid
 from pathlib import Path
 from twister_harness import DeviceAdapter, Shell
 from twister_harness.helpers.utils import find_in_config
+from mender_cli import MenderCli
 from mender_management import MenderManagement
 from helpers import Helpers
 
 logger = logging.getLogger(__name__)
 
+mender_cli = MenderCli()
 mender_management = MenderManagement()
 helpers = Helpers()
 
@@ -146,10 +148,8 @@ def test_device_troubeshoot_terminal(dut: DeviceAdapter):
     assert device is not None, f"🔴​​​ Device with MAC '{mac_address}' not found on mender server"
     assert device["status"] == "accepted", f"🔴​​​ Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
-    """Login using mender-cli."""
-    mender_management.mender_cli_login()
     """Execute command on troubleshoot terminal."""
-    mender_management.mender_cli_execute_terminal_command(device, "help")
+    mender_cli.terminal_exec(device, "help")
 
 
 @pytest.mark.dependency(depends=["test_device_registration"])

@@ -17,7 +17,6 @@
 
 import json
 import os
-import pexpect
 import requests
 import time
 from requests.auth import HTTPBasicAuth
@@ -26,7 +25,7 @@ from requests.auth import HTTPBasicAuth
 class MenderManagement:
     """
     Wrapper around Mender Management API (v1/v2).
-    Provides methods for device management, inventory, and deployments.
+    Provides methods for device management, inventory, configuration and deployments.
     """
 
     def __init__(self,
@@ -214,27 +213,3 @@ class MenderManagement:
                 return deployment_status
             time.sleep(interval)
         return None
-
-    # ============================================================
-    # CLI
-    # ============================================================
-    def mender_cli_login(self):
-        child = pexpect.spawn("mender-cli login", encoding='utf-8')
-        #child.logfile = open("mender.log", "w")
-        child.sendline(self.username)
-        child.sendline(self.password)
-        # Read output
-        #child.expect("\n")  # read one line
-        print(child.before)
-        # Send Ctrl+]
-        #child.send("\x1d")
-
-    def mender_cli_execute_terminal_command(self, device, cmd):
-        child = pexpect.spawn(f"mender-cli terminal {device["id"]}", encoding='utf-8')
-        #child.logfile = open("mender.log", "w")
-        child.sendline(f"{cmd}\n")
-        # Read output
-        #child.expect("\n")  # read one line
-        print(child.before)
-        # Send Ctrl+] to exit
-        child.sendline("\x1d")
