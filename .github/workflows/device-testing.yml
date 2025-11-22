@@ -95,7 +95,7 @@ jobs:
       # Install mender-artifact and mender-cli
       # mender-artifact is used to generate artifact for firmware update
       # mender-cli is used to connect to the troubleshoot terminal of the device
-      - name: Install mender-artifact
+      - name: Install mender-artifact and mender-cli
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
@@ -200,4 +200,4 @@ jobs:
       - name: Shutdown Mender server
         working-directory: mender-server
         run: |
-          docker compose down -v --remove-orphans
+          echo "NO" # docker compose down -v --remove-orphans
