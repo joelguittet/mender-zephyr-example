@@ -169,7 +169,7 @@ jobs:
           west twister -T app -v --allow-installed-plugin --enable-slow --inline-logs --device-testing --flash-before --hardware-map /__w/mender-zephyr-example/mender-zephyr-example/map.yml -x=EXTRA_CONF_FILE="/__w/mender-zephyr-example/mender-zephyr-example/local.conf;mcumgr.conf;troubleshoot.conf"
         env:
           MENDER_SERVER: "https://docker.mender.io"
-          MENDER_USERNAME: "admin"
+          MENDER_USERNAME: "admin@docker.mender.io"
           MENDER_PASSWORD: "PleaseReplaceWithASecurePassword"
           MENDER_CA: "/__w/mender-zephyr-example/mender-zephyr-example/mender-server/compose/certs/mender.crt"
 
@@ -200,4 +200,4 @@ jobs:
       - name: Shutdown Mender server
         working-directory: mender-server
         run: |
-          echo "NO" # docker compose down -v --remove-orphans
+          docker compose down -v --remove-orphans
