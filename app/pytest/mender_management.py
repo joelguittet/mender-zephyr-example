@@ -15,10 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import os
 import json
-import time
+import os
+import pexpect
 import requests
+import time
 from requests.auth import HTTPBasicAuth
 
 
@@ -34,8 +35,8 @@ class MenderManagement:
                  password=None,
                  ca_cert=None):
         self.server = server or os.getenv("MENDER_SERVER", "https://mender.mycompany.local")
-        self.username = username or os.getenv("MENDER_USER", "admin@mycompany.local")
-        self.password = password or os.getenv("MENDER_PASS", "MySecretPassword")
+        self.username = username or os.getenv("MENDER_USERNAME", "admin@mycompany.local")
+        self.password = password or os.getenv("MENDER_PASSWORD", "MySecretPassword")
         self.ca_cert = ca_cert or os.getenv("MENDER_CA", "/etc/ssl/certs/my-ca.crt")
 
         self.token = None
@@ -213,3 +214,27 @@ class MenderManagement:
                 return deployment_status
             time.sleep(interval)
         return None
+
+    # ============================================================
+    # CLI
+    # ============================================================
+    def mender_cli_login(self):
+        child = pexpect.spawn("mender-cli login", encoding='utf-8')
+        #child.logfile = open("mender.log", "w")
+        child.sendline(self.username)
+        child.sendline(self.password)
+        # Read output
+        #child.expect("\n")  # read one line
+        print(child.before)
+        # Send Ctrl+]
+        #child.send("\x1d")
+
+    def mender_cli_execute_terminal_command(self, device, cmd):
+        child = pexpect.spawn(f"mender-cli terminal {device["id"]}", encoding='utf-8')
+        #child.logfile = open("mender.log", "w")
+        child.sendline(f"{cmd}\n")
+        # Read output
+        #child.expect("\n")  # read one line
+        print(child.before)
+        # Send Ctrl+] to exit
+        child.sendline("\x1d")

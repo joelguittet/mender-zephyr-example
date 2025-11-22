@@ -137,6 +137,22 @@ def test_device_configuration(dut: DeviceAdapter):
 
 
 @pytest.mark.dependency(depends=["test_device_registration"])
+def test_device_troubeshoot_terminal(dut: DeviceAdapter):
+    """Get the MAC address of the device."""
+    mac_address = helpers.get_device_mac_address(dut)
+    """Ensure the device is authorized on the mender server."""
+    helpers.assert_device_authenticated(dut)
+    device = mender_management.get_device_by_mac(mac_address)
+    assert device is not None, f"🔴​​​ Device with MAC '{mac_address}' not found on mender server"
+    assert device["status"] == "accepted", f"🔴​​​ Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
+    print("✅ Device has status 'accepted' on the mender server")
+    """Login using mender-cli."""
+    mender_management.mender_cli_login()
+    """Execute command on troubleshoot terminal."""
+    mender_management.mender_cli_execute_terminal_command(device, "help")
+
+
+@pytest.mark.dependency(depends=["test_device_registration"])
 def test_device_valid_firmware_update(dut: DeviceAdapter):
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
@@ -175,7 +191,7 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
     print("✅ Device has expected firmware version")
 
 
-@pytest.mark.dependency(depends=["test_device_inventory", "test_device_configuration", "test_device_valid_firmware_update"])
+@pytest.mark.dependency(depends=["test_device_inventory", "test_device_configuration", "test_device_troubeshoot_terminal", "test_device_valid_firmware_update"])
 def test_device_decomissioning(dut: DeviceAdapter):
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)

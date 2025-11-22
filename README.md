@@ -1,6 +1,7 @@
 # mender-zephyr-example
 
-[![CI Badge](https://github.com/joelguittet/mender-zephyr-example/workflows/ci/badge.svg)](https://github.com/joelguittet/mender-zephyr-example/actions)
+[![Code Format Badge](https://github.com/joelguittet/mender-zephyr-example/workflows/check-code-format/badge.svg)](https://github.com/joelguittet/mender-zephyr-example/actions)
+[![Device testing Badge](https://github.com/joelguittet/mender-zephyr-example/workflows/device-testing/badge.svg)](https://github.com/joelguittet/mender-zephyr-example/actions)
 [![Issues Badge](https://img.shields.io/github/issues/joelguittet/mender-zephyr-example)](https://github.com/joelguittet/mender-zephyr-example/issues)
 [![License Badge](https://img.shields.io/github/license/joelguittet/mender-zephyr-example)](https://github.com/joelguittet/mender-zephyr-example/blob/master/LICENSE)
 

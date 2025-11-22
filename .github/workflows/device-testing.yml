@@ -48,7 +48,7 @@ jobs:
           path: mender-server
 
       # Start mender-server
-      # FIXME: Disable demonstration 'client' service, this avoid to pull about 1.3GB, this container is not used
+      # Refer to https://docs.mender.io/server-installation/evaluation-with-docker-compose
       # mender-server username and password are setup so that test scripts can later connect to the server
       # mender-server certificate is converted to der format to be integrated in the devices
       - name: Setup Mender server
@@ -58,7 +58,9 @@ jobs:
           export MENDER_IMAGE_TAG=v4.0.1
           docker compose up -d
           echo "Setup mender-server username and password"
-          docker compose run --name create-user useradm create-user --username "${{ secrets.MENDER_USER }}" --password "${{ secrets.MENDER_PASS }}"
+          MENDER_USERNAME=admin@docker.mender.io
+          MENDER_PASSWORD=PleaseReplaceWithASecurePassword
+          docker compose run --name create-user useradm create-user --username "$MENDER_USERNAME" --password "$MENDER_PASSWORD"
           echo "Convert mender-server certificate to der format"
           openssl x509 -in ${{ github.workspace }}/mender-server/compose/certs/mender.crt -outform der -out ${{ github.workspace }}/mender-server/compose/certs/mender.der
 
@@ -90,8 +92,9 @@ jobs:
       #    name: mender-certs
       #    path: ${{ github.workspace }}
 
-      # Install mender-artifact
-      # This tool is used to generate artifact for firmware update
+      # Install mender-artifact and mender-cli
+      # mender-artifact is used to generate artifact for firmware update
+      # mender-cli is used to connect to the troubleshoot terminal of the device
       - name: Install mender-artifact
         run: |
           apt-get update
@@ -102,7 +105,7 @@ jobs:
           echo "deb [arch=$(dpkg --print-architecture)] https://downloads.mender.io/repos/workstation-tools debian/trixie/stable main" | tee /etc/apt/sources.list.d/mender.list
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            mender-artifact
+            mender-artifact mender-cli
 
       # Checkout mender-zephyr-example
       - name: Checkout mender-zephyr-example
@@ -158,11 +161,11 @@ jobs:
       - name: Execute tests
         working-directory: mender-zephyr-example
         run: |
-          west twister -T app -v --allow-installed-plugin --enable-slow --inline-logs --device-testing --flash-before --hardware-map /__w/mender-zephyr-example/mender-zephyr-example/map.yml -x=EXTRA_CONF_FILE="/__w/mender-zephyr-example/mender-zephyr-example/local.conf;mcumgr.conf"
+          west twister -T app -v --allow-installed-plugin --enable-slow --inline-logs --device-testing --flash-before --hardware-map /__w/mender-zephyr-example/mender-zephyr-example/map.yml -x=EXTRA_CONF_FILE="/__w/mender-zephyr-example/mender-zephyr-example/local.conf;mcumgr.conf;troubleshoot.conf"
         env:
           MENDER_SERVER: "https://docker.mender.io"
-          MENDER_USER: ${{ secrets.MENDER_USER }}
-          MENDER_PASS: ${{ secrets.MENDER_PASS }}
+          MENDER_USERNAME: "admin"
+          MENDER_PASSWORD: "PleaseReplaceWithASecurePassword"
           MENDER_CA: "/__w/mender-zephyr-example/mender-zephyr-example/mender-server/compose/certs/mender.crt"
 
       # FIXME: Upload test-results artifact
