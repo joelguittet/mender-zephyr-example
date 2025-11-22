@@ -16,7 +16,7 @@
 # limitations under the License.
 
 import os
-import pexpect
+# TODO not install in yml import pexpect
 import subprocess
 
 
@@ -50,11 +50,5 @@ class MenderCli:
     # TERMINAL
     # ============================================================
     def terminal_exec(self, device, cmd):
-        child = pexpect.spawn(f"mender-cli terminal {device["id"]}", encoding='utf-8')
-        #child.logfile = open("mender.log", "w")
-        child.sendline(f"{cmd}\n")
-        # Read output
-        #child.expect("\n")  # read one line
-        print(child.before)
-        # Send Ctrl+] to exit
-        child.sendline("\x1d")
+        cmd = f"./mender-cli.sh {device["id"]} {cmd}"
+        subprocess.run(cmd, shell=True, check=True)
