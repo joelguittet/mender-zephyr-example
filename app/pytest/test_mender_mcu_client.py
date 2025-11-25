@@ -124,6 +124,7 @@ def test_device_configuration(dut: DeviceAdapter):
         raise AssertionError("🔴​​​ Deployment did not complete successfully")
     print("✅ Device configuration deployment done successfuly")
     print(f"Time after the deployment= {datetime.datetime.now()}") # TODO REM
+    print(f"Deployment is {deployment_status}") # TODO REM
     """Wait until the device configuration is updated."""
     def get_device_configuration():
         configuration = mender_management.get_device_configuration(device)
