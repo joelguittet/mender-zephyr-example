@@ -24,7 +24,7 @@ socat -d -d pty,raw,echo=0,link=/tmp/mender_cli_pty1 pty,raw,echo=0,link=/tmp/me
 SOCAT_PID=$!
 sleep 1
 
-# Start men der-cli terminal
+# Start mender-cli terminal
 mender-cli terminal ${device_id} < /tmp/mender_cli_pty1 | tee /tmp/mender.log &
 sleep 5
 
