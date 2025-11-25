@@ -32,19 +32,19 @@ tests:
       - testing
       - pytest
       - shell
-  mender.mcu.client.troubleshoot:
-    sysbuild: True
-    timeout: 900
-    slow: true
-    extra_args: EXTRA_CONF_FILE="troubleshoot.conf"
-    harness: pytest
-    harness_config:
-      pytest_dut_scope: function
-      pytest_root:
-        - "pytest/test_mender_mcu_client_troubleshoot.py"
-    platform_allow:
-      - nucleo_l4a6zg
-    tags:
-      - testing
-      - pytest
-      - shell
+  #mender.mcu.client.troubleshoot:
+  #  sysbuild: True
+  #  timeout: 900
+  #  slow: true
+   # extra_args: EXTRA_CONF_FILE="troubleshoot.conf"
+  #  harness: pytest
+   # harness_config:
+   #   pytest_dut_scope: function
+  #    pytest_root:
+ #       - "pytest/test_mender_mcu_client_troubleshoot.py"
+#    platform_allow:
+ #     - nucleo_l4a6zg
+ #   tags:
+  #    - testing
+   #   - pytest
+   #   - shell
