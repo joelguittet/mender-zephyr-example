@@ -122,12 +122,6 @@ jobs:
         env:
           PIP_ROOT_USER_ACTION: ignore
 
-      # FIXME: cleanup this
-      # Install additional Python tools
-      #- name: Install Python tools
-      #  run: |
-      #    pip3 install pexpect
-
       # Setup Zephyr project
       # Toolchains are installed to build the application for all supported boards:
       # arm-zephyr-eabi: to support frdm-mcxn947, nrf7002-dk and nucleo-l4a6zg boards
