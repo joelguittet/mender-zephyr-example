@@ -84,7 +84,7 @@ class Helpers:
         while time.time() - start_time < timeout:
             data, updated_ts = f()
             if data is not None and updated_ts is not None:
-                delta = interval + 5
+                delta = interval * 1.5
                 if datetime.fromisoformat(updated_ts) > datetime.now(timezone.utc) - timedelta(seconds=delta):
                     return data
             time.sleep(interval)
