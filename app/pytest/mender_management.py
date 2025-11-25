@@ -130,10 +130,7 @@ class MenderManagement:
     # INVENTORY
     # ============================================================
     def get_device_inventory(self, device):
-        """
-        Get inventory attributes for a given device.
-        Returns a dict of key/value pairs.
-        """
+        """Retrieve current inventory data for a device."""
         url = f"{self.server}/api/management/v1/inventory/devices/{device["id"]}"
         r = requests.get(url, headers=self.headers, verify=self.ca_cert)
         r.raise_for_status()
