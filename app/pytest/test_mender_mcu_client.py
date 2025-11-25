@@ -59,6 +59,9 @@ def test_device_registration(dut: DeviceAdapter):
 
 @pytest.mark.dependency(depends=["test_device_registration"])
 def test_device_inventory(dut: DeviceAdapter):
+    """Check if inventory add-on is built-in."""
+    if not find_in_config(Path(dut.device_config.app_build_dir) / "zephyr" / ".config", "CONFIG_MENDER_CLIENT_ADD_ON_INVENTORY"):
+        pytest.skip("Inventory add-on is not built-in")
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
     """Ensure the device is authorized on the mender server."""
@@ -102,7 +105,10 @@ def test_device_inventory(dut: DeviceAdapter):
 
 
 @pytest.mark.dependency(depends=["test_device_registration"])
-def test_device_configuration(dut: DeviceAdapter):
+def test_device_configure(dut: DeviceAdapter):
+    """Check if configure add-on is built-in."""
+    if not find_in_config(Path(dut.device_config.app_build_dir) / "zephyr" / ".config", "CONFIG_MENDER_CLIENT_ADD_ON_CONFIGURE"):
+        pytest.skip("Configure add-on is not built-in")
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
     """Ensure the device is authorized on the mender server."""
@@ -145,14 +151,11 @@ def test_device_configuration(dut: DeviceAdapter):
     print("✅ Device configuration contains expected configuration items")
 
 
-def troubleshoot_shell_enabled(dut: DeviceAdapter):
-    """Check if troubleshoot add-on shell is built-in."""
-    return find_in_config(Path(dut.device_config.app_build_dir) / "zephyr" / ".config", "CONFIG_MENDER_CLIENT_TROUBLESHOOT_SHELL") == "true"
-
-
-@pytest.mark.skipif(not troubleshoot_shell_enabled(), reason="Troubleshoot add-on shell is not built-in")
 @pytest.mark.dependency(depends=["test_device_registration"])
 def test_device_troubleshoot_shell(dut: DeviceAdapter):
+    """Check if troubleshoot add-on shell is built-in."""
+    if not find_in_config(Path(dut.device_config.app_build_dir) / "zephyr" / ".config", "CONFIG_MENDER_CLIENT_TROUBLESHOOT_SHELL"):
+        pytest.skip("Troubleshoot add-on shell is not built-in")
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
     """Ensure the device is authorized on the mender server."""
@@ -204,7 +207,7 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
     print("✅ Device has expected firmware version")
 
 
-@pytest.mark.dependency(depends=["test_device_inventory", "test_device_configuration", "test_device_troubleshoot_shell", "test_device_valid_firmware_update"], allow_skipped=True)
+@pytest.mark.dependency(depends=["test_device_inventory", "test_device_configure", "test_device_troubleshoot_shell", "test_device_valid_firmware_update"], allow_skipped=True)
 def test_device_decomissioning(dut: DeviceAdapter):
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
