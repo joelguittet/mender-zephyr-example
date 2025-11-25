@@ -122,10 +122,11 @@ jobs:
         env:
           PIP_ROOT_USER_ACTION: ignore
 
+      # FIXME: cleanup this
       # Install additional Python tools
-      - name: Install Python tools
-        run: |
-          pip3 install pexpect
+      #- name: Install Python tools
+      #  run: |
+      #    pip3 install pexpect
 
       # Setup Zephyr project
       # Toolchains are installed to build the application for all supported boards:

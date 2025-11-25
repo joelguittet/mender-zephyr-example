@@ -36,6 +36,7 @@ mender_management = MenderManagement()
 helpers = Helpers()
 
 
+@pytest.mark.first
 @pytest.mark.dependency()
 def test_device_registration(dut: DeviceAdapter):
     """Get the MAC address of the device."""
@@ -207,7 +208,8 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
     print("✅ Device has expected firmware version")
 
 
-@pytest.mark.dependency(depends=["test_device_inventory", "test_device_configure", "test_device_troubleshoot_shell", "test_device_valid_firmware_update"], allow_skipped=True)
+@pytest.mark.last
+@pytest.mark.dependency(depends=["test_device_registration"])
 def test_device_decomissioning(dut: DeviceAdapter):
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
