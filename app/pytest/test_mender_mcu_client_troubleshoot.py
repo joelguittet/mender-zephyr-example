@@ -1,5 +1,5 @@
-# @file      test_mender_mcu_client.py
-# @brief     Mender MCU client test file
+# @file      test_mender_mcu_client_troubleshoot.py
+# @brief     Mender MCU client troubleshoot add-on test file
 #
 # Copyright joelguittet and mender-mcu-client contributors
 #
@@ -54,7 +54,7 @@ def test_device_registration(dut: DeviceAdapter):
 
 
 @pytest.mark.dependency(depends=["test_device_registration"])
-def test_device_troubeshoot_terminal(dut: DeviceAdapter):
+def test_device_troubleshoot_terminal(dut: DeviceAdapter):
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
     """Ensure the device is authorized on the mender server."""
@@ -67,7 +67,7 @@ def test_device_troubeshoot_terminal(dut: DeviceAdapter):
     mender_cli.terminal_exec(device, "help")
 
 
-@pytest.mark.dependency(depends=["test_device_troubeshoot_terminal"])
+@pytest.mark.dependency(depends=["test_device_troubleshoot_terminal"])
 def test_device_decomissioning(dut: DeviceAdapter):
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
