@@ -70,6 +70,7 @@ def test_device_inventory(dut: DeviceAdapter):
     """Wait until the device inventory is updated."""
     def get_device_inventory():
         inventory = mender_management.get_device_inventory(device)
+        print(f"inventory={inventory}") # TODO REM
         if inventory.get("updated_ts"):
             return inventory, inventory.get("updated_ts")
         return None, None
@@ -128,6 +129,7 @@ def test_device_configuration(dut: DeviceAdapter):
     """Wait until the device configuration is updated."""
     def get_device_configuration():
         configuration = mender_management.get_device_configuration(device)
+        print(f"Configuration={configuration}") # TODO REM
         if configuration.get("reported_ts") and datetime.fromisoformat(configuration.get("reported_ts")) >= datetime.fromisoformat(deployment_status.get("finished")):
             print(f"Time while reported_ts is {configuration.get("reported_ts")} = {datetime.now()}") # TODO REM
             return configuration, configuration.get("reported_ts")
