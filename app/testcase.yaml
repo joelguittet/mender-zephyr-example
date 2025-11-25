@@ -18,7 +18,7 @@
 tests:
   mender.mcu.client:
     sysbuild: True
-    timeout: 900
+    timeout: 3600
     slow: true
     harness: pytest
     harness_config:

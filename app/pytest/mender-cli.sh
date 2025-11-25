@@ -16,25 +16,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-device_id=$0
-command=$1
+device_id=$1
+command=$2
 
 # Start socat with explicit PTY links
-socat -d -d pty,raw,echo=0,link=/tmp/mender_cli_pty1 pty,raw,echo=0,link=/tmp/mender_cli_pty2 &
+socat -d -d pty,raw,echo=0,link=/tmp/mender_cli_pty1 pty,raw,echo=0,link=/tmp/mender_cli_pty2 > /dev/null 2>&1 &
 SOCAT_PID=$!
 sleep 1
 
 # Start mender-cli terminal
-mender-cli terminal ${device_id} < /tmp/mender_cli_pty1 | tee /tmp/mender.log &
+mender-cli terminal $device_id < /tmp/mender_cli_pty1 > /tmp/mender_cli_pty1 2>/dev/null &
 sleep 5
 
+# Check if prompt is received
+output=$(timeout 5s dd if=/tmp/mender_cli_pty2 iflag=nonblock status=none 2>/dev/null)
+if [[ "$output" != *"\$"* ]]; then
+    # Prompt not found, exit
+    exit 1
+fi
+    
 # Print expected command to the terminal
-printf "${command}\n" > /tmp/mender_cli_pty2
+printf "$command\n" > /tmp/mender_cli_pty2
 sleep 1
 
 # Disconnect
 printf "\x1d" > /tmp/mender_cli_pty2
 sleep 1
 
+# Read result
+timeout 3s dd if=/tmp/mender_cli_pty2 iflag=nonblock status=none 2>/dev/null | tail -n +2
+
 # Stop socat
-sudo kill -9 $SOCAT_PID
+kill -TERM $SOCAT_PID > /dev/null 2>&1
+
+exit 0
