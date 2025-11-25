@@ -16,7 +16,6 @@
 # limitations under the License.
 
 
-import datetime # TODO REM
 from datetime import datetime, timedelta, timezone # TODO CLEAN
 import logging
 import pytest
@@ -115,7 +114,7 @@ def test_device_configuration(dut: DeviceAdapter):
     """Generating such configuration ensure very easily the previous one was different."""
     expected_configuration = {f"uuid{index+1}": str(uuid.uuid4()) for index in range(random.randint(4, 8))}
     """Set device configuration."""
-    print(f"Time before starting the deployment= {datetime.datetime.now()}") # TODO REM
+    print(f"Time before starting the deployment= {datetime.now()}") # TODO REM
     mender_management.set_device_configuration(device, expected_configuration)
     deployment = mender_management.deploy_device_configuration(device)
     """"Wait for deployment completes or fails."""
@@ -124,19 +123,19 @@ def test_device_configuration(dut: DeviceAdapter):
     if deployment_status["status"] not in ("finished", "success"):
         raise AssertionError("🔴​​​ Deployment did not complete successfully")
     print("✅ Device configuration deployment done successfuly")
-    print(f"Time after the deployment= {datetime.datetime.now()}") # TODO REM
+    print(f"Time after the deployment= {datetime.now()}") # TODO REM
     print(f"Deployment is {deployment_status}") # TODO REM
     """Wait until the device configuration is updated."""
     def get_device_configuration():
         configuration = mender_management.get_device_configuration(device)
         if configuration.get("reported_ts") and datetime.fromisoformat(configuration.get("reported_ts")) >= datetime.fromisoformat(deployment_status.get("finished")):
-            print(f"Time while reported_ts is {configuration.get("reported_ts")} = {datetime.datetime.now()}") # TODO REM
+            print(f"Time while reported_ts is {configuration.get("reported_ts")} = {datetime.now()}") # TODO REM
             return configuration, configuration.get("reported_ts")
         return None, None
     configuration = helpers.run_until_data_refreshed(get_device_configuration)
     assert configuration is not None, "🔴​​​ Device configuration not found"
     """Ensure of the device configuration content."""
-    print(f"Time while checking = {datetime.datetime.now()}") # TODO REM
+    print(f"Time while checking = {datetime.now()}") # TODO REM
     print(f"Device reported configuration: '{configuration["reported"]}'")
     print(f"Device expected configuration: '{expected_configuration}'")
     if configuration["reported"] != expected_configuration:
