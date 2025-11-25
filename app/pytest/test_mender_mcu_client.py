@@ -71,10 +71,10 @@ def test_device_inventory(dut: DeviceAdapter):
     def get_device_inventory():
         inventory = mender_management.get_device_inventory(device)
         print(f"inventory={inventory}") # TODO REM
-        if inventory.get("attributes") is not None and len(inventory.get("attributes")) > 0:
-            return inventory
-        return None
-    inventory = helpers.run_until_data_available(get_device_inventory)
+        if inventory.get("updated_ts"):
+            return inventory, inventory.get("updated_ts")
+        return None, None
+    inventory = helpers.run_until_data_refreshed(get_device_inventory)
     assert inventory is not None, "🔴​​​ Device inventory not found"
     """Ensure of the device inventory content."""
     inventory = {item["name"]: item["value"] for item in inventory.get("attributes", [])}
