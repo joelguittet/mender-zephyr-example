@@ -128,7 +128,7 @@ def test_device_configuration(dut: DeviceAdapter):
     """Wait until the device configuration is updated."""
     def get_device_configuration():
         configuration = mender_management.get_device_configuration(device)
-        if configuration.get("reported_ts"):
+        if configuration.get("reported_ts") and datetime.fromisoformat(configuration.get("reported_ts")) >= datetime.fromisoformat(deployment_status.get("finished")):
             print(f"Time while reported_ts is {configuration.get("reported_ts")} = {datetime.datetime.now()}") # TODO REM
             return configuration, configuration.get("reported_ts")
         return None, None
