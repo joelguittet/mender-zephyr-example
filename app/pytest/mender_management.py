@@ -59,7 +59,7 @@ class MenderManagement:
             if resp.status_code == 200 and resp.text.strip():
                 self.token = resp.text.strip()
                 self.headers = {"Authorization": f"Bearer {self.token}"}
-                print("✅ Logged in with Basic Auth")
+                print("✅ Mender Management logged in with Basic Auth")
                 return
         except requests.RequestException:
             pass
@@ -75,7 +75,7 @@ class MenderManagement:
             if resp.text.strip():
                 self.token = resp.text.strip()
                 self.headers = {"Authorization": f"Bearer {self.token}"}
-                print("✅ Logged in with JSON body")
+                print("✅ Mender Management logged in with JSON body")
                 return
         except requests.RequestException as e:
             raise RuntimeError(f"🔴​ Login failed (Basic + JSON): {e}") from e

@@ -25,7 +25,7 @@ SOCAT_PID=$!
 sleep 1
 
 # Start mender-cli terminal
-mender-cli terminal $device_id < /tmp/mender_cli_pty1 > /tmp/mender_cli_pty1 2>/dev/null &
+mender-cli terminal $device_id --skip-verify < /tmp/mender_cli_pty1 > /tmp/mender_cli_pty1 2>/dev/null &
 sleep 5
 
 # Check if prompt is received
