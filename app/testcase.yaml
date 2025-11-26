@@ -54,8 +54,10 @@ tests:
     timeout: 3600
     slow: true
     #extra_args: EXTRA_CONF_FILE="/__w/mender-zephyr-example/mender-zephyr-example/local.conf;mcumgr.conf;troubleshoot.conf"
-    extra_conf_files:
-      - troubleshoot.conf
+    extra_args:
+      - CONF_FILE="prj.conf;mcumgr.conf;troubleshoot.conf;boards/${BOARD}.conf"
+    #extra_conf_files:
+    #  - troubleshoot.conf
     harness: pytest
     harness_config:
       pytest_dut_scope: function
