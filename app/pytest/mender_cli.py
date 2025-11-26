@@ -51,5 +51,5 @@ class MenderCli:
     def shell_exec(self, device, cmd):
         """Execute a shell command using Mender CLI interface."""
         cmd = f"./mender-cli.sh {device["id"]} {cmd}"
-        result = subprocess.run(cmd, shell=True, capture_output=True, text=True, check=True)
+        result = subprocess.run(cmd, cwd=os.path.dirname(os.path.abspath(__file__)), shell=True, capture_output=True, text=True, check=True)
         return result.stdout
