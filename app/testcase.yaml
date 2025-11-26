@@ -24,48 +24,20 @@ common:
     pytest_dut_scope: function
     pytest_root:
       - "pytest/test_mender_mcu_client.py"
-  platform_allow:
-    - esp32_devkitc/esp32/procpu
-    - nucleo_l4a6zg
   tags:
     - testing
     - pytest
     - shell
 
 tests:
-#  mender.mcu.client:
-#    sysbuild: True
-#    timeout: 3600
-#    slow: true
-#    harness: pytest
-#    harness_config:
-#      pytest_dut_scope: function
-#      pytest_root:
-#        - "pytest/test_mender_mcu_client.py"
+#  mender.mcu.client.default:
+#    extra_args: EXTRA_CONF_FILE="${WEST_TOPDIR}/local.conf;mcumgr.conf"
 #    platform_allow:
 #      - esp32_devkitc/esp32/procpu
 #      - nucleo_l4a6zg
-#    tags:
-#      - testing
-#      - pytest
-#      - shell
   mender.mcu.client.troubleshoot:
-    sysbuild: True
-    timeout: 3600
-    slow: true
     extra_args: EXTRA_CONF_FILE="${WEST_TOPDIR}/local.conf;mcumgr.conf;troubleshoot.conf"
-    #extra_args:
-    #  - CONF_FILE="prj.conf;mcumgr.conf;troubleshoot.conf;boards/${BOARD}.conf"
-    #extra_conf_files:
-    #  - troubleshoot.conf
-    harness: pytest
-    harness_config:
-      pytest_dut_scope: function
-      pytest_root:
-        - "pytest/test_mender_mcu_client.py"
     platform_allow:
       - nucleo_l4a6zg
-    tags:
-      - testing
-      - pytest
-      - shell
+
+# TBD: allow esp32 platform ?
