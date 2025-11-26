@@ -40,19 +40,19 @@ class MenderCli:
     # ============================================================
     # AUTH
     # ============================================================
-    def login(self):
+    def login(self, timeout=30):
         """Authenticate to Mender CLI using Basic Auth."""
         cmd = f"mender-cli login --skip-verify --server {self.server} --username {self.username} --password {self.password}"
-        subprocess.run(cmd, shell=True, check=True)
+        subprocess.run(cmd, shell=True, check=True, timeout=timeout)
         print("✅ Mender CLI logged in with Basic Auth")
 
     # ============================================================
     # SHELL
     # ============================================================
-    def shell_exec(self, device, cmd):
+    def shell_exec(self, device, cmd, timeout=30):
         """Execute a shell command using Mender CLI interface."""
         cmd = f"./mender-cli.sh {device["id"]} {cmd}"
-        result = subprocess.run(cmd, cwd=os.path.dirname(os.path.abspath(__file__)), shell=True, capture_output=True, text=True, check=True)
+        result = subprocess.run(cmd, cwd=os.path.dirname(os.path.abspath(__file__)), shell=True, capture_output=True, text=True, check=True, timeout=timeout)
         print(result.stdout)
         print(result.stderr)
         return result.stdout
