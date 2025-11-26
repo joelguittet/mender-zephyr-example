@@ -44,6 +44,7 @@ class MenderCli:
         """Authenticate to Mender CLI using Basic Auth."""
         cmd = f"mender-cli login --skip-verify --server {self.server} --username {self.username} --password {self.password}"
         subprocess.run(cmd, shell=True, check=True)
+        print("✅ Mender CLI logged in with Basic Auth")
 
     # ============================================================
     # SHELL
