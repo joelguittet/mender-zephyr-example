@@ -53,7 +53,7 @@ tests:
     sysbuild: True
     timeout: 3600
     slow: true
-    extra_args: EXTRA_CONF_FILE="${CURRENT_WORKSPACE_DIR}/local.conf;mcumgr.conf;troubleshoot.conf"
+    extra_args: EXTRA_CONF_FILE="${WEST_TOPDIR}/local.conf;mcumgr.conf;troubleshoot.conf"
     #extra_args:
     #  - CONF_FILE="prj.conf;mcumgr.conf;troubleshoot.conf;boards/${BOARD}.conf"
     #extra_conf_files:
