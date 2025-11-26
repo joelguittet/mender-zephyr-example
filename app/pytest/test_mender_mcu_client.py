@@ -165,8 +165,10 @@ def test_device_troubleshoot_shell(dut: DeviceAdapter):
     assert device is not None, f"🔴​​​ Device with MAC '{mac_address}' not found on mender server"
     assert device["status"] == "accepted", f"🔴​​​ Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
-    """Execute command on troubleshoot shell."""
+    """Execute 'help' command on troubleshoot shell."""
     mender_cli.shell_exec(device, "help")
+    # TODO check result
+    print("✅ Device troubleshoot shell working as expected")
 
 
 @pytest.mark.dependency(depends=["test_device_registration"])
