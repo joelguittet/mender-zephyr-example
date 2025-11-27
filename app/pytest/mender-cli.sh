@@ -16,8 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-device_id=$1
-command=$2
+server=$1
+device_id=$2
+command=$3
 
 # Start socat with explicit PTY links
 socat -d -d pty,raw,echo=0,link=/tmp/mender_cli_pty1 pty,raw,echo=0,link=/tmp/mender_cli_pty2 &
@@ -25,7 +26,7 @@ SOCAT_PID=$!
 sleep 1
 echo "SOCAT DONE $SOCAT_PID"
 # Start mender-cli terminal
-mender-cli terminal $device_id --skip-verify < /tmp/mender_cli_pty1 > /tmp/mender_cli_pty1 &
+mender-cli terminal $device_id --skip-verify --server $server < /tmp/mender_cli_pty1 > /tmp/mender_cli_pty1 &
 sleep 10
 echo "CLI DONE"
 # Check if prompt is received
