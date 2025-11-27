@@ -30,7 +30,7 @@ SOCAT_PID=$!
 sleep 1
 echo "SOCAT DONE $SOCAT_PID"
 # Start mender-cli terminal
-mender-cli terminal $device_id --server $server --skip-verify < /tmp/mender_cli_pty1 > /tmp/mender_cli_pty1 &
+mender-cli terminal $device_id --server $server --skip-verify < /tmp/mender_cli_pty1 > /tmp/mender_cli_pty1 2>&1 &
 sleep 10
 echo "CLI DONE"
 # Check if prompt is received
