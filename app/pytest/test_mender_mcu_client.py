@@ -20,6 +20,7 @@ import logging
 import pytest
 import random
 import re
+import time
 import uuid
 from datetime import datetime, timedelta, timezone # TODO CLEAN
 from pathlib import Path
@@ -35,7 +36,7 @@ mender_cli = MenderCli()
 mender_management = MenderManagement()
 helpers = Helpers()
 
-
+# TODO first/last errors to be fixed see logs
 @pytest.mark.first
 @pytest.mark.dependency()
 def test_device_registration(dut: DeviceAdapter):
@@ -165,6 +166,8 @@ def test_device_troubleshoot_shell(dut: DeviceAdapter):
     assert device is not None, f"🔴​​​ Device with MAC '{mac_address}' not found on mender server"
     assert device["status"] == "accepted", f"🔴​​​ Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
+    # sleep until device is connected # TODO better : look at the log in the dut
+    time.sleep(60)
     """Execute 'help' command on troubleshoot shell."""
     mender_cli.shell_exec(device, "help")
     # TODO check result
