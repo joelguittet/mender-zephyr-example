@@ -166,11 +166,12 @@ def test_device_troubleshoot_shell(dut: DeviceAdapter):
     assert device is not None, f"🔴​​​ Device with MAC '{mac_address}' not found on mender server"
     assert device["status"] == "accepted", f"🔴​​​ Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
     print("✅ Device has status 'accepted' on the mender server")
-    # sleep until device is connected # TODO better : look at the log in the dut
-    time.sleep(60)
+    """Ensure the device troubleshoot is connected to the mender server."""
+    helpers.assert_device_troubleshoot_connected(dut)
     """Execute 'help' command on troubleshoot shell."""
-    mender_cli.shell_exec(device, "help")
-    # TODO check result
+    result = mender_cli.shell_exec(device, "help")
+    m = re.search(".*Please refer to shell documentation for more details.*", result.stdout)
+    assert m is not None, "🔴​​​ Device troubleshoot shell result is invalid"
     print("✅ Device troubleshoot shell working as expected")
 
 

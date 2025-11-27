@@ -66,6 +66,13 @@ class Helpers:
             raise AssertionError("🔴​​​ Device doesn't appear to be authenticated but it should")
         print("✅ Device is authenticated")
 
+    def assert_device_troubleshoot_connected(self, dut: DeviceAdapter) -> None:
+        try:
+            output = dut.readlines_until("Troubleshoot client connected", timeout=300)
+        except (twister_harness.exceptions.TwisterHarnessTimeoutException, AssertionError):
+            raise AssertionError("🔴​​​ Device troubleshoot doesn't appear to be connected but it should")
+        print("✅ Device troubleshoot connected")
+
     def create_mender_artifact(self, build_dir: Path, key_file: Path, device_type: str, artifact_name_prefix: str, version: str) -> Path:
         # Sign binary using west sign (key file is optional)
         cmd = f"west sign --tool imgtool --build-dir {build_dir} -- --version {version}"
