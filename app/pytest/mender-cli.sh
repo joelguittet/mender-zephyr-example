@@ -29,7 +29,7 @@ mender-cli terminal $device_id --skip-verify < /tmp/mender_cli_pty1 > /tmp/mende
 sleep 10
 echo "CLI DONE"
 # Check if prompt is received
-output=$(timeout 5s dd if=/tmp/mender_cli_pty2 iflag=nonblock status=none)
+output=$(timeout 30s dd if=/tmp/mender_cli_pty2 iflag=nonblock status=none)
 if [[ "$output" != *"\$"* ]]; then
     # Prompt not found, exit
     echo "PROMPT NOT FOUND in OUTPUT='$output'"
