@@ -26,16 +26,18 @@ sleep 1
 echo "SOCAT DONE $SOCAT_PID"
 # Start mender-cli terminal
 mender-cli terminal $device_id --skip-verify < /tmp/mender_cli_pty1 > /tmp/mender_cli_pty1 &
-sleep 5
+sleep 10
 echo "CLI DONE"
 # Check if prompt is received
 output=$(timeout 5s dd if=/tmp/mender_cli_pty2 iflag=nonblock status=none)
 if [[ "$output" != *"\$"* ]]; then
     # Prompt not found, exit
-    echo "PROMPT NOT FOUND"
+    echo "PROMPT NOT FOUND in OUTPUT='$output'"
+    # Stop socat
+    kill -TERM $SOCAT_PID > /dev/null 2>&1
     exit 1
 fi
-echo "PROMPT FOUND"
+echo "PROMPT FOUND in OUTPUT='$output'"
 # Print expected command to the terminal
 printf "$command\n" > /tmp/mender_cli_pty2
 sleep 1
