@@ -34,10 +34,8 @@ MENDER_CLI_PID=$!
 sleep 10
 
 # Check if prompt is received
-output=$(timeout 30s dd if=$temp_dir/pty2 iflag=nonblock status=none)
-
+output=$(timeout 30s dd if=$temp_dir/pty2 iflag=nonblock status=none 2>/dev/null)
 if [[ "$output" != *"\$"* ]]; then
-    # Prompt not found, exit
     # Disconnect
     printf "\x1d" > $temp_dir/pty2
     sleep 3
@@ -58,13 +56,13 @@ sleep 3
 printf "\x1d" > $temp_dir/pty2
 sleep 3
 
+# Read result
+timeout 30s dd if=$temp_dir/pty2 iflag=nonblock status=none 2>/dev/null | tail -n +2
+#output=$(timeout 30s dd if=$temp_dir/pty2 iflag=nonblock status=none 2>/dev/null | tail -n +2)
+#echo "FLUSH DONE, OUTPUT='$output'"
+
 # Stop mender-cli if still executing
 kill -TERM $MENDER_CLI_PID > /dev/null 2>&1
-
-# Read result
-#timeout 30s dd if=$temp_dir/pty2 iflag=nonblock status=none 2>/dev/null | tail -n +2
-output=$(timeout 30s dd if=$temp_dir/pty2 iflag=nonblock status=none)
-echo "FLUSH DONE, OUTPUT='$output'"
 
 # Stop socat
 kill -TERM $SOCAT_PID > /dev/null 2>&1
