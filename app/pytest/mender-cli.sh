@@ -58,8 +58,6 @@ sleep 3
 
 # Read result
 timeout 30s dd if=$temp_dir/pty2 iflag=nonblock status=none 2>/dev/null | tail -n +2
-#output=$(timeout 30s dd if=$temp_dir/pty2 iflag=nonblock status=none 2>/dev/null | tail -n +2)
-#echo "FLUSH DONE, OUTPUT='$output'"
 
 # Stop mender-cli if still executing
 kill -TERM $MENDER_CLI_PID > /dev/null 2>&1
