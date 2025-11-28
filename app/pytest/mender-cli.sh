@@ -20,10 +20,6 @@ server=$1
 device_id=$2
 command=$3
 
-echo "server=$server"
-echo "did=$device_id"
-echo "cmd=$command"
-
 # Create temporary directory for PTYs
 temp_dir=$(mktemp -d /tmp/mender-cli-xxxxxx)
 
@@ -39,13 +35,12 @@ sleep 10
 
 # Check if prompt is received
 output=$(timeout 30s dd if=$temp_dir/pty2 iflag=nonblock status=none)
-echo "res=$!"
+
 if [[ "$output" != *"\$"* ]]; then
     # Prompt not found, exit
     echo "PROMPT NOT FOUND in OUTPUT='$output'"
     # Disconnect
     printf "\x1d" > $temp_dir/pty2
-    echo "res=$!"
     sleep 3
     # Stop mender-cli if still executing
     kill -TERM $MENDER_CLI_PID > /dev/null 2>&1
@@ -55,16 +50,13 @@ if [[ "$output" != *"\$"* ]]; then
     rm -rf $temp_dir
     exit 1
 fi
-echo "PROMPT FOUND in OUTPUT='$output'"
 
 # Print expected command to the terminal
 printf "$command\n" > $temp_dir/pty2
-echo "res=$!"
 sleep 3
 
 # Disconnect
 printf "\x1d" > $temp_dir/pty2
-echo "res=$!"
 sleep 3
 
 # Stop mender-cli if still executing
@@ -73,12 +65,10 @@ kill -TERM $MENDER_CLI_PID > /dev/null 2>&1
 # Read result
 #timeout 30s dd if=$temp_dir/pty2 iflag=nonblock status=none 2>/dev/null | tail -n +2
 output=$(timeout 30s dd if=$temp_dir/pty2 iflag=nonblock status=none)
-echo "res=$!"
 echo "FLUSH DONE, OUTPUT='$output'"
 
 # Stop socat
 kill -TERM $SOCAT_PID > /dev/null 2>&1
-echo "SOCAT END"
 
 # Cleaning
 rm -rf $temp_dir
