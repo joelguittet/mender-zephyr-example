@@ -20,9 +20,8 @@ import logging
 import pytest
 import random
 import re
-import time
 import uuid
-from datetime import datetime, timedelta, timezone # TODO CLEAN
+from datetime import datetime
 from pathlib import Path
 from twister_harness import DeviceAdapter, Shell
 from twister_harness.helpers.utils import find_in_config
@@ -37,7 +36,7 @@ mender_management = MenderManagement()
 helpers = Helpers()
 
 # TODO first/last errors to be fixed see logs
-@pytest.mark.first
+@pytest.mark.order("first")
 @pytest.mark.dependency()
 def test_device_registration(dut: DeviceAdapter):
     """Get the MAC address of the device."""
@@ -75,7 +74,6 @@ def test_device_inventory(dut: DeviceAdapter):
     """Wait until the device inventory is updated."""
     def get_device_inventory():
         inventory = mender_management.get_device_inventory(device)
-        print(f"inventory={inventory}") # TODO REM
         if inventory.get("updated_ts"):
             return inventory, inventory.get("updated_ts")
         return None, None
@@ -123,7 +121,6 @@ def test_device_configure(dut: DeviceAdapter):
     """Generating such configuration ensure very easily the previous one was different."""
     expected_configuration = {f"uuid{index+1}": str(uuid.uuid4()) for index in range(random.randint(4, 8))}
     """Set device configuration."""
-    print(f"Time before starting the deployment= {datetime.now()}") # TODO REM
     mender_management.set_device_configuration(device, expected_configuration)
     deployment = mender_management.deploy_device_configuration(device)
     """"Wait for deployment completes or fails."""
@@ -132,20 +129,15 @@ def test_device_configure(dut: DeviceAdapter):
     if deployment_status["status"] not in ("finished", "success"):
         raise AssertionError("🔴​​​ Deployment did not complete successfully")
     print("✅ Device configuration deployment done successfuly")
-    print(f"Time after the deployment= {datetime.now()}") # TODO REM
-    print(f"Deployment is {deployment_status}") # TODO REM
     """Wait until the device configuration is updated."""
     def get_device_configuration():
         configuration = mender_management.get_device_configuration(device)
-        print(f"Configuration={configuration}") # TODO REM
         if configuration.get("reported_ts") and datetime.fromisoformat(configuration.get("reported_ts")) >= datetime.fromisoformat(deployment_status.get("finished")):
-            print(f"Time while reported_ts is {configuration.get("reported_ts")} = {datetime.now()}") # TODO REM
             return configuration, configuration.get("reported_ts")
         return None, None
     configuration = helpers.run_until_data_refreshed(get_device_configuration)
     assert configuration is not None, "🔴​​​ Device configuration not found"
     """Ensure of the device configuration content."""
-    print(f"Time while checking = {datetime.now()}") # TODO REM
     print(f"Device reported configuration: '{configuration["reported"]}'")
     print(f"Device expected configuration: '{expected_configuration}'")
     if configuration["reported"] != expected_configuration:
@@ -214,7 +206,7 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
     print("✅ Device has expected firmware version")
 
 
-@pytest.mark.last
+@pytest.mark.order("last")
 @pytest.mark.dependency(depends=["test_device_registration"])
 def test_device_decomissioning(dut: DeviceAdapter):
     """Get the MAC address of the device."""

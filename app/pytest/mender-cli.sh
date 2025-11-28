@@ -21,7 +21,7 @@ device_id=$2
 command=$3
 
 # Create temporary directory for PTYs
-temp_dir=$(mktemp -d /tmp/mender-cli-xxxxxx)
+temp_dir=$(mktemp -d /tmp/mender-cli-XXXXXX)
 
 # Start socat with explicit PTY links
 socat -d -d pty,raw,echo=0,link=$temp_dir/pty1 pty,raw,echo=0,link=$temp_dir/pty2 &
