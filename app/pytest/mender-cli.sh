@@ -24,37 +24,63 @@ echo "server=$server"
 echo "did=$device_id"
 echo "cmd=$command"
 
+# Create temporary directory for PTYs
+temp_dir=$(mktemp -d /tmp/mender-cli-xxxxxx)
+
 # Start socat with explicit PTY links
-socat -d -d pty,raw,echo=0,link=/tmp/mender_cli_pty1 pty,raw,echo=0,link=/tmp/mender_cli_pty2 &
+socat -d -d pty,raw,echo=0,link=$temp_dir/pty1 pty,raw,echo=0,link=$temp_dir/pty2 &
 SOCAT_PID=$!
-sleep 1
-echo "SOCAT DONE $SOCAT_PID"
+sleep 3
+
 # Start mender-cli terminal
-mender-cli terminal $device_id --server $server --skip-verify < /tmp/mender_cli_pty1 > /tmp/mender_cli_pty1 2>&1 &
+mender-cli terminal $device_id --server $server --skip-verify < $temp_dir/pty1 > $temp_dir/pty1 2>&1 &
+MENDER_CLI_PID=$!
 sleep 10
-echo "CLI DONE"
+
 # Check if prompt is received
-output=$(timeout 30s dd if=/tmp/mender_cli_pty2 iflag=nonblock status=none)
+output=$(timeout 30s dd if=$temp_dir/pty2 iflag=nonblock status=none)
+echo "res=$!"
 if [[ "$output" != *"\$"* ]]; then
     # Prompt not found, exit
     echo "PROMPT NOT FOUND in OUTPUT='$output'"
+    # Disconnect
+    printf "\x1d" > $temp_dir/pty2
+    echo "res=$!"
+    sleep 3
+    # Stop mender-cli if still executing
+    kill -TERM $MENDER_CLI_PID > /dev/null 2>&1
     # Stop socat
     kill -TERM $SOCAT_PID > /dev/null 2>&1
+    # Cleaning
+    rm -rf $temp_dir
     exit 1
 fi
 echo "PROMPT FOUND in OUTPUT='$output'"
+
 # Print expected command to the terminal
-printf "$command\n" > /tmp/mender_cli_pty2
-sleep 1
-echo "COMMAND SENT"
+printf "$command\n" > $temp_dir/pty2
+echo "res=$!"
+sleep 3
+
 # Disconnect
-printf "\x1d" > /tmp/mender_cli_pty2
-sleep 1
-echo "DISCON"
+printf "\x1d" > $temp_dir/pty2
+echo "res=$!"
+sleep 3
+
+# Stop mender-cli if still executing
+kill -TERM $MENDER_CLI_PID > /dev/null 2>&1
+
 # Read result
-timeout 3s dd if=/tmp/mender_cli_pty2 iflag=nonblock status=none 2>/dev/null | tail -n +2
-echo "FLUSH DONE"
+#timeout 30s dd if=$temp_dir/pty2 iflag=nonblock status=none 2>/dev/null | tail -n +2
+output=$(timeout 30s dd if=$temp_dir/pty2 iflag=nonblock status=none)
+echo "res=$!"
+echo "FLUSH DONE, OUTPUT='$output'"
+
 # Stop socat
 kill -TERM $SOCAT_PID > /dev/null 2>&1
 echo "SOCAT END"
+
+# Cleaning
+rm -rf $temp_dir
+    
 exit 0
