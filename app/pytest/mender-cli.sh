@@ -24,7 +24,7 @@ command=$3
 temp_dir=$(mktemp -d /tmp/mender-cli-XXXXXX)
 
 # Start socat with explicit PTY links
-socat -d -d pty,raw,echo=0,link=$temp_dir/pty1 pty,raw,echo=0,link=$temp_dir/pty2 &
+socat -d -d pty,raw,echo=0,link=$temp_dir/pty1 pty,raw,echo=0,link=$temp_dir/pty2 > /dev/null 2>&1 &
 SOCAT_PID=$!
 sleep 3
 
@@ -38,7 +38,6 @@ output=$(timeout 30s dd if=$temp_dir/pty2 iflag=nonblock status=none)
 
 if [[ "$output" != *"\$"* ]]; then
     # Prompt not found, exit
-    echo "PROMPT NOT FOUND in OUTPUT='$output'"
     # Disconnect
     printf "\x1d" > $temp_dir/pty2
     sleep 3

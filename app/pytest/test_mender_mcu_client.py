@@ -35,7 +35,6 @@ mender_cli = MenderCli()
 mender_management = MenderManagement()
 helpers = Helpers()
 
-# TODO first/last errors to be fixed see logs
 @pytest.mark.order("first")
 @pytest.mark.dependency()
 def test_device_registration(dut: DeviceAdapter):

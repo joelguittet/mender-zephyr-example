@@ -123,10 +123,10 @@ jobs:
           PIP_ROOT_USER_ACTION: ignore
 
       # Install Python tools
-      - name: Install Python tools
-        working-directory: mender-zephyr-example
-        run: |
-          pip install pytest-order
+      #- name: Install Python tools
+      #  working-directory: mender-zephyr-example
+      #  run: |
+      #    pip install pytest-order
 
       # Setup Zephyr project
       # Toolchains are installed to build the application for all supported boards:
