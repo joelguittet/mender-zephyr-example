@@ -30,14 +30,12 @@ common:
     - shell
 
 tests:
-#  mender.mcu.client.default:
-#    extra_args: EXTRA_CONF_FILE="${WEST_TOPDIR}/local.conf;mcumgr.conf"
-#    platform_allow:
-#      - esp32_devkitc/esp32/procpu
-#      - nucleo_l4a6zg
+  mender.mcu.client.default:
+    extra_args: EXTRA_CONF_FILE="${WEST_TOPDIR}/local.conf;mcumgr.conf"
+    platform_allow:
+      - esp32_devkitc/esp32/procpu
+      - nucleo_l4a6zg
   mender.mcu.client.troubleshoot:
     extra_args: EXTRA_CONF_FILE="${WEST_TOPDIR}/local.conf;mcumgr.conf;troubleshoot.conf"
     platform_allow:
       - nucleo_l4a6zg
-
-# TBD: allow esp32 platform ?
