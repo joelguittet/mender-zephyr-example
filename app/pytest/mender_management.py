@@ -174,31 +174,24 @@ class MenderManagement:
         r.raise_for_status()
         return r.json() if r.text else {}
 
-    def get_artifact_properties(self, name=None):
-        """Get artifact properties."""
-        url = f"{self.server}/api/management/v2/deployments/artifacts"
+    def list_artifacts(self, name=None):
+        """List artifacts."""
+        url = f"{self.server}/api/management/v1/deployments/artifacts/list"
         params = {}
         if name is not None:
             params["name"] = name
         r = requests.get(url, headers=self.headers, params=params, verify=self.ca_cert)
         r.raise_for_status()
-        for item in r.json():
-            if name is not None:
-                if item.get("name") == name:
-                    return item
-        return None
+        return r.json()
 
-    def delete_artifact(self, name=None):
+    def delete_artifact(self, name):
         """Delete artifact."""
-        #artifact = self.get_artifact_properties(name)
-        #if artifact is None:
-        #    return False
-        #url = f"{self.server}/api/management/v1/deployments/artifacts/{artifact["id"]}"
-        params = {}
-        if name is not None:
-            params["name"] = name
-        url = f"{self.server}/api/management/v2/deployments/releases"
-        r = requests.delete(url, headers=self.headers, params=params, verify=self.ca_cert)
+        artifacts = self.get_artifact_properties(name)
+        for artifact in artifacts:
+            if artifact.get("name") == name:
+                break
+        url = f"{self.server}/api/management/v1/deployments/artifacts/{artifact["id"]}"
+        r = requests.delete(url, headers=self.headers, verify=self.ca_cert)
         r.raise_for_status()
         return True
 
