@@ -1,5 +1,5 @@
 #!/bin/bash
-# @file      mender-cli.sh
+# @file      mender-cli-terminal.sh
 # @brief     mender-cli terminal wrapper
 #
 # Copyright joelguittet and mender-mcu-client contributors

@@ -198,6 +198,7 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
     assert deployment_status is not None, "🔴​​​ Deployment status not found"
     if deployment_status["status"] not in ("finished", "success"):
         raise AssertionError("🔴​​​ Deployment did not complete successfully")
+    mender_management.delete_artifact(artifact_name)
     print("✅ Device firmware deployment done successfuly")
     """Get the firmware version of the device."""
     fw_version = helpers.get_device_firmware_version(dut)
