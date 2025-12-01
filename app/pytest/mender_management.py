@@ -186,7 +186,7 @@ class MenderManagement:
 
     def delete_artifact(self, name):
         """Delete artifact."""
-        artifacts = self.get_artifact_properties(name)
+        artifacts = self.list_artifacts(name)
         for artifact in artifacts:
             if artifact.get("name") == name:
                 break
