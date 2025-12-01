@@ -188,13 +188,17 @@ class MenderManagement:
                     return item
         return None
 
-    def delete_artifact(self, name):
+    def delete_artifact(self, name=None):
         """Delete artifact."""
-        artifact = self.get_artifact_properties(name)
-        if artifact is None:
-            return False
-        url = f"{self.server}/api/management/v1/deployments/artifacts/{artifact["id"]}"
-        r = requests.delete(url, headers=self.headers, verify=self.ca_cert)
+        #artifact = self.get_artifact_properties(name)
+        #if artifact is None:
+        #    return False
+        #url = f"{self.server}/api/management/v1/deployments/artifacts/{artifact["id"]}"
+        params = {}
+        if name is not None:
+            params["name"] = name
+        url = f"{self.server}/api/management/v2/deployments/releases"
+        r = requests.delete(url, headers=self.headers, params=params, verify=self.ca_cert)
         r.raise_for_status()
         return True
 
