@@ -64,13 +64,13 @@ jobs:
           echo "Convert mender-server certificate to der format"
           openssl x509 -in ${{ github.workspace }}/mender-server/compose/certs/mender.crt -outform der -out ${{ github.workspace }}/mender-server/compose/certs/mender.der
 
-      # FIXME: Upload mender-certs artifact
+      # Upload mender-certs artifact
       # This step is used to save mender certificates so they can be used for tests
-      #- name: Upload artifact
-      #  uses: actions/upload-artifact@v4
-      #  with:
-      #    name: mender-certs
-      #    path: ${{ github.workspace }}/mender-server/compose/certs
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: mender-certs
+          path: ${{ github.workspace }}/mender-server/compose/certs
 
   device-testing:
     name: Execute tests on the targets
@@ -85,12 +85,12 @@ jobs:
       options: --privileged
 
     steps:
-      # FIXME: Download mender-certs artifact
+      # Download mender-certs artifact
       # This step is used to retrieve mender certificates so they can be used for tests
-      #- uses: actions/download-artifact@v4
-      #  with:
-      #    name: mender-certs
-      #    path: ${{ github.workspace }}
+      - uses: actions/download-artifact@v4
+        with:
+          name: mender-certs
+          path: ${{ github.workspace }}
 
       # Install mender-artifact and mender-cli
       # mender-artifact is used to generate artifact for firmware update
@@ -167,15 +167,15 @@ jobs:
           MENDER_PASSWORD: "PleaseReplaceWithASecurePassword"
           MENDER_CA: "/__w/mender-zephyr-example/mender-zephyr-example/mender-server/compose/certs/mender.crt"
 
-      # FIXME: Upload test-results artifact
+      # Upload test-results artifact
       # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
-      #- name: Upload artifact
-      #  uses: actions/upload-artifact@v4
-      #  if: ${{ always() }}
-      #  with:
-      #    name: test-results
-      #    path: mender-zephyr-example/twister-out
-      #    include-hidden-files: true
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: test-results
+          path: mender-zephyr-example/twister-out
+          include-hidden-files: true
 
       # Cleanup Zephyr environment
       - name: Cleanup Zephyr environment
