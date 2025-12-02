@@ -160,7 +160,7 @@ jobs:
       - name: Execute tests
         working-directory: mender-zephyr-example
         run: |
-          west twister -T app -v --allow-installed-plugin --enable-slow --inline-logs --device-testing --flash-before --hardware-map /__w/mender-zephyr-example/mender-zephyr-example/map.yml
+          west twister -T app -v --allow-installed-plugin --enable-slow --inline-logs --device-testing --flash-before --hardware-map /__w/mender-zephyr-example/mender-zephyr-example/map.yml --junit-report junit.xml
         env:
           MENDER_SERVER: "https://docker.mender.io"
           MENDER_USERNAME: "admin@docker.mender.io"
@@ -169,12 +169,12 @@ jobs:
 
       # Analyse test results
       # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
-      - name: Analyze test results
-        if: ${{ always() }}
-        run: |
-          /__w/mender-zephyr-example/mender-zephyr-example/zephyr/scripts/ci/twister_report_analyzer.py /__w/mender-zephyr-example/mender-zephyr-example/mender-zephyr-example/twister-out/twister.json --long-summary --platforms --status --output-md results.md
-          echo '### Results Summary 🚀' >> $GITHUB_STEP_SUMMARY
-          cat results.md  >> $GITHUB_STEP_SUMMARY
+      #- name: Analyze test results
+      #  if: ${{ always() }}
+      #  run: |
+      #    /__w/mender-zephyr-example/mender-zephyr-example/zephyr/scripts/ci/twister_report_analyzer.py /__w/mender-zephyr-example/mender-zephyr-example/mender-zephyr-example/twister-out/twister.json --long-summary --platforms --status --output-md results.md
+      #    echo '### Results Summary 🚀' >> $GITHUB_STEP_SUMMARY
+      #    cat results.md  >> $GITHUB_STEP_SUMMARY
 
       # Upload test-results artifact
       # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
@@ -185,6 +185,18 @@ jobs:
           name: test-results
           path: mender-zephyr-example/twister-out
           include-hidden-files: true
+
+      - name: Publish JUnit test results
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-report
+          path: mender-zephyr-example/junit.xml
+
+      # Native GitHub test UI (optional but recommended)
+      - name: GitHub Test Summary
+        uses: mikepenz/action-junit-report@v4
+        with:
+          report_paths: 'mender-zephyr-example/junit.xml'
 
       # Cleanup Zephyr environment
       - name: Cleanup Zephyr environment
