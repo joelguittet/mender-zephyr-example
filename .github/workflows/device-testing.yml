@@ -167,6 +167,15 @@ jobs:
           MENDER_PASSWORD: "PleaseReplaceWithASecurePassword"
           MENDER_CA: "/__w/mender-zephyr-example/mender-zephyr-example/mender-server/compose/certs/mender.crt"
 
+      # Analyse test results
+      # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
+      - name: Analyze test results
+        if: ${{ always() }}
+        run: |
+          $WEST_TOPDIR/zephyr/scripts/ci/twister_report_analyzer.py twister-out/twister.json --long-summary --platforms --output-md results.md
+          echo '### Results Summary 🚀' >> $GITHUB_STEP_SUMMARY
+          cat results.md  >> $GITHUB_STEP_SUMMARY
+
       # Upload test-results artifact
       # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
       - name: Upload artifact
