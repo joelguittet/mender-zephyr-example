@@ -73,7 +73,7 @@ jobs:
           path: ${{ github.workspace }}/mender-server/compose/certs
 
   device-testing:
-    name: Execute tests on the targets
+    name: Test execution
     runs-on: self-hosted
     needs: setup
     container:
@@ -172,7 +172,7 @@ jobs:
       - name: Analyze test results
         if: ${{ always() }}
         run: |
-          /__w/mender-zephyr-example/mender-zephyr-example/zephyr/scripts/ci/twister_report_analyzer.py twister-out/twister.json --long-summary --platforms --status --output-md results.md
+          /__w/mender-zephyr-example/mender-zephyr-example/zephyr/scripts/ci/twister_report_analyzer.py /__w/mender-zephyr-example/mender-zephyr-example/mender-zephyr-example/twister-out/twister.json --long-summary --platforms --status --output-md results.md
           echo '### Results Summary 🚀' >> $GITHUB_STEP_SUMMARY
           cat results.md  >> $GITHUB_STEP_SUMMARY
 
