@@ -172,7 +172,7 @@ jobs:
       - name: Analyze test results
         if: ${{ always() }}
         run: |
-          $WEST_TOPDIR/zephyr/scripts/ci/twister_report_analyzer.py twister-out/twister.json --long-summary --platforms --output-md results.md
+          /__w/mender-zephyr-example/mender-zephyr-example/zephyr/scripts/ci/twister_report_analyzer.py twister-out/twister.json --long-summary --platforms --status --output-md results.md
           echo '### Results Summary 🚀' >> $GITHUB_STEP_SUMMARY
           cat results.md  >> $GITHUB_STEP_SUMMARY
 
