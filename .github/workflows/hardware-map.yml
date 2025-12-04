@@ -33,7 +33,7 @@ jobs:
     steps:
       # Checkout mender-zephyr-example
       - name: Checkout mender-zephyr-example
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           path: mender-zephyr-example
@@ -64,7 +64,7 @@ jobs:
 
       # Upload hardware-map artifact
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: hardware-map
           path: map.yml

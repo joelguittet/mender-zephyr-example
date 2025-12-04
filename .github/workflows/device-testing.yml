@@ -41,7 +41,7 @@ jobs:
     steps:
       # Checkout mender-server
       - name: Checkout mender-server
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           repository: mendersoftware/mender-server
           ref: 8d34064338d1a1ffbe83f710e97f9f007b779354
@@ -67,7 +67,7 @@ jobs:
       # Upload mender-certs artifact
       # This step is used to save mender certificates so they can be used for tests
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: mender-certs
           path: ${{ github.workspace }}/mender-server/compose/certs
@@ -87,7 +87,7 @@ jobs:
     steps:
       # Download mender-certs artifact
       # This step is used to retrieve mender certificates so they can be used for tests
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v6
         with:
           name: mender-certs
           path: ${{ github.workspace }}
@@ -109,7 +109,7 @@ jobs:
 
       # Checkout mender-zephyr-example
       - name: Checkout mender-zephyr-example
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: recursive
           path: mender-zephyr-example
@@ -160,7 +160,7 @@ jobs:
       - name: Execute tests
         working-directory: mender-zephyr-example
         run: |
-          west twister -T app -v --allow-installed-plugin --enable-slow --inline-logs --device-testing --flash-before --hardware-map /__w/mender-zephyr-example/mender-zephyr-example/map.yml --junit-report junit.xml
+          west twister -T app -v --allow-installed-plugin --enable-slow --inline-logs --device-testing --flash-before --hardware-map /__w/mender-zephyr-example/mender-zephyr-example/map.yml
         env:
           MENDER_SERVER: "https://docker.mender.io"
           MENDER_USERNAME: "admin@docker.mender.io"
@@ -176,27 +176,29 @@ jobs:
       #    echo '### Results Summary 🚀' >> $GITHUB_STEP_SUMMARY
       #    cat results.md  >> $GITHUB_STEP_SUMMARY
 
+      - name: Merge Test Results
+        if: ${{ always() }}
+        working-directory: mender-zephyr-example
+        run: |
+          junitparser merge --glob twister-out/twister.xml twister-out/junit.xml
+          junit2html twister-out/junit.xml twister-out/junit.html
+
+      - name: Upload Unit Test Results
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v5
+        with:
+          name: Unit Test Results
+          path: twister-out/junit.xml twister-out/junit.html
+
       # Upload test-results artifact
       # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        if: ${{ always() }}
+        if: ${{ always() }}  
+        uses: actions/upload-artifact@v5
         with:
           name: test-results
           path: mender-zephyr-example/twister-out
           include-hidden-files: true
-
-      - name: Publish JUnit test results
-        uses: actions/upload-artifact@v4
-        with:
-          name: junit-report
-          path: mender-zephyr-example/junit.xml
-
-      # Native GitHub test UI (optional but recommended)
-      - name: GitHub Test Summary
-        uses: mikepenz/action-junit-report@v4
-        with:
-          report_paths: 'mender-zephyr-example/junit.xml'
 
       # Cleanup Zephyr environment
       - name: Cleanup Zephyr environment

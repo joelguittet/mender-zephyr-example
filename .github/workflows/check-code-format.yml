@@ -42,7 +42,7 @@ jobs:
 
       # Checkout mender-zephyr-example
       - name: Checkout mender-zephyr-example
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           path: mender-zephyr-example
 
