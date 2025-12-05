@@ -169,26 +169,12 @@ jobs:
 
       # Analyse test results
       # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
-      #- name: Analyze test results
-      #  if: ${{ always() }}
-      #  run: |
-      #    /__w/mender-zephyr-example/mender-zephyr-example/zephyr/scripts/ci/twister_report_analyzer.py /__w/mender-zephyr-example/mender-zephyr-example/mender-zephyr-example/twister-out/twister.json --long-summary --platforms --status --output-md results.md
-      #    echo '### Results Summary 🚀' >> $GITHUB_STEP_SUMMARY
-      #    cat results.md  >> $GITHUB_STEP_SUMMARY
-
-      - name: Merge Test Results
+      - name: Analyze test results
         if: ${{ always() }}
         working-directory: mender-zephyr-example
         run: |
-          junitparser merge --glob twister-out/twister.xml twister-out/junit.xml
-          junit2html twister-out/junit.xml twister-out/junit.html
-
-      - name: Upload Unit Test Results
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v5
-        with:
-          name: Unit Test Results
-          path: twister-out/junit.xml twister-out/junit.html
+          ./scripts/twister_report_summary.py twister-out/twister_report.xml > twister-out/summary.md
+          cat twister-out/summary.md  > $GITHUB_STEP_SUMMARY
 
       # Upload test-results artifact
       # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
@@ -197,8 +183,20 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: test-results
-          path: mender-zephyr-example/twister-out
-          include-hidden-files: true
+          if-no-files-found: ignore
+          path: |
+            mender-zephyr-example/twister-out/summary.md
+            mender-zephyr-example/twister-out/testplan.json
+            mender-zephyr-example/twister-out/twister.json
+            mender-zephyr-example/twister-out/twister.log
+            mender-zephyr-example/twister-out/twister.xml
+            mender-zephyr-example/twister-out/twister_report.xml
+            mender-zephyr-example/twister-out/twister_suite_report.xml
+            mender-zephyr-example/twister-out/**/build.log
+            mender-zephyr-example/twister-out/**/device.log
+            mender-zephyr-example/twister-out/**/handler.log
+            mender-zephyr-example/twister-out/**/report.xml
+            mender-zephyr-example/twister-out/**/twister_harness.log
 
       # Cleanup Zephyr environment
       - name: Cleanup Zephyr environment
