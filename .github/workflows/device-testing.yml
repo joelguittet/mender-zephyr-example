@@ -76,8 +76,14 @@ jobs:
     name: Test execution
     runs-on: self-hosted
     needs: setup
+    # Twister is executed inside zephyrproject-rtos/ci container
+    # The container is executed with privileged option to have full access to the host
+    # The following are bounded in the container:
+    # - /dev: to allow access to the devices
+    # - local.conf: contains configuration of the test bench such as Mender server and Wi-Fi settings
+    # - map.yml: the twister hardware map corresponding to the devices physically connected to the test bench
     container:
-      image: ghcr.io/zephyrproject-rtos/ci:v0.28.6
+      image: ghcr.io/zephyrproject-rtos/ci:v0.28.7
       volumes:
         - /dev:/dev
         - /home/testbench/mender-zephyr-example/local.conf:/__w/mender-zephyr-example/mender-zephyr-example/local.conf
@@ -124,8 +130,8 @@ jobs:
 
       # Setup Zephyr project
       # Toolchains are installed to build the application for all supported boards:
-      # arm-zephyr-eabi: to support frdm-mcxn947, nrf7002-dk and nucleo-l4a6zg boards
-      # xtensa-espressif_esp32_zephyr-elf: to support esp32-devkitc
+      # - arm-zephyr-eabi: to support frdm-mcxn947, nrf7002-dk and nucleo-l4a6zg boards
+      # - xtensa-espressif_esp32_zephyr-elf: to support esp32-devkitc
       - name: Setup Zephyr project
         uses: zephyrproject-rtos/action-zephyr-setup@8354324d917cd398fb48d5fdd759cd61e147f084
         with:
@@ -136,8 +142,8 @@ jobs:
 
       # Fetch blobs
       # The following blobs are fetch:
-      # hal_espressif: to support esp32-devkitc board
-      # nrf_wifi: to support nrf7002-dk board
+      # - hal_espressif: to support esp32-devkitc board
+      # - nrf_wifi: to support nrf7002-dk board
       - name: Fetch blobs
         working-directory: mender-zephyr-example
         run: |
@@ -173,8 +179,8 @@ jobs:
         if: ${{ always() }}
         working-directory: mender-zephyr-example
         run: |
-          ./scripts/twister_report_summary.py twister-out/twister_report.xml > twister-out/summary.md
-          cat twister-out/summary.md  > $GITHUB_STEP_SUMMARY
+          python3 scripts/twister_report_summary.py twister-out/twister_report.xml > twister-out/summary.md
+          cat twister-out/summary.md > $GITHUB_STEP_SUMMARY
 
       # Upload test-results artifact
       # This step is always executed, so that we can get logs even in case of failure during the execution of the tests

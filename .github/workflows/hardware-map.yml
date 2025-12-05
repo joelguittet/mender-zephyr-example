@@ -25,7 +25,7 @@ jobs:
     name: Generate hardware map
     runs-on: self-hosted
     container:
-      image: ghcr.io/zephyrproject-rtos/ci:v0.28.4
+      image: ghcr.io/zephyrproject-rtos/ci:v0.28.7
       volumes:
         - /dev:/dev
       options: --privileged

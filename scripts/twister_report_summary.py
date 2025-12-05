@@ -1,4 +1,20 @@
-#!/usr/bin/env python3
+# @file      twister_report_summary.py
+# @brief     Twister report summary
+#
+# Copyright joelguittet and mender-mcu-client contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import xml.etree.ElementTree as ET
 import sys
 import html
@@ -8,19 +24,6 @@ import re
 def slugify(name: str) -> str:
     """Convert testcase name to safe HTML anchor ID."""
     return re.sub(r'[^a-zA-Z0-9\-]+', '-', name)
-
-
-def summarize_status(status_counts):
-    if status_counts["FAILED"] > 0:
-        color = "red"
-        text = "failing"
-    elif status_counts["SKIPPED"] > 0:
-        color = "yellow"
-        text = "passing_with_skips"
-    else:
-        color = "brightgreen"
-        text = "passing"
-    return f"![status](https://img.shields.io/badge/tests-{text}-{color}.svg)"
 
 
 def format_report(xml_path):
@@ -107,13 +110,9 @@ def format_report(xml_path):
     out.append(f"- **FAILED**: {global_counts['FAILED']}")
     out.append(f"- **SKIPPED**: {global_counts['SKIPPED']}\n")
 
-    # Badge
-    out.append("## Status\n")
-    out.append(summarize_status(global_counts))
-
     # Full logs AFTER tables
     if failure_logs:
-        out.append("\n# 🔎 Failure Logs\n")
+        out.append("# 🔎 Failure Logs\n")
         out.extend(failure_logs)
 
     return "\n".join(out)
