@@ -34,13 +34,13 @@ def format_report(xml_path):
     suites_summary = []
 
     out = []
-    failure_logs = []  # All collapsible logs collected here
 
     out.append("# 🧪 Zephyr Twister Test Report\n")
 
     for ts in root.findall("testsuite"):
         suite_name = ts.get("name")
         suite_pass = suite_fail = suite_skip = 0
+        failure_logs = []
 
         out.append(f"## Testsuite: `{suite_name}`\n")
         out.append("| Testcase | Status | Duration | Details |")
@@ -94,6 +94,9 @@ def format_report(xml_path):
             )
 
         suites_summary.append((suite_name, suite_pass, suite_fail, suite_skip))
+
+        if failure_logs:
+            out.extend(failure_logs)
         out.append("")  # blank line
 
     # --- Summary Section ---
@@ -109,11 +112,6 @@ def format_report(xml_path):
     out.append(f"- **PASS**: {global_counts['PASS']}")
     out.append(f"- **FAILED**: {global_counts['FAILED']}")
     out.append(f"- **SKIPPED**: {global_counts['SKIPPED']}\n")
-
-    # Full logs AFTER tables
-    if failure_logs:
-        out.append("# 🔎 Failure Logs\n")
-        out.extend(failure_logs)
 
     return "\n".join(out)
 
