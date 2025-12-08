@@ -54,12 +54,15 @@ def format_report(xml_path):
             in_table_details = ""
 
             skipped = tc.find("skipped")
-            failure = tc.find("failure")
+            failure = tc.find("failure") if tc.find("failure") is not None else tc.find("error")
 
             if skipped is not None:
                 status = "SKIPPED"
                 in_table_details = skipped.get("message", "")
                 suite_skip += 1
+
+                # No duration for skipped tests
+                duration = ""
 
             elif failure is not None:
                 status = "FAILED"
