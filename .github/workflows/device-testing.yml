@@ -121,22 +121,28 @@ jobs:
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             whiptail libusb-1.0-0-dev dfu-util usbutils hwdata
-          wget https://www.nxp.com/lgfiles/updates/mcuxpresso/LinkServer_25.9.134.x86_64.deb.bin
-          chmod a+x LinkServer_25.9.134.x86_64.deb.bin
-          ./LinkServer_24.9.75.x86_64.deb.bin --noexec --target linkserver
+          wget https://www.nxp.com/lgfiles/updates/mcuxpresso/LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin
+          chmod a+x LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin
+          ./LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin --noexec --target linkserver
           cd linkserver
-          dpkg --unpack LinkServer_25.9.134.x86_64.deb
-          rm /var/lib/dpkg/info/linkserver_24.9.75.postinst
-          dpkg --configure linkserver_24.9.75
+          dpkg --unpack LinkServer_${LINK_SERVER_VERSION}.x86_64.deb
+          rm /var/lib/dpkg/info/linkserver_${LINK_SERVER_VERSION}.postinst
+          dpkg --configure linkserver_${LINK_SERVER_VERSION}
           dpkg --unpack LPCScrypt.deb
           rm /var/lib/dpkg/info/lpcscrypt.postinst
           DEBIAN_FRONTEND=noninteractive apt-get install -yf
+          rm LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin
+        env:
+          LINK_SERVER_VERSION: 25.9.134
 
       # Install J-Link (used to flash nrf7002-dk board)
       - name: Install J-Link
         run: |
-          wget https://www.segger.com/downloads/jlink/JLink_Linux_x86_64.deb
-          dpkg -i JLink_Linux_x86_64.deb
+          wget https://www.segger.com/downloads/jlink/JLink_Linux_${JLINK_VERSION}_x86_64.deb
+          dpkg -i JLink_Linux_${JLINK_VERSION}_x86_64.deb
+          rm JLink_Linux_${JLINK_VERSION}_x86_64.deb
+        env:
+          JLINK_VERSION: V890
 
       # Checkout mender-zephyr-example
       - name: Checkout mender-zephyr-example
