@@ -140,7 +140,7 @@ jobs:
       # Install J-Link (used to flash nrf7002-dk board)
       - name: Install J-Link
         run: |
-          wget https://www.segger.com/downloads/jlink/JLink_Linux_${JLINK_VERSION}_x86_64.deb
+          curl -d "accept_license_agreement=accepted&submit=Download+software" -X POST -O "https://www.segger.com/downloads/jlink/JLink_Linux_${JLINK_VERSION}_x86_64.deb"
           dpkg -i JLink_Linux_${JLINK_VERSION}_x86_64.deb
           rm JLink_Linux_${JLINK_VERSION}_x86_64.deb
         env:
