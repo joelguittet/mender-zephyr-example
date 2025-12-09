@@ -144,8 +144,10 @@ jobs:
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             libxcb-render-util0 libxcb-shape0 libxcb-icccm4 libxcb-keysyms1 libxcb-image0 libxkbcommon-x11-0
           curl -d "accept_license_agreement=accepted&submit=Download+software" -X POST -O "https://www.segger.com/downloads/jlink/JLink_Linux_${JLINK_VERSION}_x86_64.deb"
+          ln -s /bin/true /usr/bin/udevadm # Fake udevadm
           dpkg -i JLink_Linux_${JLINK_VERSION}_x86_64.deb
           rm JLink_Linux_${JLINK_VERSION}_x86_64.deb
+          rm /usr/bin/udevadm
         env:
           JLINK_VERSION: V890
 
