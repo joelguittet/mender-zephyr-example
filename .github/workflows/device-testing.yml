@@ -121,7 +121,7 @@ jobs:
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             whiptail libusb-1.0-0-dev dfu-util usbutils hwdata
-          wget -O LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin https://www.nxp.com/lgfiles/updates/mcuxpresso/LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin
+          wget https://www.nxp.com/lgfiles/updates/mcuxpresso/LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin
           chmod a+x LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin
           ./LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin --noexec --target linkserver
           cd linkserver
@@ -140,7 +140,7 @@ jobs:
       # Install J-Link (used to flash nrf7002-dk board)
       - name: Install J-Link
         run: |
-          wget -O JLink_Linux_${JLINK_VERSION}_x86_64.deb https://www.segger.com/downloads/jlink/JLink_Linux_${JLINK_VERSION}_x86_64.deb
+          wget https://www.segger.com/downloads/jlink/JLink_Linux_${JLINK_VERSION}_x86_64.deb
           dpkg -i JLink_Linux_${JLINK_VERSION}_x86_64.deb
           rm JLink_Linux_${JLINK_VERSION}_x86_64.deb
         env:
