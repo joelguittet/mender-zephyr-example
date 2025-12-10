@@ -59,6 +59,7 @@ jobs:
       # The following options is used:
       # --generate-hardware-map: generate hardware map
       - name: Generate hardware map
+        working-directory: mender-zephyr-example
         run: |
           west twister --generate-hardware-map map.yml
 
@@ -68,7 +69,15 @@ jobs:
         with:
           name: hardware-map
           retention-days: 1
-          path: map.yml
+          path: |
+            mender-zephyr-example/twister-out/map.yml
+
+      # Cleanup twister results
+      - name: Cleanup twister results
+        if: ${{ always() }}
+        working-directory: mender-zephyr-example
+        run: |
+          rm -rf twister-out
 
       # Cleanup Zephyr environment
       - name: Cleanup build
