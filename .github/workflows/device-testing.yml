@@ -150,6 +150,9 @@ jobs:
           rm JLink_Linux_${JLINK_VERSION}_x86_64.deb
           rm /usr/bin/udevadm
           # DEBUG
+          curl https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfutil -o nrfutil
+          chmod a+x nrfutil
+          mv nrfutil /usr/bin/nrfutil
           nrfutil device list
         env:
           JLINK_VERSION: V890
@@ -245,6 +248,13 @@ jobs:
             mender-zephyr-example/twister-out/**/handler.log
             mender-zephyr-example/twister-out/**/report.xml
             mender-zephyr-example/twister-out/**/twister_harness.log
+
+      # Cleanup twister results
+      - name: Cleanup twister results
+        if: ${{ always() }}s
+        working-directory: mender-zephyr-example
+        run: |
+          rm -rf twister-out
 
       # Cleanup Zephyr environment
       - name: Cleanup Zephyr environment
