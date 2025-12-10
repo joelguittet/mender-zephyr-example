@@ -72,6 +72,7 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: mender-certs
+          retention-days: 1
           path: ${{ github.workspace }}/mender-server/compose/certs
 
   device-testing:
@@ -228,6 +229,7 @@ jobs:
         with:
           name: test-results
           if-no-files-found: ignore
+          retention-days: 7
           path: |
             mender-zephyr-example/twister-out/summary.md
             mender-zephyr-example/twister-out/testplan.json
