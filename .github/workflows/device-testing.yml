@@ -72,6 +72,7 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: mender-certs
+          if-no-files-found: error
           retention-days: 1
           path: ${{ github.workspace }}/mender-server/compose/certs
 
@@ -165,18 +166,19 @@ jobs:
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            curl libxcb-render-util0 libxcb-shape0 libxcb-icccm4 libxcb-keysyms1 libxcb-image0 libxkbcommon-x11-0
+            curl libxcb-render-util0 libxcb-shape0 libxcb-icccm4 libxcb-keysyms1 libxcb-image0 libxkbcommon-x11-0 udev
+          /lib/systemd/systemd-udevd --daemon
           curl -d "accept_license_agreement=accepted&submit=Download+software" -X POST -O "https://www.segger.com/downloads/jlink/JLink_Linux_${JLINK_VERSION}_x86_64.deb"
-          ln -s /bin/true /usr/bin/udevadm # Fake udevadm
+          #ln -s /bin/true /usr/bin/udevadm # Fake udevadm
           dpkg -i JLink_Linux_${JLINK_VERSION}_x86_64.deb
           rm JLink_Linux_${JLINK_VERSION}_x86_64.deb
-          rm /usr/bin/udevadm
+          #rm /usr/bin/udevadm
           # DEBUG
           which LinkServer
           #curl https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfutil -o /usr/bin/nrfutil
           #chmod a+x /usr/bin/nrfutil
-          curl https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfjprog -o /usr/bin/nrfjprog
-          chmod a+x /usr/bin/nrfjprog
+          #curl https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfjprog -o /usr/bin/nrfjprog
+          #chmod a+x /usr/bin/nrfjprog
         env:
           JLINK_VERSION: V890
 
@@ -257,7 +259,7 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: test-results
-          if-no-files-found: ignore
+          if-no-files-found: error
           retention-days: 7
           path: |
             mender-zephyr-example/twister-out/summary.md

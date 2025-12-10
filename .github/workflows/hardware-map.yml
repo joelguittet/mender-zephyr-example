@@ -61,13 +61,14 @@ jobs:
       - name: Generate hardware map
         working-directory: mender-zephyr-example
         run: |
-          west twister --generate-hardware-map map.yml
+          west twister --generate-hardware-map twister-out/map.yml
 
       # Upload hardware-map artifact
       - name: Upload artifact
         uses: actions/upload-artifact@v5
         with:
           name: hardware-map
+          if-no-files-found: error
           retention-days: 1
           path: |
             mender-zephyr-example/twister-out/map.yml
