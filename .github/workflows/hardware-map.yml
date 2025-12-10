@@ -67,6 +67,7 @@ jobs:
         uses: actions/upload-artifact@v5
         with:
           name: hardware-map
+          retention-days: 1
           path: map.yml
 
       # Cleanup Zephyr environment
