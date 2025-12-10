@@ -149,6 +149,8 @@ jobs:
           dpkg -i JLink_Linux_${JLINK_VERSION}_x86_64.deb
           rm JLink_Linux_${JLINK_VERSION}_x86_64.deb
           rm /usr/bin/udevadm
+          # DEBUG
+          nrfutil device list
         env:
           JLINK_VERSION: V890
 
