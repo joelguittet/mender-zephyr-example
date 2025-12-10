@@ -153,6 +153,7 @@ jobs:
           curl https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfutil -o nrfutil
           chmod a+x nrfutil
           mv nrfutil /usr/bin/nrfutil
+          nrfutil install device
           nrfutil device list
         env:
           JLINK_VERSION: V890
