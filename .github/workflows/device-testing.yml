@@ -121,7 +121,7 @@ jobs:
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            whiptail libusb-1.0-0-dev dfu-util usbutils hwdata
+            wget whiptail libusb-1.0-0-dev dfu-util usbutils hwdata
           wget https://www.nxp.com/lgfiles/updates/mcuxpresso/LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin
           chmod a+x LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin
           ./LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin --noexec --target linkserver
@@ -147,19 +147,17 @@ jobs:
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            libxcb-render-util0 libxcb-shape0 libxcb-icccm4 libxcb-keysyms1 libxcb-image0 libxkbcommon-x11-0
+            curl libxcb-render-util0 libxcb-shape0 libxcb-icccm4 libxcb-keysyms1 libxcb-image0 libxkbcommon-x11-0
           curl -d "accept_license_agreement=accepted&submit=Download+software" -X POST -O "https://www.segger.com/downloads/jlink/JLink_Linux_${JLINK_VERSION}_x86_64.deb"
           ln -s /bin/true /usr/bin/udevadm # Fake udevadm
           dpkg -i JLink_Linux_${JLINK_VERSION}_x86_64.deb
           rm JLink_Linux_${JLINK_VERSION}_x86_64.deb
           rm /usr/bin/udevadm
           # DEBUG
-          curl https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfutil -o nrfutil
-          chmod a+x nrfutil
-          mv nrfutil /usr/bin/nrfutil
-          nrfutil install device
-          nrfutil device list
-          which LinkServer
+          #curl https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfutil -o /usr/bin/nrfutil
+          #chmod a+x /usr/bin/nrfutil
+          curl https://files.nordicsemi.com/artifactory/swtools/external/nrfutil/executables/x86_64-unknown-linux-gnu/nrfjprog -o /usr/bin/nrfjprog
+          chmod a+x /usr/bin/nrfjprog
         env:
           JLINK_VERSION: V890
 
