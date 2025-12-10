@@ -132,11 +132,11 @@ jobs:
           dpkg --unpack LPCScrypt.deb
           rm /var/lib/dpkg/info/lpcscrypt.postinst
           DEBIAN_FRONTEND=noninteractive apt-get install -yf
-          echo "/usr/local/LinkServer" >> "$GITHUB_PATH"
+          echo "/usr/local/LinkServer_${LINK_SERVER_VERSION}" >> "$GITHUB_PATH"
           cd ..
           # Debug
           ls -l /usr/local
-          ls -l /usr/local/LinkServer
+          ls -l /usr/local/LinkServer_${LINK_SERVER_VERSION}
           rm LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin
           rm -rf linkserver
         env:
