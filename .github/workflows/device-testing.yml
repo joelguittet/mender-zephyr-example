@@ -209,6 +209,7 @@ jobs:
       # - MENDER_CA: mender-server certificate path to connect to the server
       - name: Execute tests
         working-directory: mender-zephyr-example
+        id: execute-tests
         run: |
           west twister -T app -v --allow-installed-plugin --enable-slow --inline-logs --device-testing --flash-before --hardware-map /__w/mender-zephyr-example/mender-zephyr-example/map.yml
         env:
@@ -220,7 +221,7 @@ jobs:
       # Analyse test results
       # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
       - name: Analyze test results
-        if: ${{ always() }}
+        if: ${{ always() && steps.execute-tests.conclusion != 'skipped' && steps.execute-tests.conclusion != 'cancelled' }}
         working-directory: mender-zephyr-example
         run: |
           python3 scripts/twister_report_summary.py twister-out/twister_report.xml > twister-out/summary.md
@@ -229,7 +230,7 @@ jobs:
       # Upload test-results artifact
       # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
       - name: Upload artifact
-        if: ${{ always() }}  
+        if: ${{ always() && steps.execute-tests.conclusion != 'skipped' && steps.execute-tests.conclusion != 'cancelled' }}
         uses: actions/upload-artifact@v5
         with:
           name: test-results
@@ -251,7 +252,7 @@ jobs:
 
       # Cleanup twister results
       - name: Cleanup twister results
-        if: ${{ always() }}s
+        if: ${{ always() }}
         working-directory: mender-zephyr-example
         run: |
           rm -rf twister-out
