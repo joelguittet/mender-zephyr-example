@@ -78,8 +78,6 @@ class Helpers:
         cmd = f"west sign --tool imgtool --build-dir {build_dir} -- --version {version}"
         if os.path.exists(key_file):
             cmd += f" --key {key_file}"
-        print(f"BUILD_DIR IS {build_dir}") # TODO REM
-        print(f"CMD IS {cmd}") # TODO REM
         subprocess.run(cmd, shell=True, check=True)
         # Create artifact using mender-artifact
         zephyr_signed_bin = Path(build_dir) / "zephyr" / "zephyr.signed.bin"
