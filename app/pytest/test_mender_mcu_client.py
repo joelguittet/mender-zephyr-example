@@ -73,7 +73,7 @@ def test_device_inventory(dut: DeviceAdapter):
     """Wait until the device inventory is updated."""
     def get_device_inventory():
         inventory = mender_management.get_device_inventory(device)
-        if inventory.get("updated_ts"):
+        if inventory is not None and inventory.get("updated_ts"):
             return inventory, inventory.get("updated_ts")
         return None, None
     inventory = helpers.run_until_data_refreshed(get_device_inventory)
@@ -122,6 +122,7 @@ def test_device_configure(dut: DeviceAdapter):
     """Set device configuration."""
     mender_management.set_device_configuration(device, expected_configuration)
     deployment = mender_management.deploy_device_configuration(device)
+    assert deployment is not None, "🔴​​​ Deployment not found"
     """"Wait for deployment completes or fails."""
     deployment_status = mender_management.wait_for_deployment(deployment=deployment)
     assert deployment_status is not None, "🔴​​​ Deployment status not found"
@@ -131,7 +132,7 @@ def test_device_configure(dut: DeviceAdapter):
     """Wait until the device configuration is updated."""
     def get_device_configuration():
         configuration = mender_management.get_device_configuration(device)
-        if configuration.get("reported_ts") and datetime.fromisoformat(configuration.get("reported_ts")) >= datetime.fromisoformat(deployment_status.get("finished")):
+        if configuration is not None and configuration.get("reported_ts") and datetime.fromisoformat(configuration.get("reported_ts")) >= datetime.fromisoformat(deployment_status.get("finished")):
             return configuration, configuration.get("reported_ts")
         return None, None
     configuration = helpers.run_until_data_refreshed(get_device_configuration)
