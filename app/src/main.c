@@ -110,7 +110,8 @@ static const unsigned char ca_certificate_secondary[] = {
  */
 static K_EVENT_DEFINE(mender_client_events);
 #define MENDER_CLIENT_EVENT_NETWORK_UP (1 << 0)
-#define MENDER_CLIENT_EVENT_RESTART    (1 << 1)
+#define MENDER_CLIENT_EVENT_NETWORK_DOWN (1 << 1)
+#define MENDER_CLIENT_EVENT_RESTART    (1 << 2)
 
 /**
  * @brief Network management callback
@@ -166,6 +167,20 @@ static void
 net_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event, struct net_if *iface) {
 #endif
 
+    switch (mgmt_event) {
+        case NET_EVENT_WIFI_CONNECT_RESULT: {
+            LOG_INF("Connected to %s", CONFIG_EXAMPLE_WIFI_SSID);
+            k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_NETWORK_UP);
+            break;
+        }
+        case NET_EVENT_WIFI_DISCONNECT_RESULT: {
+            LOG_INF("Disconnected from %s", CONFIG_EXAMPLE_WIFI_SSID);
+            k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_NETWORK_DOWN);
+            break;
+        }
+    }
+
+return;//TODO CHECK
     /* Check event */
     if (NET_EVENT_IPV4_ADDR_ADD != mgmt_event) {
         return;
@@ -547,10 +562,13 @@ main(void) {
     LOG_INF("Initialization of network interface");
     struct net_if *iface = net_if_get_default();
     assert(NULL != iface);
-    net_mgmt_init_event_callback(&mgmt_cb, net_event_handler, NET_EVENT_IPV4_ADDR_ADD);
+    net_mgmt_init_event_callback(&mgmt_cb,
+                                 net_event_handler,
+                                 NET_EVENT_WIFI_CONNECT_RESULT | NET_EVENT_WIFI_DISCONNECT_RESULT | NET_EVENT_WIFI_AP_ENABLE_RESULT
+                                     | NET_EVENT_WIFI_AP_DISABLE_RESULT | NET_EVENT_WIFI_AP_STA_CONNECTED | NET_EVENT_WIFI_AP_STA_DISCONNECTED);
     net_mgmt_add_event_callback(&mgmt_cb);
     net_dhcpv4_start(iface);
-
+retry:
 #ifdef CONFIG_WIFI
 
     /* Set connection request parameters */
@@ -559,15 +577,15 @@ main(void) {
     params.channel                        = WIFI_CHANNEL_ANY;
     params.mfp                            = WIFI_MFP_OPTIONAL;
     params.ssid                           = CONFIG_EXAMPLE_WIFI_SSID;
-    params.ssid_length                    = strlen(params.ssid);
+    params.ssid_length                    = sizeof(CONFIG_EXAMPLE_WIFI_SSID) - 1;
 #if defined(CONFIG_EXAMPLE_WIFI_AUTHENTICATION_MODE_WPA2_PSK)
     params.security   = WIFI_SECURITY_TYPE_PSK;
     params.psk        = CONFIG_EXAMPLE_WIFI_PSK;
-    params.psk_length = strlen(CONFIG_EXAMPLE_WIFI_PSK);
+    params.psk_length = sizeof(CONFIG_EXAMPLE_WIFI_PSK) - 1;
 #elif defined(CONFIG_EXAMPLE_WIFI_AUTHENTICATION_MODE_WPA3_SAE)
     params.security            = WIFI_SECURITY_TYPE_SAE;
     params.sae_password        = CONFIG_EXAMPLE_WIFI_PSK;
-    params.sae_password_length = strlen(CONFIG_EXAMPLE_WIFI_PSK);
+    params.sae_password_length = sizeof(CONFIG_EXAMPLE_WIFI_PSK) - 1;
 #else
     params.security = WIFI_SECURITY_TYPE_NONE;
 #endif
@@ -579,7 +597,10 @@ main(void) {
 #endif /* CONFIG_WIFI */
 
     /* Wait until the network interface is operational */
-    k_event_wait(&mender_client_events, MENDER_CLIENT_EVENT_NETWORK_UP, true, K_FOREVER);
+    uint32_t res = k_event_wait(&mender_client_events, MENDER_CLIENT_EVENT_NETWORK_UP | MENDER_CLIENT_EVENT_NETWORK_DOWN, true, K_SECONDS(30));
+    if (MENDER_CLIENT_EVENT_NETWORK_UP != (res & MENDER_CLIENT_EVENT_NETWORK_UP)) {
+        goto retry;
+    }
 
 #ifdef CONFIG_NET_SOCKETS_SOCKOPT_TLS
     /* Initialize certificate */

@@ -43,8 +43,8 @@ jobs:
       - name: Checkout mender-server
         uses: actions/checkout@v6
         with:
-          repository: mendersoftware/mender-server
-          ref: 8d34064338d1a1ffbe83f710e97f9f007b779354
+          repository: joelguittet/mender-server
+          ref: dc763f6aa1dd7d8787142ee88c8b596946eaed43
           path: mender-server
 
       # Start mender-server
