@@ -92,6 +92,7 @@
 };
 
 &enet_mac {
+    /* MAC address is used to identify the device on the mender-server */
     /delete-property/ zephyr,random-mac-address;
     local-mac-address = [AE 9A 22 01 02 03];
 };

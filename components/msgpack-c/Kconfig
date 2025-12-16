@@ -16,7 +16,7 @@
 # limitations under the License.
 
 menuconfig MSGPACK_C
-    bool "MessagePack implementation for C and C++" 
+    bool "MessagePack implementation for C and C++"
     help
         MessagePack is an efficient binary serialization format, which lets you
         exchange data among multiple languages like JSON, except that it's faster

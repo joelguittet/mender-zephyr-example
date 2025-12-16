@@ -154,7 +154,6 @@ print_dhcpv4_addr(struct net_if *iface, struct net_if_addr *if_addr, void *user_
         return;
     }
 
-    LOG_INF("Network interface connected");
     LOG_INF("IPv4 address: %s", net_addr_ntop(AF_INET, &if_addr->address.in_addr, hr_addr, NET_IPV4_ADDR_LEN));
     LOG_INF("Lease time: %u seconds", iface->config.dhcpv4.lease_time);
     netmask = net_if_ipv4_get_netmask_by_addr(iface, &if_addr->address.in_addr);
@@ -178,6 +177,8 @@ net_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event, struc
 
     switch (mgmt_event) {
         case NET_EVENT_IPV4_ADDR_ADD:
+            /* Connected to network */
+            LOG_INF("Connected to the network");
             /* Print interface information */
             net_if_ipv4_addr_foreach(iface, print_dhcpv4_addr, NULL);
             /* Indicate the network is available */
