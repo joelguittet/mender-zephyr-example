@@ -109,14 +109,23 @@ static const unsigned char ca_certificate_secondary[] = {
  * @brief Mender client events
  */
 static K_EVENT_DEFINE(mender_client_events);
-#define MENDER_CLIENT_EVENT_NETWORK_UP (1 << 0)
+#define MENDER_CLIENT_EVENT_NETWORK_UP   (1 << 0)
 #define MENDER_CLIENT_EVENT_NETWORK_DOWN (1 << 1)
-#define MENDER_CLIENT_EVENT_RESTART    (1 << 2)
+#define MENDER_CLIENT_EVENT_RESTART      (1 << 2)
 
 /**
  * @brief Network management callback
  */
 static struct net_mgmt_event_callback mgmt_cb;
+
+/**
+ * @brief Network management event mask
+ */
+#ifdef CONFIG_WIFI
+#define NET_EVENT_MASK NET_EVENT_WIFI_CONNECT_RESULT | NET_EVENT_WIFI_DISCONNECT_RESULT
+#else
+#define NET_EVENT_MASK NET_EVENT_IPV4_ADDR_ADD | NET_EVENT_WIFI_CONNECT_RESULT | NET_EVENT_WIFI_DISCONNECT_RESULT
+#endif /* CONFIG_WIFI */
 
 #ifdef CONFIG_LLEXT
 
@@ -168,29 +177,27 @@ net_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event, struc
 #endif
 
     switch (mgmt_event) {
-        case NET_EVENT_WIFI_CONNECT_RESULT: {
-            LOG_INF("Connected to %s", CONFIG_EXAMPLE_WIFI_SSID);
+        case NET_EVENT_IPV4_ADDR_ADD:
+            /* Print interface information */
+            net_if_ipv4_addr_foreach(iface, print_dhcpv4_addr, NULL);
+            /* Indicate the network is available */
             k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_NETWORK_UP);
             break;
-        }
-        case NET_EVENT_WIFI_DISCONNECT_RESULT: {
-            LOG_INF("Disconnected from %s", CONFIG_EXAMPLE_WIFI_SSID);
+#ifdef CONFIG_WIFI
+        case NET_EVENT_WIFI_CONNECT_RESULT:
+            /* Connected to Wi-Fi network */
+            LOG_INF("Connected to Wi-Fi '%s'", CONFIG_EXAMPLE_WIFI_SSID);
+            /* Indicate the network is available */
+            k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_NETWORK_UP);
+            break;
+        case NET_EVENT_WIFI_DISCONNECT_RESULT:
+            /* Disconnected from Wi-Fi network */
+            LOG_INF("Disconnected from Wi-Fi '%s'", CONFIG_EXAMPLE_WIFI_SSID);
+            /* Indicate the network is not available */
             k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_NETWORK_DOWN);
             break;
-        }
+#endif /* CONFIG_WIFI */
     }
-
-return;//TODO CHECK
-    /* Check event */
-    if (NET_EVENT_IPV4_ADDR_ADD != mgmt_event) {
-        return;
-    }
-
-    /* Print interface information */
-    net_if_ipv4_addr_foreach(iface, print_dhcpv4_addr, NULL);
-
-    /* Indicate the network is available */
-    k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_NETWORK_UP);
 }
 
 /**
@@ -562,44 +569,54 @@ main(void) {
     LOG_INF("Initialization of network interface");
     struct net_if *iface = net_if_get_default();
     assert(NULL != iface);
-    net_mgmt_init_event_callback(&mgmt_cb,
-                                 net_event_handler,
-                                 NET_EVENT_WIFI_CONNECT_RESULT | NET_EVENT_WIFI_DISCONNECT_RESULT | NET_EVENT_WIFI_AP_ENABLE_RESULT
-                                     | NET_EVENT_WIFI_AP_DISABLE_RESULT | NET_EVENT_WIFI_AP_STA_CONNECTED | NET_EVENT_WIFI_AP_STA_DISCONNECTED);
+    net_mgmt_init_event_callback(&mgmt_cb, net_event_handler, NET_EVENT_MASK);
     net_mgmt_add_event_callback(&mgmt_cb);
     net_dhcpv4_start(iface);
-retry:
+
+    /* Connect to the network */
+    int      tries = 0;
+    uint32_t event = 0;
+    while (MENDER_CLIENT_EVENT_NETWORK_UP != (event & MENDER_CLIENT_EVENT_NETWORK_UP)) {
+
 #ifdef CONFIG_WIFI
 
-    /* Set connection request parameters */
-    struct wifi_connect_req_params params = { 0 };
-    params.band                           = WIFI_FREQ_BAND_UNKNOWN;
-    params.channel                        = WIFI_CHANNEL_ANY;
-    params.mfp                            = WIFI_MFP_OPTIONAL;
-    params.ssid                           = CONFIG_EXAMPLE_WIFI_SSID;
-    params.ssid_length                    = sizeof(CONFIG_EXAMPLE_WIFI_SSID) - 1;
+        /* Set connection request parameters */
+        struct wifi_connect_req_params params = { 0 };
+        params.band                           = WIFI_FREQ_BAND_UNKNOWN;
+        params.channel                        = WIFI_CHANNEL_ANY;
+        params.mfp                            = WIFI_MFP_OPTIONAL;
+        params.ssid                           = CONFIG_EXAMPLE_WIFI_SSID;
+        params.ssid_length                    = sizeof(CONFIG_EXAMPLE_WIFI_SSID) - 1;
 #if defined(CONFIG_EXAMPLE_WIFI_AUTHENTICATION_MODE_WPA2_PSK)
-    params.security   = WIFI_SECURITY_TYPE_PSK;
-    params.psk        = CONFIG_EXAMPLE_WIFI_PSK;
-    params.psk_length = sizeof(CONFIG_EXAMPLE_WIFI_PSK) - 1;
+        params.security   = WIFI_SECURITY_TYPE_PSK;
+        params.psk        = CONFIG_EXAMPLE_WIFI_PSK;
+        params.psk_length = sizeof(CONFIG_EXAMPLE_WIFI_PSK) - 1;
 #elif defined(CONFIG_EXAMPLE_WIFI_AUTHENTICATION_MODE_WPA3_SAE)
-    params.security            = WIFI_SECURITY_TYPE_SAE;
-    params.sae_password        = CONFIG_EXAMPLE_WIFI_PSK;
-    params.sae_password_length = sizeof(CONFIG_EXAMPLE_WIFI_PSK) - 1;
+        params.security            = WIFI_SECURITY_TYPE_SAE;
+        params.sae_password        = CONFIG_EXAMPLE_WIFI_PSK;
+        params.sae_password_length = sizeof(CONFIG_EXAMPLE_WIFI_PSK) - 1;
 #else
-    params.security = WIFI_SECURITY_TYPE_NONE;
+        params.security = WIFI_SECURITY_TYPE_NONE;
 #endif
-    /* Request connection to the network */
-    while (0 != net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params))) {
-        k_msleep(500);
-    }
+        /* Request connection to the network */
+        net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params)); //TODO test this
 
 #endif /* CONFIG_WIFI */
 
-    /* Wait until the network interface is operational */
-    uint32_t res = k_event_wait(&mender_client_events, MENDER_CLIENT_EVENT_NETWORK_UP | MENDER_CLIENT_EVENT_NETWORK_DOWN, true, K_SECONDS(30));
-    if (MENDER_CLIENT_EVENT_NETWORK_UP != (res & MENDER_CLIENT_EVENT_NETWORK_UP)) {
-        goto retry;
+        /* Wait until the network event */
+        event = k_event_wait(&mender_client_events,
+                             MENDER_CLIENT_EVENT_NETWORK_UP | MENDER_CLIENT_EVENT_NETWORK_DOWN,
+                             true,
+                             K_SECONDS(CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_TIMEOUT));
+        if (MENDER_CLIENT_EVENT_NETWORK_UP != (event & MENDER_CLIENT_EVENT_NETWORK_UP)) {
+            tries++;
+            if (tries < CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES) {
+                LOG_WRN("Unable to connect to the network (%d/%d), retrying to establish connection", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
+            } else {
+                LOG_ERR("Unable to connect to the network (%d/%d)", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
+                goto RESTART;
+            }
+        }
     }
 
 #ifdef CONFIG_NET_SOCKETS_SOCKOPT_TLS

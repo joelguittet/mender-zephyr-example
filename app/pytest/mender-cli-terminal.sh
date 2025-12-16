@@ -67,5 +67,5 @@ kill -TERM $SOCAT_PID > /dev/null 2>&1
 
 # Cleaning
 rm -rf $temp_dir
-    
+
 exit 0

@@ -71,6 +71,18 @@ menu "Application"
             bool "None"
     endchoice
 
+    config EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES
+        int "Maximum number of retries to establish connection with the network"
+        default 3
+        help
+            Defines the number of retries to establish connection with the network.
+
+    config EXAMPLE_NETWORK_CONNECT_FAILS_TIMEOUT
+        int "Timeout to wait for network connection to be established (seconds)"
+        default 30
+        help
+            Defines the timeout to wait for network connection to be established (seconds).
+
     config EXAMPLE_AUTHENTICATION_FAILS_MAX_TRIES
         int "Maximum number of retries when Mender client authentification fails"
         default 3
