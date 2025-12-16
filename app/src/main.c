@@ -124,7 +124,7 @@ static struct net_mgmt_event_callback mgmt_cb;
 #ifdef CONFIG_WIFI
 #define NET_EVENT_MASK NET_EVENT_WIFI_CONNECT_RESULT | NET_EVENT_WIFI_DISCONNECT_RESULT
 #else
-#define NET_EVENT_MASK NET_EVENT_IPV4_ADDR_ADD | NET_EVENT_WIFI_CONNECT_RESULT | NET_EVENT_WIFI_DISCONNECT_RESULT
+#define NET_EVENT_MASK NET_EVENT_IPV4_ADDR_ADD
 #endif /* CONFIG_WIFI */
 
 #ifdef CONFIG_LLEXT
@@ -599,7 +599,7 @@ main(void) {
         params.security = WIFI_SECURITY_TYPE_NONE;
 #endif
         /* Request connection to the network */
-        net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params)); //TODO test this
+        net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params));
 
 #endif /* CONFIG_WIFI */
 
