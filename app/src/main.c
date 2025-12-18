@@ -34,6 +34,8 @@ LOG_MODULE_REGISTER(mender_zephyr_example, LOG_LEVEL_INF);
 #ifdef CONFIG_WIFI
 #include <zephyr/net/wifi_mgmt.h>
 #endif /* CONFIG_WIFI */
+#include <zephyr/shell/shell.h>
+#include <zephyr/shell/shell_uart.h>
 #include <zephyr/sys/reboot.h>
 
 #ifdef CONFIG_MENDER_CLIENT_ADD_ON_TROUBLESHOOT
@@ -213,7 +215,54 @@ network_connect_cb(void) {
     /* This callback can be used to configure network connection */
     /* Note that the application can connect the network before if required */
     /* This callback only indicates the mender-client requests network access now */
-    /* Nothing to do in this example application just return network is available */
+
+    /* Retrieve default network interface */
+    struct net_if *iface = net_if_get_default();
+    assert(NULL != iface);
+
+#ifdef CONFIG_WIFI
+
+    /* Set connection request parameters */
+    struct wifi_connect_req_params params = { 0 };
+    params.band                           = WIFI_FREQ_BAND_UNKNOWN;
+    params.channel                        = WIFI_CHANNEL_ANY;
+    params.mfp                            = WIFI_MFP_OPTIONAL;
+    params.ssid                           = CONFIG_EXAMPLE_WIFI_SSID;
+    params.ssid_length                    = sizeof(CONFIG_EXAMPLE_WIFI_SSID) - 1;
+#if defined(CONFIG_EXAMPLE_WIFI_AUTHENTICATION_MODE_WPA2_PSK)
+    params.security   = WIFI_SECURITY_TYPE_PSK;
+    params.psk        = CONFIG_EXAMPLE_WIFI_PSK;
+    params.psk_length = sizeof(CONFIG_EXAMPLE_WIFI_PSK) - 1;
+#elif defined(CONFIG_EXAMPLE_WIFI_AUTHENTICATION_MODE_WPA3_SAE)
+    params.security            = WIFI_SECURITY_TYPE_SAE;
+    params.sae_password        = CONFIG_EXAMPLE_WIFI_PSK;
+    params.sae_password_length = sizeof(CONFIG_EXAMPLE_WIFI_PSK) - 1;
+#else
+    params.security = WIFI_SECURITY_TYPE_NONE;
+#endif
+    /* Request connection to the network */
+    net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params));
+
+    /* Wait until the network event */
+    uint32_t event = k_event_wait(&mender_client_events,
+                                  MENDER_CLIENT_EVENT_NETWORK_UP | MENDER_CLIENT_EVENT_NETWORK_DOWN,
+                                  true,
+                                  K_SECONDS(CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_TIMEOUT));
+    if (MENDER_CLIENT_EVENT_NETWORK_UP != (event & MENDER_CLIENT_EVENT_NETWORK_UP)) {
+        LOG_ERR("Unable to connect to the network");
+        return MENDER_FAIL;
+    }
+
+#else
+
+    /* Check if connected to the network */
+    if (false == net_if_is_up(iface)) {
+        LOG_ERR("Not connected to the network");
+        return MENDER_FAIL;
+    }
+
+#endif /* CONFIG_WIFI */
+
     return MENDER_OK;
 }
 
@@ -229,7 +278,18 @@ network_release_cb(void) {
     /* This callback can be used to release network connection */
     /* Note that the application can keep network activated if required */
     /* This callback only indicates the mender-client doesn't request network access now */
-    /* Nothing to do in this example application just return network is released */
+
+#ifdef CONFIG_WIFI
+
+    /* Retrieve default network interface */
+    struct net_if *iface = net_if_get_default();
+    assert(NULL != iface);
+
+    /* Request disconnection from the network */
+    net_mgmt(NET_REQUEST_WIFI_DISCONNECT, iface, NULL, 0);
+
+#endif /* CONFIG_WIFI */
+
     return MENDER_OK;
 }
 
@@ -566,6 +626,12 @@ hello_world_module_cb(char *id, char *artifact_name, char *type, cJSON *meta_dat
 int
 main(void) {
 
+#ifdef CONFIG_SHELL_BACKEND_SERIAL
+    /* Wait until the shell is ready - This allow to see all following logs */
+    struct shell *sh = shell_backend_uart_get_ptr();
+    WAIT_FOR(shell_ready(sh), 20000, k_msleep(1));
+#endif /* CONFIG_SHELL_BACKEND_SERIAL */
+
     /* Initialize network */
     LOG_INF("Initialization of network interface");
     struct net_if *iface = net_if_get_default();
@@ -574,54 +640,9 @@ main(void) {
     net_mgmt_add_event_callback(&mgmt_cb);
     net_dhcpv4_start(iface);
 
-    /* Connect to the network */
-    int      tries = 0;
-    uint32_t event = 0;
-    while (MENDER_CLIENT_EVENT_NETWORK_UP != (event & MENDER_CLIENT_EVENT_NETWORK_UP)) {
-
-#ifdef CONFIG_WIFI
-
-        /* Set connection request parameters */
-        struct wifi_connect_req_params params = { 0 };
-        params.band                           = WIFI_FREQ_BAND_UNKNOWN;
-        params.channel                        = WIFI_CHANNEL_ANY;
-        params.mfp                            = WIFI_MFP_OPTIONAL;
-        params.ssid                           = CONFIG_EXAMPLE_WIFI_SSID;
-        params.ssid_length                    = sizeof(CONFIG_EXAMPLE_WIFI_SSID) - 1;
-#if defined(CONFIG_EXAMPLE_WIFI_AUTHENTICATION_MODE_WPA2_PSK)
-        params.security   = WIFI_SECURITY_TYPE_PSK;
-        params.psk        = CONFIG_EXAMPLE_WIFI_PSK;
-        params.psk_length = sizeof(CONFIG_EXAMPLE_WIFI_PSK) - 1;
-#elif defined(CONFIG_EXAMPLE_WIFI_AUTHENTICATION_MODE_WPA3_SAE)
-        params.security            = WIFI_SECURITY_TYPE_SAE;
-        params.sae_password        = CONFIG_EXAMPLE_WIFI_PSK;
-        params.sae_password_length = sizeof(CONFIG_EXAMPLE_WIFI_PSK) - 1;
-#else
-        params.security = WIFI_SECURITY_TYPE_NONE;
-#endif
-        /* Request connection to the network */
-        net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params));
-
-#endif /* CONFIG_WIFI */
-
-        /* Wait until the network event */
-        event = k_event_wait(&mender_client_events,
-                             MENDER_CLIENT_EVENT_NETWORK_UP | MENDER_CLIENT_EVENT_NETWORK_DOWN,
-                             true,
-                             K_SECONDS(CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_TIMEOUT));
-        if (MENDER_CLIENT_EVENT_NETWORK_UP != (event & MENDER_CLIENT_EVENT_NETWORK_UP)) {
-            tries++;
-            if (tries < CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES) {
-                LOG_WRN("Unable to connect to the network (%d/%d), retrying to establish connection", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
-            } else {
-                LOG_ERR("Unable to connect to the network (%d/%d)", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
-                goto RESTART;
-            }
-        }
-    }
-
 #ifdef CONFIG_NET_SOCKETS_SOCKOPT_TLS
     /* Initialize certificate */
+    LOG_INF("Initialization of certificate(s)");
     tls_credential_add(CONFIG_MENDER_NET_CA_CERTIFICATE_TAG_PRIMARY, TLS_CREDENTIAL_CA_CERTIFICATE, ca_certificate_primary, sizeof(ca_certificate_primary));
 #if (0 != CONFIG_MENDER_NET_CA_CERTIFICATE_TAG_SECONDARY)
     tls_credential_add(
