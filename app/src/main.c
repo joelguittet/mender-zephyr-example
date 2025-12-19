@@ -665,8 +665,8 @@ main(void) {
              linkaddr->addr[5]);
     LOG_INF("MAC address of the device '%s'", mac_address);
 
-    /* Print version of the device */
 #ifdef CONFIG_MCUMGR_GRP_IMG
+    /* Retrieve running version of the device */
     struct image_version image_version;
     img_mgmt_my_version(&image_version);
     LOG_INF("Running project '%s' version '%d.%d.%d+%d'",
@@ -676,6 +676,7 @@ main(void) {
             image_version.iv_revision,
             image_version.iv_build_num);
 #else
+    /* Print version of the device */
     LOG_INF("Running project '%s' version '%s'", PROJECT_NAME, APP_VERSION_STRING);
 #endif /* CONFIG_MCUMGR_GRP_IMG */
 
@@ -761,10 +762,10 @@ main(void) {
                            .read  = file_transfer_read_cb,
                            .write = file_transfer_write_cb,
                            .close = file_transfer_close_cb },
+#endif /* CONFIG_MENDER_CLIENT_TROUBLESHOOT_FILE_TRANSFER */
 #ifdef CONFIG_MENDER_CLIENT_TROUBLESHOOT_PORT_FORWARDING
         .port_forwarding = { .connect = NULL, .send = NULL, .close = NULL },
 #endif /* CONFIG_MENDER_CLIENT_TROUBLESHOOT_PORT_FORWARDING */
-#endif /* CONFIG_MENDER_CLIENT_TROUBLESHOOT_FILE_TRANSFER */
 #ifdef CONFIG_MENDER_CLIENT_TROUBLESHOOT_SHELL
         .shell = { .open = mender_shell_open, .resize = mender_shell_resize, .write = mender_shell_write, .close = mender_shell_close }
 #endif /* CONFIG_MENDER_CLIENT_TROUBLESHOOT_SHELL */

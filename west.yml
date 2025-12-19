@@ -50,5 +50,5 @@ manifest:
           - zcbor # required in case mcumgr is enabled
     - name: mender-mcu-client
       remote: joelguittet
-      revision: a6082998b0fc27a578d2657efcf2ae2eef14a95d
+      revision: ff0f3bb93546b939391f64f5f545e1c9951ea525
       path: modules/lib/mender-mcu-client
