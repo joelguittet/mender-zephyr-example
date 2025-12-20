@@ -21,7 +21,7 @@ import subprocess
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from twister_harness import DeviceAdapter
+from twister_harness import DeviceAdapter, Shell
 from twister_harness.helpers.utils import match_no_lines
 
 
@@ -29,6 +29,9 @@ class Helpers:
     """
     Provides helper methods for device management.
     """
+
+    def reboot_device(self, shell: Shell):
+        shell.exec_command("kernel reboot")
 
     def get_device_mac_address(self, dut: DeviceAdapter) -> str:
         output = dut.readlines_until(".*<inf>.*MAC address of the device '.*'", timeout=60)
@@ -50,7 +53,7 @@ class Helpers:
         print(f"✅ Firmware version of the device is '{fw_version}'")
         return fw_version
 
-    def assert_device_not_authenticated(self, dut: DeviceAdapter) -> None:
+    def assert_device_not_authenticated(self, dut: DeviceAdapter):
         try:
             output = dut.readlines_until(r".*<err>.*\[401\] Unauthorized.*|.*<inf>.*Mender client authenticated.*", timeout=300)
             match_no_lines(output[-1:], ["Mender client authenticated"])
@@ -58,15 +61,15 @@ class Helpers:
             raise AssertionError("🔴​​​ Device appear to be authenticated but it should not")
         print("✅ Device is not authenticated")
 
-    def assert_device_authenticated(self, dut: DeviceAdapter) -> None:
+    def assert_device_authenticated(self, dut: DeviceAdapter):
         try:
-            output = dut.readlines_until("Mender client authenticated", timeout=300)
+            output = dut.readlines_until("Mender client authenticated", timeout=300) # TODO check for unauthorized here ?
             match_no_lines(output[-1:], [r"\[401\] Unauthorized"])
         except (twister_harness.exceptions.TwisterHarnessTimeoutException, AssertionError):
             raise AssertionError("🔴​​​ Device doesn't appear to be authenticated but it should")
         print("✅ Device is authenticated")
 
-    def assert_device_troubleshoot_connected(self, dut: DeviceAdapter) -> None:
+    def assert_device_troubleshoot_connected(self, dut: DeviceAdapter):
         try:
             output = dut.readlines_until("Troubleshoot client connected", timeout=300)
         except (twister_harness.exceptions.TwisterHarnessTimeoutException, AssertionError):
