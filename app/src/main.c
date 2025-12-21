@@ -626,11 +626,12 @@ hello_world_module_cb(char *id, char *artifact_name, char *type, cJSON *meta_dat
 int
 main(void) {
 
-#ifdef CONFIG_SHELL_BACKEND_SERIAL
+//#ifdef CONFIG_SHELL_BACKEND_SERIAL
     /* Wait until the shell is ready - This allow to see all following logs */
     //const struct shell *sh = shell_backend_uart_get_ptr();
     //WAIT_FOR(shell_ready(sh), 20000, k_msleep(1));
-#endif /* CONFIG_SHELL_BACKEND_SERIAL */
+//#endif /* CONFIG_SHELL_BACKEND_SERIAL */
+    //k_sleep(K_SECONDS(5));
 
     /* Initialize network */
     LOG_INF("Initialization of network interface");
