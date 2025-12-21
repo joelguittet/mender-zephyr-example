@@ -628,8 +628,8 @@ main(void) {
 
 #ifdef CONFIG_SHELL_BACKEND_SERIAL
     /* Wait until the shell is ready - This allow to see all following logs */
-    const struct shell *sh = shell_backend_uart_get_ptr();
-    WAIT_FOR(shell_ready(sh), 20000, k_msleep(1));
+    //const struct shell *sh = shell_backend_uart_get_ptr();
+    //WAIT_FOR(shell_ready(sh), 20000, k_msleep(1));
 #endif /* CONFIG_SHELL_BACKEND_SERIAL */
 
     /* Initialize network */
