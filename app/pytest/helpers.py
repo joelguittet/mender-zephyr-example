@@ -40,7 +40,10 @@ class Helpers:
             pass
 
     def get_device_mac_address(self, dut: DeviceAdapter) -> str:
-        output = dut.readlines_until(".*<inf>.*MAC address of the device '.*'", timeout=60)
+        try:
+            output = dut.readlines_until(".*<inf>.*MAC address of the device '.*'", timeout=60)
+        except (TwisterHarnessTimeoutException, AssertionError):
+            raise AssertionError(f"🔴​​​ MAC address of the device not found in '{output}'") # TODO REM output
         m = re.search(".*<inf>.*MAC address of the device '(.+?)'", output[-1])
         if m:
             mac_address = m.group(1)
@@ -50,7 +53,10 @@ class Helpers:
         return mac_address
 
     def get_device_firmware_version(self, dut: DeviceAdapter) -> str:
-        output = dut.readlines_until(".*<inf>.*Running project 'mender-zephyr-example' version '.*'", timeout=60)
+        try:
+            output = dut.readlines_until(".*<inf>.*Running project 'mender-zephyr-example' version '.*'", timeout=60)
+        except (TwisterHarnessTimeoutException, AssertionError):
+            raise AssertionError(f"🔴​​​ Firmware version of the device not found in '{output}'") # TODO REM output
         m = re.search(".*<inf>.*Running project 'mender-zephyr-example' version '(.+?)'", output[-1])
         if m:
             fw_version = m.group(1)
