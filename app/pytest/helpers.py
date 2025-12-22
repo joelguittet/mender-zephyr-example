@@ -22,6 +22,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from twister_harness import DeviceAdapter, Shell
+from twister_harness.exceptions import TwisterHarnessTimeoutException
 from twister_harness.helpers.utils import match_no_lines
 
 
