@@ -60,10 +60,12 @@ def test_device_registration(shell: Shell, dut: DeviceAdapter):
 
 
 @pytest.mark.dependency(depends=["test_device_registration"])
-def test_device_inventory(dut: DeviceAdapter):
+def test_device_inventory(shell: Shell, dut: DeviceAdapter):
     """Check if inventory add-on is built-in."""
     if not find_in_config(Path(dut.device_config.app_build_dir) / "zephyr" / ".config", "CONFIG_MENDER_CLIENT_ADD_ON_INVENTORY"):
         pytest.skip("Inventory add-on is not built-in")
+    """Restart to ensure the test can catch all relevant logs."""
+    helpers.reboot_device(shell)
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
     """Ensure the device is authorized on the mender server."""
@@ -106,10 +108,12 @@ def test_device_inventory(dut: DeviceAdapter):
 
 
 @pytest.mark.dependency(depends=["test_device_registration"])
-def test_device_configure(dut: DeviceAdapter):
+def test_device_configure(shell: Shell, dut: DeviceAdapter):
     """Check if configure add-on is built-in."""
     if not find_in_config(Path(dut.device_config.app_build_dir) / "zephyr" / ".config", "CONFIG_MENDER_CLIENT_ADD_ON_CONFIGURE"):
         pytest.skip("Configure add-on is not built-in")
+    """Restart to ensure the test can catch all relevant logs."""
+    helpers.reboot_device(shell)
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
     """Ensure the device is authorized on the mender server."""
@@ -148,10 +152,12 @@ def test_device_configure(dut: DeviceAdapter):
 
 
 @pytest.mark.dependency(depends=["test_device_registration"])
-def test_device_troubleshoot_shell(dut: DeviceAdapter):
+def test_device_troubleshoot_shell(shell: Shell, dut: DeviceAdapter):
     """Check if troubleshoot add-on shell is built-in."""
     if not find_in_config(Path(dut.device_config.app_build_dir) / "zephyr" / ".config", "CONFIG_MENDER_CLIENT_TROUBLESHOOT_SHELL"):
         pytest.skip("Troubleshoot add-on shell is not built-in")
+    """Restart to ensure the test can catch all relevant logs."""
+    helpers.reboot_device(shell)
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
     """Ensure the device is authorized on the mender server."""
@@ -170,7 +176,9 @@ def test_device_troubleshoot_shell(dut: DeviceAdapter):
 
 
 @pytest.mark.dependency(depends=["test_device_registration"])
-def test_device_valid_firmware_update(dut: DeviceAdapter):
+def test_device_valid_firmware_update(shell: Shell, dut: DeviceAdapter):
+    """Restart to ensure the test can catch all relevant logs."""
+    helpers.reboot_device(shell)
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
     """Get the firmware version of the device."""
@@ -211,7 +219,9 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
 
 @pytest.mark.order("last")
 @pytest.mark.dependency(depends=["test_device_registration"])
-def test_device_decomissioning(dut: DeviceAdapter):
+def test_device_decomissioning(shell: Shell, dut: DeviceAdapter):
+    """Restart to ensure the test can catch all relevant logs."""
+    helpers.reboot_device(shell)
     """Get the MAC address of the device."""
     mac_address = helpers.get_device_mac_address(dut)
     """Ensure the device is authorized on the mender server."""
