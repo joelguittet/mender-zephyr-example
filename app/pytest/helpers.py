@@ -44,7 +44,9 @@ class Helpers:
 
     def get_device_mac_address(self, dut: DeviceAdapter) -> str:
         try:
-            output = dut.readlines_until(".*<inf>.*MAC address of the device '.*'.*", timeout=60)
+            # TODO TEST THIS (more robust?)
+            #output = dut.readlines_until(".*<inf>.*MAC address of the device '.*'.*", timeout=60)
+            output = dut.readlines_until(".*MAC address of the device.*", timeout=60)
         except (TwisterHarnessTimeoutException, AssertionError):
             raise AssertionError(f"🔴​​​ MAC address of the device not found")
         m = re.search(".*<inf>.*MAC address of the device '(.+?)'.*", output[-1])
