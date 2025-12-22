@@ -31,20 +31,23 @@ class Helpers:
     Provides helper methods for device management.
     """
 
-    def reboot_device(self, shell: Shell):
+    def reboot_device(self, shell: Shell, dut: DeviceAdapter):
         if shell.wait_for_prompt(timeout=60) == False:
             raise AssertionError("🔴​​​ Prompt not available on the device")
         try:
             shell.exec_command(command="kernel reboot", timeout=0)
         except TwisterHarnessTimeoutException:
+            # This exception will occur for the above 'kernel reboot' shell command
             pass
+        # Clear device buffer to remove all lines from the previous boot
+        dut.clear_buffer()
 
     def get_device_mac_address(self, dut: DeviceAdapter) -> str:
         try:
-            output = dut.readlines_until(".*<inf>.*MAC address of the device '.*'", timeout=60)
+            output = dut.readlines_until(".*<inf>.*MAC address of the device '.*'.*", timeout=60)
         except (TwisterHarnessTimeoutException, AssertionError):
-            raise AssertionError(f"🔴​​​ MAC address of the device not found in '{output}'") # TODO REM output
-        m = re.search(".*<inf>.*MAC address of the device '(.+?)'", output[-1])
+            raise AssertionError(f"🔴​​​ MAC address of the device not found")
+        m = re.search(".*<inf>.*MAC address of the device '(.+?)'.*", output[-1])
         if m:
             mac_address = m.group(1)
         else:
@@ -54,10 +57,10 @@ class Helpers:
 
     def get_device_firmware_version(self, dut: DeviceAdapter) -> str:
         try:
-            output = dut.readlines_until(".*<inf>.*Running project 'mender-zephyr-example' version '.*'", timeout=60)
+            output = dut.readlines_until(".*<inf>.*Running project 'mender-zephyr-example' version '.*'.*", timeout=60)
         except (TwisterHarnessTimeoutException, AssertionError):
-            raise AssertionError(f"🔴​​​ Firmware version of the device not found in '{output}'") # TODO REM output
-        m = re.search(".*<inf>.*Running project 'mender-zephyr-example' version '(.+?)'", output[-1])
+            raise AssertionError(f"🔴​​​ Firmware version of the device not found")
+        m = re.search(".*<inf>.*Running project 'mender-zephyr-example' version '(.+?)'.*", output[-1])
         if m:
             fw_version = m.group(1)
         else:
@@ -75,7 +78,8 @@ class Helpers:
 
     def assert_device_authenticated(self, dut: DeviceAdapter):
         try:
-            output = dut.readlines_until("Mender client authenticated", timeout=300) # TODO check for unauthorized here ?
+            #output = dut.readlines_until(".*Mender client authenticated.*", timeout=300) # TODO check for unauthorized here ?
+            output = dut.readlines_until(r".*<err>.*\[401\] Unauthorized.*|.*<inf>.*Mender client authenticated.*", timeout=300)
             match_no_lines(output[-1:], [r"\[401\] Unauthorized"])
         except (TwisterHarnessTimeoutException, AssertionError):
             raise AssertionError("🔴​​​ Device doesn't appear to be authenticated but it should")
@@ -83,7 +87,7 @@ class Helpers:
 
     def assert_device_troubleshoot_connected(self, dut: DeviceAdapter):
         try:
-            output = dut.readlines_until("Troubleshoot client connected", timeout=300)
+            output = dut.readlines_until(".*Troubleshoot client connected.*", timeout=300)
         except (TwisterHarnessTimeoutException, AssertionError):
             raise AssertionError("🔴​​​ Device troubleshoot doesn't appear to be connected but it should")
         print("✅ Device troubleshoot connected")
