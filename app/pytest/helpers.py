@@ -33,7 +33,10 @@ class Helpers:
     def reboot_device(self, shell: Shell):
         if shell.wait_for_prompt(timeout=60) == False:
             raise AssertionError("🔴​​​ Prompt not available on the device")
-        shell.exec_command(command="kernel reboot", timeout=10)
+        try:
+            shell.exec_command(command="kernel reboot", timeout=0)
+        except TwisterHarnessTimeoutException:
+            pass
 
     def get_device_mac_address(self, dut: DeviceAdapter) -> str:
         output = dut.readlines_until(".*<inf>.*MAC address of the device '.*'", timeout=60)
