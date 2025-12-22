@@ -44,9 +44,7 @@ class Helpers:
 
     def get_device_mac_address(self, dut: DeviceAdapter) -> str:
         try:
-            # TODO TEST THIS (more robust?)
-            #output = dut.readlines_until(".*<inf>.*MAC address of the device '.*'.*", timeout=60)
-            output = dut.readlines_until(".*MAC address of the device.*", timeout=60)
+            output = dut.readlines_until("MAC address of the device '[0-9A-Za-z:]+'", timeout=60)
         except (TwisterHarnessTimeoutException, AssertionError):
             raise AssertionError(f"🔴​​​ MAC address of the device not found")
         m = re.search(".*<inf>.*MAC address of the device '(.+?)'.*", output[-1])
@@ -59,7 +57,7 @@ class Helpers:
 
     def get_device_firmware_version(self, dut: DeviceAdapter) -> str:
         try:
-            output = dut.readlines_until(".*<inf>.*Running project 'mender-zephyr-example' version '.*'.*", timeout=60)
+            output = dut.readlines_until("Running project 'mender-zephyr-example' version '[0-9.+]+'", timeout=60)
         except (TwisterHarnessTimeoutException, AssertionError):
             raise AssertionError(f"🔴​​​ Firmware version of the device not found")
         m = re.search(".*<inf>.*Running project 'mender-zephyr-example' version '(.+?)'.*", output[-1])
@@ -89,7 +87,7 @@ class Helpers:
 
     def assert_device_troubleshoot_connected(self, dut: DeviceAdapter):
         try:
-            output = dut.readlines_until(".*Troubleshoot client connected.*", timeout=300)
+            output = dut.readlines_until("Troubleshoot client connected", timeout=300)
         except (TwisterHarnessTimeoutException, AssertionError):
             raise AssertionError("🔴​​​ Device troubleshoot doesn't appear to be connected but it should")
         print("✅ Device troubleshoot connected")
