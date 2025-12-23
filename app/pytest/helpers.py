@@ -43,25 +43,25 @@ class Helpers:
         dut.clear_buffer()
 
     def get_device_mac_address(self, shell: Shell, dut: DeviceAdapter) -> str:
-        if shell.wait_for_prompt(timeout=60) == False:
-            raise AssertionError("🔴​​​ Prompt not available on the device")
-        try:
-            output = shell.exec_command(command="net iface", timeout=10)
-            print(f"output={output}")
-        except TwisterHarnessTimeoutException:
-            raise AssertionError("🔴​​​ Unable to retrieve 'inet iface' response")
-        raise AssertionError("🔴​​​ TEMP TODO REMOVE")
+        #if shell.wait_for_prompt(timeout=60) == False:
+        #    raise AssertionError("🔴​​​ Prompt not available on the device")
         #try:
-        #    output = dut.readlines_until("MAC address of the device '[0-9A-Za-z:]+'", timeout=60)
-        #except (TwisterHarnessTimeoutException, AssertionError):
-        #    raise AssertionError(f"🔴​​​ MAC address of the device not found")
-        #m = re.search(".*<inf>.*MAC address of the device '(.+?)'.*", output[-1])
-        #if m:
-        #    mac_address = m.group(1)
-        #else:
-        #    raise AssertionError("🔴​​​ MAC address of the device not found")
-        #print(f"✅ MAC address of the device is '{mac_address}'")
-        #return mac_address
+        #    output = shell.exec_command(command="net iface", timeout=10)
+        #    print(f"output={output}")
+        #except TwisterHarnessTimeoutException:
+        #    raise AssertionError("🔴​​​ Unable to retrieve 'inet iface' response")
+        #raise AssertionError("🔴​​​ TEMP TODO REMOVE")
+        try:
+            output = dut.readlines_until("MAC address of the device '[0-9A-Za-z:]+'", timeout=60)
+        except (TwisterHarnessTimeoutException, AssertionError):
+            raise AssertionError(f"🔴​​​ MAC address of the device not found")
+        m = re.search(".*<inf>.*MAC address of the device '(.+?)'.*", output[-1])
+        if m:
+            mac_address = m.group(1)
+        else:
+            raise AssertionError("🔴​​​ MAC address of the device not found")
+        print(f"✅ MAC address of the device is '{mac_address}'")
+        return mac_address
 
     def get_device_firmware_version(self, dut: DeviceAdapter) -> str:
         try:
