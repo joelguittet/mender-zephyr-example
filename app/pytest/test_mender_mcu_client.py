@@ -38,10 +38,8 @@ helpers = Helpers()
 @pytest.mark.order("first")
 @pytest.mark.dependency()
 def test_device_registration(shell: Shell, dut: DeviceAdapter):
-    """Restart to ensure the test can catch all relevant logs."""
-    helpers.reboot_device(shell, dut)
     """Get the MAC address of the device."""
-    mac_address = helpers.get_device_mac_address(dut)
+    mac_address = helpers.get_device_mac_address(shell, dut)
     """Ensure the device is not authorized to the mender server."""
     helpers.assert_device_not_authenticated(dut)
     device = mender_management.get_device_by_mac(mac_address)
