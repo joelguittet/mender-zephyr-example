@@ -52,7 +52,7 @@ class Helpers:
         #    raise AssertionError("🔴​​​ Unable to retrieve 'inet iface' response")
         #raise AssertionError("🔴​​​ TEMP TODO REMOVE")
         try:
-            output = dut.readlines_until("MAC address of the device '[0-9A-Za-z:]+'", timeout=60)
+            output = dut.readlines_until(regex="MAC address of the device '[0-9A-Za-z:]+'", timeout=60)
         except (TwisterHarnessTimeoutException, AssertionError):
             raise AssertionError(f"🔴​​​ MAC address of the device not found")
         m = re.search(".*<inf>.*MAC address of the device '(.+?)'.*", output[-1])
@@ -65,7 +65,7 @@ class Helpers:
 
     def get_device_firmware_version(self, dut: DeviceAdapter) -> str:
         try:
-            output = dut.readlines_until("Running project 'mender-zephyr-example' version '[0-9.+]+'", timeout=60)
+            output = dut.readlines_until(regex="Running project 'mender-zephyr-example' version '[0-9.+]+'", timeout=60)
         except (TwisterHarnessTimeoutException, AssertionError):
             raise AssertionError(f"🔴​​​ Firmware version of the device not found")
         m = re.search(".*<inf>.*Running project 'mender-zephyr-example' version '(.+?)'.*", output[-1])
@@ -78,7 +78,7 @@ class Helpers:
 
     def assert_device_not_authenticated(self, dut: DeviceAdapter):
         try:
-            output = dut.readlines_until(r".*<err>.*\[401\] Unauthorized.*|.*<inf>.*Mender client authenticated.*", timeout=300)
+            output = dut.readlines_until(regex=r".*<err>.*\[401\] Unauthorized.*|.*<inf>.*Mender client authenticated.*", timeout=300)
             match_no_lines(output[-1:], ["Mender client authenticated"])
         except (TwisterHarnessTimeoutException, AssertionError):
             raise AssertionError("🔴​​​ Device appear to be authenticated but it should not")
@@ -86,8 +86,8 @@ class Helpers:
 
     def assert_device_authenticated(self, dut: DeviceAdapter):
         try:
-            #output = dut.readlines_until(".*Mender client authenticated.*", timeout=300) # TODO check for unauthorized here ?
-            output = dut.readlines_until(r".*<err>.*\[401\] Unauthorized.*|.*<inf>.*Mender client authenticated.*", timeout=300)
+            #output = dut.readlines_until(regex=".*Mender client authenticated.*", timeout=300) # TODO check for unauthorized here ?
+            output = dut.readlines_until(regex=r".*<err>.*\[401\] Unauthorized.*|.*<inf>.*Mender client authenticated.*", timeout=300)
             match_no_lines(output[-1:], [r"\[401\] Unauthorized"])
         except (TwisterHarnessTimeoutException, AssertionError):
             raise AssertionError("🔴​​​ Device doesn't appear to be authenticated but it should")
@@ -95,7 +95,7 @@ class Helpers:
 
     def assert_device_troubleshoot_connected(self, dut: DeviceAdapter):
         try:
-            output = dut.readlines_until("Troubleshoot client connected", timeout=300)
+            output = dut.readlines_until(regex="Troubleshoot client connected", timeout=300)
         except (TwisterHarnessTimeoutException, AssertionError):
             raise AssertionError("🔴​​​ Device troubleshoot doesn't appear to be connected but it should")
         print("✅ Device troubleshoot connected")
