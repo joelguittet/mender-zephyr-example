@@ -275,9 +275,34 @@ network_connect_cb(void) {
 
     /* Check if connected to the network */
     if (false == net_if_is_up(iface)) {
+#define CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES 3 //TODO Kconfig
+        /* Waiting interface to connect to the network */
+        int      tries = 0;
+        uint32_t event = 0;
+        while (MENDER_CLIENT_EVENT_NETWORK_UP != (event & MENDER_CLIENT_EVENT_NETWORK_UP)) {
+
+            /* Wait until the network event */
+            event = k_event_wait(&mender_client_events,
+                                 MENDER_CLIENT_EVENT_NETWORK_UP | MENDER_CLIENT_EVENT_NETWORK_DOWN,
+                                 true,
+                                 K_SECONDS(CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_TIMEOUT));
+            if (MENDER_CLIENT_EVENT_NETWORK_UP != (event & MENDER_CLIENT_EVENT_NETWORK_UP)) {
+                tries++;
+                if (tries < CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES) {
+                    LOG_WRN("Not connected to the network (%d/%d), waiting for interface to connect", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
+                } else {
+                    LOG_ERR("Not connected to the network (%d/%d)", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
+                    return MENDER_FAIL;
+                }
+            }
+        }
+    }
+
+    /* Check if connected to the network */
+    /*if (false == net_if_is_up(iface)) {
         LOG_ERR("Not connected to the network");
         return MENDER_FAIL;
-    }
+    }*/
 
 #endif /* CONFIG_WIFI */
 
