@@ -42,7 +42,7 @@ class Helpers:
         # Clear device buffer to remove all lines from the previous boot
         dut.clear_buffer()
 
-    def get_device_mac_address(self, shell: Shell, dut: DeviceAdapter) -> str:
+    def get_device_mac_address(dut: DeviceAdapter) -> str:
         #if shell.wait_for_prompt(timeout=60) == False:
         #    raise AssertionError("🔴​​​ Prompt not available on the device")
         #try:
