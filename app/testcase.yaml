@@ -34,12 +34,12 @@ tests:
     extra_args: EXTRA_CONF_FILE="${WEST_TOPDIR}/local.conf;mcumgr.conf"
     platform_allow:
       - esp32_devkitc/esp32/procpu
-      #- frdm_mcxn947/mcxn947/cpu0
-      #- nrf7002dk/nrf5340/cpuapp
+      - frdm_mcxn947/mcxn947/cpu0
+      - nrf7002dk/nrf5340/cpuapp
       - nucleo_l4a6zg
-  #mender.mcu.client.troubleshoot:
-  #  extra_args: EXTRA_CONF_FILE="${WEST_TOPDIR}/local.conf;mcumgr.conf;troubleshoot.conf"
-  #  platform_allow:
-  #    - frdm_mcxn947/mcxn947/cpu0
-  #    - nrf7002dk/nrf5340/cpuapp
-  #    - nucleo_l4a6zg
+  mender.mcu.client.troubleshoot:
+    extra_args: EXTRA_CONF_FILE="${WEST_TOPDIR}/local.conf;mcumgr.conf;troubleshoot.conf"
+    platform_allow:
+      - frdm_mcxn947/mcxn947/cpu0
+      - nrf7002dk/nrf5340/cpuapp
+      - nucleo_l4a6zg

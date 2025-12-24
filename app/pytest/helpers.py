@@ -21,7 +21,7 @@ import subprocess
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from twister_harness import DeviceAdapter, Shell
+from twister_harness import DeviceAdapter
 from twister_harness.exceptions import TwisterHarnessTimeoutException
 from twister_harness.helpers.utils import match_no_lines
 
@@ -31,30 +31,7 @@ class Helpers:
     Provides helper methods for device management.
     """
 
-    def reboot_device(self, shell: Shell, dut: DeviceAdapter, timeout=60, interval=3):
-        start_time = time.time()
-        if shell.wait_for_prompt(timeout=timeout) == False:
-            raise AssertionError("🔴​​​ Prompt not available on the device")
-        while time.time() - start_time < timeout:
-            try:
-                # Execute "kernel reboot' command
-                shell.exec_command(command="kernel reboot", timeout=0)
-                # Clear device buffer to remove all lines from the previous boot
-                dut.clear_buffer()
-            except (TwisterHarnessTimeoutException, AssertionError):
-                pass
-            time.sleep(interval)
-        raise AssertionError("🔴​​​ Unable to reboot the device")
-
     def get_device_mac_address(self, dut: DeviceAdapter) -> str:
-        #if shell.wait_for_prompt(timeout=60) == False:
-        #    raise AssertionError("🔴​​​ Prompt not available on the device")
-        #try:
-        #    output = shell.exec_command(command="net iface", timeout=10)
-        #    print(f"output={output}")
-        #except TwisterHarnessTimeoutException:
-        #    raise AssertionError("🔴​​​ Unable to retrieve 'inet iface' response")
-        #raise AssertionError("🔴​​​ TEMP TODO REMOVE")
         try:
             output = dut.readlines_until(regex="MAC address of the device '[0-9A-Za-z:]+'", timeout=60)
         except (TwisterHarnessTimeoutException, AssertionError):
