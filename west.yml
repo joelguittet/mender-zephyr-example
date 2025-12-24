@@ -27,11 +27,12 @@ manifest:
 
   projects:
     - name: zephyr
-      remote: zephyrproject-rtos
+      # remote: zephyrproject-rtos
+      remote: joelguittet
       # Use latest commit on v4.3-branch to solve mcumgr image management issue
       # https://github.com/zephyrproject-rtos/zephyr/issues/99762
-      #revision: fd6cfbd96bd3eefe5cc055ba523c7fa07a22c9af
-      revision: main
+      # revision: fd6cfbd96bd3eefe5cc055ba523c7fa07a22c9af
+      revision: fix/shell-fixture-do-not-wait
       import:
         # By using name-allowlist we can clone only the modules that are
         # strictly needed by the application
