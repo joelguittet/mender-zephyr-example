@@ -189,7 +189,6 @@ jobs:
       # --enable-slow: execute test with "slow: true" in the testcase.yml file
       # --inline-logs: print logs to stdout
       # --device-testing: test on devices
-      # --flash-before: flash before opening console, useful for boards sharing the same serial port for flashing and console
       # --hardware-map: Hardware map file, specific to the testbench machine
       # The following environment variables are defined:
       # - MENDER_SERVER: mender-server URL "https://docker.mender.io"
@@ -200,7 +199,7 @@ jobs:
         working-directory: mender-zephyr-example
         id: execute-tests
         run: |
-          west twister -T app -v --allow-installed-plugin --enable-slow --inline-logs --device-testing --flash-before --hardware-map /__w/mender-zephyr-example/mender-zephyr-example/map.yml
+          west twister -T app -v --allow-installed-plugin --enable-slow --inline-logs --device-testing --hardware-map /__w/mender-zephyr-example/mender-zephyr-example/map.yml
         env:
           MENDER_SERVER: "https://docker.mender.io"
           MENDER_USERNAME: "admin@docker.mender.io"
