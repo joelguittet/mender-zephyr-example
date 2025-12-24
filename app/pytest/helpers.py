@@ -31,16 +31,20 @@ class Helpers:
     Provides helper methods for device management.
     """
 
-    def reboot_device(self, shell: Shell, dut: DeviceAdapter):
-        if shell.wait_for_prompt(timeout=60) == False:
+    def reboot_device(self, shell: Shell, dut: DeviceAdapter, timeout=60, interval=3):
+        start_time = time.time()
+        if shell.wait_for_prompt(timeout=timeout) == False:
             raise AssertionError("🔴​​​ Prompt not available on the device")
-        try:
-            shell.exec_command(command="kernel reboot", timeout=0)
-        except TwisterHarnessTimeoutException:
-            # This exception will occur for the above 'kernel reboot' shell command
-            pass
-        # Clear device buffer to remove all lines from the previous boot
-        dut.clear_buffer()
+        while time.time() - start_time < timeout:
+            try:
+                # Execute "kernel reboot' command
+                shell.exec_command(command="kernel reboot", timeout=0)
+                # Clear device buffer to remove all lines from the previous boot
+                dut.clear_buffer()
+            except (TwisterHarnessTimeoutException, AssertionError):
+                pass
+            time.sleep(interval)
+        raise AssertionError("🔴​​​ Unable to reboot the device")
 
     def get_device_mac_address(self, dut: DeviceAdapter) -> str:
         #if shell.wait_for_prompt(timeout=60) == False:
