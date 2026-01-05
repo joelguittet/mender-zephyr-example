@@ -243,7 +243,9 @@ network_connect_cb(void) {
     //if (false == net_if_is_up(iface)) {
     LOG_INF("TODO CLEAN, net if up = %d, network_connected = %d", net_if_is_up(iface), network_connected);
     //TODO can be removed ? if in wifi and trying to connect while alreayd connected, what append ? which event can be monitored to say "donnected / allready connected" ?
-    if (false == network_connected) {
+    struct wifi_iface_status status = {0};
+    net_mgmt(NET_REQUEST_WIFI_IFACE_STATUS, wifi_ctx.iface, &status, sizeof(struct wifi_iface_status));
+    if (WIFI_STATE_COMPLETED != status.state) {
 
 #ifdef CONFIG_WIFI
 
@@ -285,6 +287,10 @@ network_connect_cb(void) {
                 tries++;
                 if (tries < CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES) {
                     LOG_WRN("Not connected to the network (%d/%d), waiting for interface to connect", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
+#ifdef CONFIG_WIFI
+                    /* Request connection to the network */
+                    net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params));
+#endif /* CONFIG_WIFI */
                 } else {
                     LOG_ERR("Not connected to the network (%d/%d)", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
                     return MENDER_FAIL;
