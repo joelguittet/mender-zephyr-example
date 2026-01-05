@@ -239,14 +239,19 @@ network_connect_cb(void) {
 
 #define CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES 3 //TODO Kconfig
 
+    #ifdef CONFIG_WIFI
+    
     /* Check if connected to the network */
     //if (false == net_if_is_up(iface)) {
     LOG_INF("TODO CLEAN, net if up = %d, network_connected = %d", net_if_is_up(iface), network_connected);
     //TODO can be removed ? if in wifi and trying to connect while alreayd connected, what append ? which event can be monitored to say "donnected / allready connected" ?
     struct wifi_iface_status status = {0};
-    net_mgmt(NET_REQUEST_WIFI_IFACE_STATUS, wifi_ctx.iface, &status, sizeof(struct wifi_iface_status));
+    net_mgmt(NET_REQUEST_WIFI_IFACE_STATUS, iface, &status, sizeof(struct wifi_iface_status));
     if (WIFI_STATE_COMPLETED != status.state) {
-
+#else
+        if (false == network_connected) {
+#endif
+        
 #ifdef CONFIG_WIFI
 
         /* Set connection request parameters */
