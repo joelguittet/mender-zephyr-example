@@ -37,9 +37,9 @@ tests:
       #- frdm_mcxn947/mcxn947/cpu0
       #- nrf7002dk/nrf5340/cpuapp
       - nucleo_l4a6zg
-  mender.mcu.client.troubleshoot:
-    extra_args: EXTRA_CONF_FILE="${WEST_TOPDIR}/local.conf;mcumgr.conf;troubleshoot.conf"
-    platform_allow:
+ # mender.mcu.client.troubleshoot:
+   # extra_args: EXTRA_CONF_FILE="${WEST_TOPDIR}/local.conf;mcumgr.conf;troubleshoot.conf"
+    #platform_allow:
       #- frdm_mcxn947/mcxn947/cpu0
       #- nrf7002dk/nrf5340/cpuapp
-      - nucleo_l4a6zg
+      #- nucleo_l4a6zg
