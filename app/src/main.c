@@ -130,6 +130,11 @@ static struct net_mgmt_event_callback mgmt_cb;
 #endif*/ /* CONFIG_WIFI */
 #define NET_EVENT_MASK NET_EVENT_IPV4_ADDR_ADD | NET_EVENT_IPV4_ADDR_DEL
 
+/**
+ * @brief Network connected status
+ */
+static bool network_connected = false;
+
 #ifdef CONFIG_LLEXT
 
 /**
@@ -185,25 +190,30 @@ net_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event, struc
             /* Print interface information */
             net_if_ipv4_addr_foreach(iface, print_dhcpv4_addr, NULL);
             /* Indicate the network is available */
+            network_connected = true;
             k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_NETWORK_UP);
             break;
         case NET_EVENT_IPV4_ADDR_DEL:
             /* Disconnected from network */
             LOG_INF("Disconnected from the network");
             /* Indicate the network is not available */
+            network_connected = false;
             k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_NETWORK_DOWN);
             break;
+//TODO CLEAN THIS
 #ifdef CONFIG_WIFI
         case NET_EVENT_WIFI_CONNECT_RESULT:
             /* Connected to Wi-Fi network */
             LOG_INF("Connected to Wi-Fi '%s'", CONFIG_EXAMPLE_WIFI_SSID);
             /* Indicate the network is available */
+            network_connected = true;
             k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_NETWORK_UP);
             break;
         case NET_EVENT_WIFI_DISCONNECT_RESULT:
             /* Disconnected from Wi-Fi network */
             LOG_INF("Disconnected from Wi-Fi '%s'", CONFIG_EXAMPLE_WIFI_SSID);
             /* Indicate the network is not available */
+            network_connected = false;
             k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_NETWORK_DOWN);
             break;
 #endif /* CONFIG_WIFI */
@@ -230,7 +240,10 @@ network_connect_cb(void) {
 #define CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES 3 //TODO Kconfig
 
     /* Check if connected to the network */
-    if (false == net_if_is_up(iface)) {
+    //if (false == net_if_is_up(iface)) {
+    LOG_INF("TODO CLEAN, net if up = %d, network_connected = %d", net_if_is_up(iface), network_connected);
+    //TODO can be removed ? if in wifi and trying to connect while alreayd connected, what append ? which event can be monitored to say "donnected / allready connected" ?
+    if (false == network_connected) {
 
 #ifdef CONFIG_WIFI
 
