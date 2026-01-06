@@ -290,6 +290,7 @@ network_connect_cb(void) {
 #else
         params.security = WIFI_SECURITY_TYPE_NONE;
 #endif
+        params.timeout = 1000 * CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_TIMEOUT;
 
         /* Request connection to the network */
         net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params));
