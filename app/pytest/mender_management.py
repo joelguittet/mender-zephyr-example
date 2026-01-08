@@ -222,7 +222,7 @@ class MenderManagement:
                     return item
         return None
 
-wait_for_deployment    def wait_for_deployment(self, name=None, deployment=None, timeout=1200, interval=30):
+    def wait_for_deployment(self, name=None, deployment=None, timeout=1200, interval=30):
         """Wait until deployment completes or fails."""
         start_time = time.time()
         while time.time() - start_time < timeout:
