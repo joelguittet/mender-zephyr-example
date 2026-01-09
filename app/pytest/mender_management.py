@@ -224,6 +224,7 @@ class MenderManagement:
 
     def wait_for_deployment(self, name=None, deployment=None, timeout=1200, interval=30):
         """Wait until deployment completes or fails."""
+        deployment_status = None
         start_time = time.time()
         while time.time() - start_time < timeout:
             deployment_status = self.get_deployment_status(name, deployment)
@@ -231,4 +232,4 @@ class MenderManagement:
             if deployment_status is not None and deployment_status.get("status") in ("finished", "success", "failure", "aborted"):
                 return deployment_status
             time.sleep(interval)
-        return None
+        return deployment_status
