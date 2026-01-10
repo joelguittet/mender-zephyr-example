@@ -32,7 +32,7 @@ manifest:
       # Use latest commit on v4.3-branch to solve mcumgr image management issue
       # https://github.com/zephyrproject-rtos/zephyr/issues/99762
       # revision: fd6cfbd96bd3eefe5cc055ba523c7fa07a22c9af
-      revision: fix/temp-tests-shell
+      revision: fix/shell-fixture-do-not-wait
       import:
         # By using name-allowlist we can clone only the modules that are
         # strictly needed by the application
@@ -49,8 +49,9 @@ manifest:
           - nrf_hw_models # required for nrf7002-dk board
           - nrf_wifi # required for nrf7002-dk board
           - picolibc
+          - trusted-firmware-m # required for frdm-mcxn947 board
           - zcbor # required in case mcumgr is enabled
     - name: mender-mcu-client
       remote: joelguittet
-      revision: b925e0a9ca7a68838b30eb5b4b3a48367c94fc0a
+      revision: b37e5487d5fb52affd92a69e28355299e095e035
       path: modules/lib/mender-mcu-client
