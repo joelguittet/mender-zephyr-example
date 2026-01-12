@@ -79,7 +79,7 @@ jobs:
   device-testing:
     name: Test execution
     runs-on: self-hosted
-    timeout-minutes: 60
+    timeout-minutes: 120
     needs: setup
     # Twister is executed inside zephyrproject-rtos/ci container
     # The container is executed with privileged option to have full access to the host
