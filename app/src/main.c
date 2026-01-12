@@ -401,6 +401,7 @@ int network_connect(struct net_if *iface) {
                     net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params));
                 } else {
                     LOG_ERR("Not connected to the network (%d/%d)", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
+                    net_mgmt(NET_REQUEST_WIFI_DISCONNECT, iface, NULL, 0);
                     return -ENODEV;
                 }
             }
@@ -425,6 +426,7 @@ int network_connect(struct net_if *iface) {
                     LOG_WRN("Not connected to the network (%d/%d), waiting for interface to connect", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
                 } else {
                     LOG_ERR("Not connected to the network (%d/%d)", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
+                    net_if_down(iface);
                     return -ENODEV;
                 }
             }
