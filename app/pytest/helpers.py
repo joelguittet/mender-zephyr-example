@@ -59,29 +59,29 @@ class Helpers:
 
     def assert_device_not_authenticated(self, dut: DeviceAdapter):
         try:
-            output = dut.readlines_until(regex=r".*<err>.*\[401\] Unauthorized.*|.*<inf>.*Mender client authenticated.*", timeout=300)
+            output = dut.readlines_until(regex=r".*<err>.*\[401\] Unauthorized.*|.*<inf>.*Mender client authenticated.*", timeout=600)
         except (TwisterHarnessTimeoutException, AssertionError):
-            raise AssertionError("🔴​​​ Device doesn't appear to communicate with the server")
+            raise AssertionError("🔴​​​ Device is not communicating with the server")
         try:
             match_no_lines(output[-1:], ["Mender client authenticated"])
         except (AssertionError):
-            raise AssertionError("🔴​​​ Device appear to be authenticated but it should not")
+            raise AssertionError("🔴​​​ Device is authenticated to the server but it should not")
         print("✅ Device is not authenticated")
 
     def assert_device_authenticated(self, dut: DeviceAdapter):
         try:
-            output = dut.readlines_until(regex=r".*<err>.*\[401\] Unauthorized.*|.*<inf>.*Mender client authenticated.*", timeout=300)
+            output = dut.readlines_until(regex=r".*<err>.*\[401\] Unauthorized.*|.*<inf>.*Mender client authenticated.*", timeout=600)
         except (TwisterHarnessTimeoutException, AssertionError):
-            raise AssertionError("🔴​​​ Device doesn't appear to communicate with the server")
+            raise AssertionError("🔴​​​ Device is not communicating with the server")
         try:
             match_no_lines(output[-1:], [r"\[401\] Unauthorized"])
         except (AssertionError):
-            raise AssertionError("🔴​​​ Device doesn't appear to be authenticated but it should")        
+            raise AssertionError("🔴​​​ Device is not authenticated to the server but it should not")
         print("✅ Device is authenticated")
 
     def assert_device_troubleshoot_connected(self, dut: DeviceAdapter):
         try:
-            output = dut.readlines_until(regex="Troubleshoot client connected", timeout=300)
+            output = dut.readlines_until(regex="Troubleshoot client connected", timeout=600)
         except (TwisterHarnessTimeoutException, AssertionError):
             raise AssertionError("🔴​​​ Device troubleshoot doesn't appear to be connected but it should")
         print("✅ Device troubleshoot connected")

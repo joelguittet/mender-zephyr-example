@@ -141,8 +141,8 @@ static struct net_mgmt_event_callback mgmt_cb;
  * @brief Network events
  */
 static K_EVENT_DEFINE(network_events);
-#define NETWORK_EVENT_CONNECTED      (1 << 0)
-#define NETWORK_EVENT_DISCONNECTED    (1 << 1)
+#define NETWORK_EVENT_CONNECTED    (1 << 0)
+#define NETWORK_EVENT_DISCONNECTED (1 << 1)
 
 #ifdef CONFIG_LLEXT
 
@@ -246,7 +246,10 @@ network_connect_cb(void) {
     /* In this example, example_connect and example_disconnect configures Wi-Fi or Ethernet, as selected in menuconfig */
     /* Read "Establishing Wi-Fi or Ethernet Connection" section in examples/protocols/README.md for more information */
     k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_CONNECT);
-    uint32_t events = k_event_wait(&mender_client_events, MENDER_CLIENT_EVENT_CONNECTED | MENDER_CLIENT_EVENT_DISCONNECTED, false, K_SECONDS(2 * CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES * CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_TIMEOUT));
+    uint32_t events = k_event_wait(&mender_client_events,
+                                   MENDER_CLIENT_EVENT_CONNECTED | MENDER_CLIENT_EVENT_DISCONNECTED,
+                                   false,
+                                   K_SECONDS(2 * CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES * CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_TIMEOUT));
     k_event_clear(&mender_client_events, events);
     if (MENDER_CLIENT_EVENT_CONNECTED != (events & MENDER_CLIENT_EVENT_CONNECTED)) {
         return MENDER_FAIL;
@@ -257,7 +260,7 @@ network_connect_cb(void) {
     struct net_if *iface = net_if_get_default();
     assert(NULL != iface);
 
-    #ifdef CONFIG_WIFI
+#ifdef CONFIG_WIFI
     
     /* Check if connected to the network */
     //if (false == net_if_is_up(iface)) {
@@ -269,7 +272,7 @@ network_connect_cb(void) {
 #else
         if (false == network_connected) {
 #endif
-        
+
 #ifdef CONFIG_WIFI
 
         /* Set connection request parameters */
@@ -356,95 +359,97 @@ network_release_cb(void) {
     return MENDER_OK;
 }
 
-int network_connect(struct net_if *iface) {
+int
+network_connect(struct net_if *iface) {
 
     k_event_clear(&network_events, NETWORK_EVENT_CONNECTED | NETWORK_EVENT_DISCONNECTED);
 
 #ifdef CONFIG_WIFI
 
-        /* Set connection request parameters */
-        struct wifi_connect_req_params params = { 0 };
-        params.band                           = WIFI_FREQ_BAND_UNKNOWN;
-        params.channel                        = WIFI_CHANNEL_ANY;
-        params.mfp                            = WIFI_MFP_OPTIONAL;
-        params.ssid                           = CONFIG_EXAMPLE_WIFI_SSID;
-        params.ssid_length                    = sizeof(CONFIG_EXAMPLE_WIFI_SSID) - 1;
+    /* Set connection request parameters */
+    struct wifi_connect_req_params params = { 0 };
+    params.band                           = WIFI_FREQ_BAND_UNKNOWN;
+    params.channel                        = WIFI_CHANNEL_ANY;
+    params.mfp                            = WIFI_MFP_OPTIONAL;
+    params.ssid                           = CONFIG_EXAMPLE_WIFI_SSID;
+    params.ssid_length                    = sizeof(CONFIG_EXAMPLE_WIFI_SSID) - 1;
 #if defined(CONFIG_EXAMPLE_WIFI_AUTHENTICATION_MODE_WPA2_PSK)
-        params.security   = WIFI_SECURITY_TYPE_PSK;
-        params.psk        = CONFIG_EXAMPLE_WIFI_PSK;
-        params.psk_length = sizeof(CONFIG_EXAMPLE_WIFI_PSK) - 1;
+    params.security   = WIFI_SECURITY_TYPE_PSK;
+    params.psk        = CONFIG_EXAMPLE_WIFI_PSK;
+    params.psk_length = sizeof(CONFIG_EXAMPLE_WIFI_PSK) - 1;
 #elif defined(CONFIG_EXAMPLE_WIFI_AUTHENTICATION_MODE_WPA3_SAE)
-        params.security            = WIFI_SECURITY_TYPE_SAE;
-        params.sae_password        = CONFIG_EXAMPLE_WIFI_PSK;
-        params.sae_password_length = sizeof(CONFIG_EXAMPLE_WIFI_PSK) - 1;
+    params.security            = WIFI_SECURITY_TYPE_SAE;
+    params.sae_password        = CONFIG_EXAMPLE_WIFI_PSK;
+    params.sae_password_length = sizeof(CONFIG_EXAMPLE_WIFI_PSK) - 1;
 #else
-        params.security = WIFI_SECURITY_TYPE_NONE;
+    params.security = WIFI_SECURITY_TYPE_NONE;
 #endif
 
-        /* Request connection to the network */
-        net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params));
+    /* Request connection to the network */
+    net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params));
 
-        /* Waiting interface to connect to the network */
-        int      tries = 0;
-        uint32_t events = 0;
-        while (NETWORK_EVENT_CONNECTED != (events & NETWORK_EVENT_CONNECTED)) {
+    /* Waiting interface to connect to the network */
+    int      tries  = 0;
+    uint32_t events = 0;
+    while (NETWORK_EVENT_CONNECTED != (events & NETWORK_EVENT_CONNECTED)) {
 
-            /* Wait until the network event */
-            events = k_event_wait(&network_events,
-                                 NETWORK_EVENT_CONNECTED | NETWORK_EVENT_DISCONNECTED, false, K_SECONDS(CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_TIMEOUT));
-            k_event_clear(&network_events, events);
-            if (NETWORK_EVENT_CONNECTED != (events & NETWORK_EVENT_CONNECTED)) {
-                tries++;
-                if (tries < CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES) {
-                    LOG_WRN("Not connected to the network (%d/%d), waiting for interface to connect", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
-                    /* Request connection to the network */
-                    net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params));
-                } else {
-                    LOG_ERR("Not connected to the network (%d/%d)", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
-                    net_mgmt(NET_REQUEST_WIFI_DISCONNECT, iface, NULL, 0);
-                    return -ENODEV;
-                }
+        /* Wait until the network event */
+        events = k_event_wait(
+            &network_events, NETWORK_EVENT_CONNECTED | NETWORK_EVENT_DISCONNECTED, false, K_SECONDS(CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_TIMEOUT));
+        k_event_clear(&network_events, events);
+        if (NETWORK_EVENT_CONNECTED != (events & NETWORK_EVENT_CONNECTED)) {
+            tries++;
+            if (tries < CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES) {
+                LOG_WRN("Not connected to the network (%d/%d), waiting for interface to connect", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
+                /* Request connection to the network */
+                net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params));
+            } else {
+                LOG_ERR("Not connected to the network (%d/%d)", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
+                net_mgmt(NET_REQUEST_WIFI_DISCONNECT, iface, NULL, 0);
+                return -ENODEV;
             }
         }
-    
+    }
 
 #else
 
     net_if_up(iface);
 
     /* Waiting interface to connect to the network */
-        int      tries = 0;
-        uint32_t events = 0;
-        while (NETWORK_EVENT_CONNECTED != (events & NETWORK_EVENT_CONNECTED)) {
+    int      tries  = 0;
+    uint32_t events = 0;
+    while (NETWORK_EVENT_CONNECTED != (events & NETWORK_EVENT_CONNECTED)) {
 
-            /* Wait until the network event */
-            events = k_event_wait(&network_events, NETWORK_EVENT_CONNECTED | NETWORK_EVENT_DISCONNECTED, false, K_SECONDS(CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_TIMEOUT));
-            k_event_clear(&network_events, events);
-            if (NETWORK_EVENT_CONNECTED != (events & NETWORK_EVENT_CONNECTED)) {
-                tries++;
-                if (tries < CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES) {
-                    LOG_WRN("Not connected to the network (%d/%d), waiting for interface to connect", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
-                } else {
-                    LOG_ERR("Not connected to the network (%d/%d)", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
-                    net_if_down(iface);
-                    return -ENODEV;
-                }
+        /* Wait until the network event */
+        events = k_event_wait(
+            &network_events, NETWORK_EVENT_CONNECTED | NETWORK_EVENT_DISCONNECTED, false, K_SECONDS(CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_TIMEOUT));
+        k_event_clear(&network_events, events);
+        if (NETWORK_EVENT_CONNECTED != (events & NETWORK_EVENT_CONNECTED)) {
+            tries++;
+            if (tries < CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES) {
+                LOG_WRN("Not connected to the network (%d/%d), waiting for interface to connect", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
+            } else {
+                LOG_ERR("Not connected to the network (%d/%d)", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
+                net_if_down(iface);
+                return -ENODEV;
             }
         }
+    }
 
 #endif /* CONFIG_WIFI */
 
     return 0;
 }
 
-int network_disconnect(struct net_if *iface) {
+int
+network_disconnect(struct net_if *iface) {
 
 #ifdef CONFIG_WIFI
 
     /* Request disconnection of the network */
     net_mgmt(NET_REQUEST_WIFI_DISCONNECT, iface, NULL, 0);
 
-    #else
+#else
 
     net_if_down(iface);
 
@@ -976,7 +981,8 @@ main(void) {
     /* Wait for mender-mcu-client events, connect and disconnect network on request, restart the application if required */
     bool connected = false;
     while (1) {
-        uint32_t events = k_event_wait(&mender_client_events, MENDER_CLIENT_EVENT_CONNECT | MENDER_CLIENT_EVENT_DISCONNECT | MENDER_CLIENT_EVENT_RESTART, false, K_FOREVER);
+        uint32_t events
+            = k_event_wait(&mender_client_events, MENDER_CLIENT_EVENT_CONNECT | MENDER_CLIENT_EVENT_DISCONNECT | MENDER_CLIENT_EVENT_RESTART, false, K_FOREVER);
         k_event_clear(&mender_client_events, events);
         if (MENDER_CLIENT_EVENT_CONNECT == (events & MENDER_CLIENT_EVENT_CONNECT)) {
             /* Connect to the network */
