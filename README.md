@@ -1,20 +1,52 @@
 # mender-zephyr-example
 
-[![Code Format Badge](https://github.com/joelguittet/mender-zephyr-example/workflows/check-code-format/badge.svg)](https://github.com/joelguittet/mender-zephyr-example/actions)
-[![Device testing Badge](https://github.com/joelguittet/mender-zephyr-example/workflows/device-testing/badge.svg)](https://github.com/joelguittet/mender-zephyr-example/actions)
+[![Workflow check-code-format Badge](https://github.com/joelguittet/mender-zephyr-example/workflows/check-code-format/badge.svg)](https://github.com/joelguittet/mender-zephyr-example/actions)
+[![Workflow device-testing Badge](https://github.com/joelguittet/mender-zephyr-example/workflows/device-testing/badge.svg)](https://github.com/joelguittet/mender-zephyr-example/actions)
 [![Issues Badge](https://img.shields.io/github/issues/joelguittet/mender-zephyr-example)](https://github.com/joelguittet/mender-zephyr-example/issues)
 [![License Badge](https://img.shields.io/github/license/joelguittet/mender-zephyr-example)](https://github.com/joelguittet/mender-zephyr-example/blob/master/LICENSE)
 
-[Mender MCU client](https://github.com/joelguittet/mender-mcu-client) is an open source over-the-air (OTA) library updater for MCU devices. This demonstration project runs on STM32L4 hardware using Zephyr RTOS.
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=joelguittet_mender-zephyr-example&metric=bugs)](https://sonarcloud.io/dashboard?id=joelguittet_mender-zephyr-example)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=joelguittet_mender-zephyr-example&metric=code_smells)](https://sonarcloud.io/dashboard?id=joelguittet_mender-zephyr-example)
+[![Duplicated Lines (%)](https://sonarcloud.io/api/project_badges/measure?project=joelguittet_mender-zephyr-example&metric=duplicated_lines_density)](https://sonarcloud.io/dashboard?id=joelguittet_mender-zephyr-example)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=joelguittet_mender-zephyr-example&metric=ncloc)](https://sonarcloud.io/dashboard?id=joelguittet_mender-zephyr-example)
+[![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=joelguittet_mender-zephyr-example&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=joelguittet_mender-zephyr-example)
+
+[![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=joelguittet_mender-zephyr-example&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=joelguittet_mender-zephyr-example)
+[![Reliability Rating](https://sonarcloud.io/api/project_badges/measure?project=joelguittet_mender-zephyr-example&metric=reliability_rating)](https://sonarcloud.io/dashboard?id=joelguittet_mender-zephyr-example)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=joelguittet_mender-zephyr-example&metric=security_rating)](https://sonarcloud.io/dashboard?id=joelguittet_mender-zephyr-example)
+
+[Mender MCU client](https://github.com/joelguittet/mender-mcu-client) is an open source over-the-air (OTA) library updater for MCU devices. This demonstration project runs on several hardware platforms using Zephyr RTOS.
 
 
 ## Getting started
 
-This project is used with a [NUCLEO-L4A6ZG](https://www.st.com/en/evaluation-tools/nucleo-l4a6zg.html) evaluation board and an Ethernet [W5500](https://www.wiznet.io/product-item/w5500) module available low cost at several places. The device tree overlay `app/boards/nucleo_l4a6zg.overlay` specifies the wiring of the module, as illustrated on the following image, and it is possible to adapt it to your own hardware.
+This project is used with one of the following setup.
+
+* [Espressif ESP32-DevKitC](https://www.espressif.com/en/products/devkits/esp32-devkitc/overview) development board
+
+This board is well known and has a very low cost, providing a perfect choice to start developing applications using the embedded Wi-Fi interface.
+
+![ESP32-DevKitC](https://raw.githubusercontent.com/joelguittet/mender-zephyr-example/master/.github/docs/esp32-devkitc.png)
+
+* [NXP FRDM-MCXN947](https://www.nxp.com/design/design-center/development-boards-and-designs/FRDM-MCXN947) development board
+
+This board has Dual Arm Cortex-M33 cores and NPU and it targets AI and Machine Learning applications.
+
+![FRDM-MCXN947](https://raw.githubusercontent.com/joelguittet/mender-zephyr-example/master/.github/docs/frdm-mcxn947.png)
+
+* [Nordic Semiconductor nRF7002-DK](https://www.nordicsemi.com/Products/Development-hardware/nRF7002-DK) development kit
+
+This board is the development kit for nRF7002 Wi-Fi 6 companion IC. It is based on nRF5340 MCU. While support using the Nordic Connect SDK environement is also provided throw the [mender-ncs-example](https://github.com/joelguittet/mender-ncs-example) repository, it is also possible to build a vanilla Zephyr application.
+
+![nRF7002-DK](https://raw.githubusercontent.com/joelguittet/mender-zephyr-example/master/.github/docs/nrf7002-dk.png)
+
+* [STMicroelectronics NUCLEO-L4A6ZG](https://www.st.com/en/evaluation-tools/nucleo-l4a6zg.html) development board
+
+Together with a network IC such as the [W5500](https://wiznet.io/products/ethernet-chips/w5500). The device tree overlay `app/boards/nucleo_l4a6zg.overlay` specifies the wiring of the module W5500 used in the project, as illustrated on the following image, and it is possible to adapt it to your own hardware.
 
 ![NUCLEO-L4A6ZG and W5500 wiring](https://raw.githubusercontent.com/joelguittet/mender-zephyr-example/master/.github/docs/nucleo-l4a6zg.png)
 
-The project is built using Zephyr RTOS v3.7.x (v3.7-branch) and Zephyr SDK >= v0.16.0. It depends on [cJSON](https://github.com/DaveGamble/cJSON). There is no other dependencies.
+The project is built using Zephyr RTOS v4.4.x (v4.4-branch) and Zephyr SDK >= v0.17.4. [TODO: UPDATE version if required]
 
 To start using Mender, we recommend that you begin with the Getting started section in [the Mender documentation](https://docs.mender.io).
 
@@ -22,22 +54,19 @@ To start using Zephyr, we recommend that you begin with the Getting started sect
 
 ### Open the project
 
-Open a new Zephyr virtual environment terminal usingthe following command.
+Initiate a new workspace using the following commands. This will download the dependencies of the example application.
+
+The projects depends on [cJSON](https://github.com/DaveGamble/cJSON) and [msgpack-c](https://github.com/msgpack/msgpack-c) (if troubleshoot add-on support is integrated, see below).
 
 ```
-source ~/zephyrproject/.venv/bin/activate
-```
-
-Then initialize a new workspace using the following commands. This will download the dependencies of the example application.
-
-```
-west init -m https://github.com/joelguittet/mender-zephyr-example --mr master workspace-zephyr
+mkdir workspace-zephyr
 cd workspace-zephyr
+git clone https://github.com/joelguittet/mender-zephyr-example
+cd mender-zephyr-example
+git submodule update --init --recursive
+west init -l .
 west update
 ```
-
-TODO:
-Clone the project and retrieve submodules using `git submodule update --init --recursive`.
 
 ### Configuration of the application
 
@@ -45,6 +74,7 @@ The example application should first be configured in `app/prj.conf` to set at l
 - `CONFIG_MENDER_SERVER_TENANT_TOKEN` to set the Tenant Token of your account on "https://hosted.mender.io" server.
 
 You may want to customize few interesting settings:
+- `CONFIG_EXAMPLE_WIFI_SSID` and `CONFIG_EXAMPLE_WIFI_PSK` for boards supporting Wi-Fi.
 - `CONFIG_MENDER_SERVER_HOST` if using your own Mender server instance. Tenant Token is not required in this case.
 - `CONFIG_MENDER_CLIENT_AUTHENTICATION_POLL_INTERVAL` is the interval to retry authentication on the mender server.
 - `CONFIG_MENDER_CLIENT_UPDATE_POLL_INTERVAL` is the interval to check for new deployments.
@@ -53,72 +83,67 @@ You may want to customize few interesting settings:
 
 Other settings are available in the Kconfig. You can also refer to the mender-mcu-client API and configuration keys.
 
-Particularly, it is possible to activate the Device Troubleshoot add-on that will permit to display the Zephyr console of the device directly on the Mender interface as shown on the following screenshot. File Transfer feature can be activated too. A littlefs partition is used to upload/download files to/from the Mender server.
-
-![Troubleshoot console](https://raw.githubusercontent.com/joelguittet/mender-zephyr-example/master/.github/docs/troubleshoot.png)
-
-In order to get the Device Troubleshoot add-on working, a configuration file `` has been written to set the expected settings. following configuration keys must be defined in the `prj.conf` file:
-
-```
-CONFIG_HEAP_MEM_POOL_SIZE=1500
-CONFIG_ZVFS_OPEN_MAX=16
-CONFIG_SHELL_BACKEND_SERIAL=n
-CONFIG_SHELL_AUTOSTART=n
-CONFIG_SHELL_STACK_SIZE=3072
-CONFIG_FILE_SYSTEM=y
-CONFIG_FILE_SYSTEM_LITTLEFS=y
-```
-
 ### Building and flashing the application
+
+Some boards depends on binary blobs. You can download them using the following commands.
+
+* Espressif ESP32-DevKitC development board
+```
+west blobs fetch hal_espressif
+```
+* Nordic Semiconductor nRF7002-DK development kit
+```
+west blobs fetch nrf_wifi
+```
 
 The application relies on mcuboot and requires to build a signed binary file to be flashed on the evaluation board.
 
-Use the following commands to build and flash mcuboot and the application:
+Use the following commands to build mcuboot and the application all together using sysbuild, depending of the board being used:
 
+* Espressif ESP32-DevKitC development board
+```
+west build -b esp32_devkitc/esp32/procpu --sysbuild app
+```
+* NXP FRDM-MCXN947 development board
+```
+west build -b frdm_mcxn947/mcxn947/cpu0 --sysbuild app
+```
+* Nordic Semiconductor nRF7002-DK development kit
+```
+west build -b nrf7002dk/nrf5340/cpuapp --sysbuild app
+```
+* STMicroelectronics NUCLEO-L4A6ZG development board
 ```
 west build -b nucleo_l4a6zg --sysbuild app
+```
+
+Finaly flash the board using the following command. Both mcuboot and the application will be flashed.
+
+```
 west flash
 ```
 
-### Execution of the application
+### Execution of the application [TODO: update logs]
 
-After flashing the application on the NUCLEO-L4A6ZG evaluation board and displaying logs, you should be able to see the following:
+After flashing the application on the development board and opening a terminal to display the logs, you should be able to see the following:
 
 ```
-*** Booting MCUboot v2.1.0-rc1-36-gfb2cf0ec3da3 ***
-*** Using Zephyr OS build v3.7.0 ***
-I: Starting bootloader
-I: Primary image: magic=unset, swap_type=0x1, copy_done=0x3, image_ok=0x3
-I: Scratch: magic=unset, swap_type=0x1, copy_done=0x3, image_ok=0x3
-I: Boot source: primary slot
-I: Image index: 0, Swap type: none
-I: Bootloader chainload address offset: 0xe000
-I: Jumping to the first image slot
-
-
-[00:00:02.016,000] <inf> eth_w5500: eth_w5500@0: Link up
-[00:00:02.033,000] <inf> mender_zephyr_example: IPv4 address: 192.168.1.216
-[00:00:02.044,000] <inf> mender_zephyr_example: Lease time: 43200 seconds
-[00:00:02.054,000] <inf> mender_zephyr_example: Subnet: 255.255.255.0
-[00:00:02.064,000] <inf> mender_zephyr_example: Router: 192.168.1.1
-[00:00:02.074,000] <inf> mender_zephyr_example: MAC address of the device '00:08:dc:01:02:03'
-[00:00:02.085,000] <inf> mender_zephyr_example: Running project 'mender-zephyr-example' version '0.1.0'
-[00:00:02.104,000] <inf> mender_zephyr_example: Mender client initialized
-[00:00:02.114,000] <inf> mender_zephyr_example: Mender client registered hello-world module
-[00:00:02.126,000] <inf> mender: CMAKE_SOURCE_DIR/components/mender-mcu-client/platform/storage/zephyr/nvs/src/mender-storage.c (242): Device configuration not available
-[00:00:02.144,000] <inf> mender_zephyr_example: Mender configure add-on registered
-[00:00:02.155,000] <inf> mender_zephyr_example: Mender inventory add-on registered
-[00:00:02.166,000] <inf> mender_zephyr_example: Device configuration retrieved
-[00:00:02.177,000] <inf> mender: CMAKE_SOURCE_DIR/components/mender-mcu-client/platform/storage/zephyr/nvs/src/mender-storage.c (110): Authentication keys are not available
-[00:00:02.195,000] <inf> mender: CMAKE_SOURCE_DIR/components/mender-mcu-client/platform/tls/generic/mbedtls/src/mender-tls.c (126): Generating authentication keys...
-[00:04:54.037,000] <inf> mender: CMAKE_SOURCE_DIR/components/mender-mcu-client/platform/storage/zephyr/nvs/src/mender-storage.c (182): Deployment data not available
-[00:04:54.054,000] <inf> mender_zephyr_example: Mender client connect network
-[00:05:04.953,000] <err> mender: CMAKE_SOURCE_DIR/components/mender-mcu-client/core/src/mender-api.c (900): [401] Unauthorized: Unauthorized
-[00:05:04.969,000] <inf> mender_zephyr_example: Mender client authentication failed
-[00:05:04.980,000] <inf> mender_zephyr_example: Mender client released network
+[00:00:03.790,000] <inf> mender_zephyr_example: Running project 'mender-zephyr-example' version '0.1.0'
+[00:00:03.809,000] <inf> mender_zephyr_example: Mender client initialized
+[00:00:03.812,000] <inf> mender: WEST_TOPDIR/modules/lib/mender-mcu-client/platform/storage/zephyr/nvs/src/mender-storage.c (243): Device configuration not available
+[00:00:03.829,000] <inf> mender_zephyr_example: Mender configure add-on registered
+[00:00:03.839,000] <inf> mender_zephyr_example: Mender inventory add-on registered
+[00:00:03.849,000] <inf> mender_zephyr_example: Mender device configuration retrieved
+[00:00:03.877,000] <inf> mender: WEST_TOPDIR/modules/lib/mender-mcu-client/platform/storage/zephyr/nvs/src/mender-storage.c (111): Authentication keys are not available
+[00:00:03.894,000] <inf> mender: WEST_TOPDIR/modules/lib/mender-mcu-client/platform/tls/generic/mbedtls/src/mender-tls.c (118): Generating authentication keys...
+[00:03:52.301,000] <inf> mender: WEST_TOPDIR/modules/lib/mender-mcu-client/platform/storage/zephyr/nvs/src/mender-storage.c (183): Deployment data not available
+[00:03:52.307,000] <inf> mender_zephyr_example: Mender client connect network
+[00:03:58.683,000] <err> mender: WEST_TOPDIR/modules/lib/mender-mcu-client/core/src/mender-api.c (514): [401] Unauthorized: dev auth: unauthorized
+[00:03:58.689,000] <err> mender_zephyr_example: Mender client authentication failed (1/3)
+[00:03:58.699,000] <inf> mender_zephyr_example: Mender client released network
 ```
 
-Which means you now have generated authentication keys on the device. Generating is a bit long but authentication keys are stored in `storage_partition` of the MCU so it's done only the first time the device is flashed. You now have to accept your device on the mender interface. Once it is accepted on the mender interface the following will be displayed:
+Which means you now have generated authentication keys on the device. Generating is a bit long (depending of the hardware) but authentication keys are stored in the device so it's done only the first time the device is flashed. You now have to accept your device on the mender interface. Once it is accepted on the mender interface the following will be displayed:
 
 ```
 [00:10:02.176,000] <inf> mender_zephyr_example: Mender client connect network
@@ -130,12 +155,25 @@ Which means you now have generated authentication keys on the device. Generating
 
 Congratulation! Your device is connected to the mender server. Device type is `mender-zephyr-example` and the current software version is displayed.
 
-### Create a new deployment
+### Create a new deployment [TODO: update logs]
 
 First retrieve [mender-artifact](https://docs.mender.io/downloads#mender-artifact) tool.
 
-Change `VERSION` file to `VERSION_MAJOR=0` and `VERSION_MINOR=2`, rebuild the firmware using the following command.
+Change `VERSION` file to `VERSION_MAJOR=0` and `VERSION_MINOR=2`, rebuild the firmware using the same command already used.
 
+* Espressif ESP32-DevKitC development board
+```
+west build -b esp32_devkitc/esp32/procpu --sysbuild app
+```
+* NXP FRDM-MCXN947 development board
+```
+west build -b frdm_mcxn947/mcxn947/cpu0 --sysbuild app
+```
+* Nordic Semiconductor nRF7002-DK development kit
+```
+west build -b nrf7002dk/nrf5340/cpuapp --sysbuild app
+```
+* STMicroelectronics NUCLEO-L4A6ZG development board
 ```
 west build -b nucleo_l4a6zg --sysbuild app
 ```
@@ -143,14 +181,31 @@ west build -b nucleo_l4a6zg --sysbuild app
 Then create a new artifact using the following command line:
 
 ```
-path/to/mender-artifact write rootfs-image --compression none --device-type mender-<board_name>-zephyr-example --artifact-name mender-zephyr-example-v0.2.0 --output-path build/zephyr/mender-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
+path/to/mender-artifact write rootfs-image --compression none --device-type mender-<board_name>-zephyr-example --artifact-name mender-<board_name>-zephyr-example-v0.2.0 --output-path build/zephyr/mender-<board_name>-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
 ```
 
-Where `<board_name>` is the name of the board, e.g. `nucleo-l4a6zg`.
+Where `<board_name>` is the name of the board:
+
+* Espressif ESP32-DevKitC development board
+```
+path/to/mender-artifact write rootfs-image --compression none --device-type mender-esp32-devkitc-zephyr-example --artifact-name mender-esp32-devkitc-zephyr-example-v0.2.0 --output-path build/zephyr/mender-esp32-devkitc-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
+```
+* NXP FRDM-MCXN947 development board
+```
+path/to/mender-artifact write rootfs-image --compression none --device-type mender-frdm-mcxn947-zephyr-example --artifact-name mender-frdm-mcxn947-zephyr-example-v0.2.0 --output-path build/zephyr/mender-frdm-mcxn947-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
+```
+* Nordic Semiconductor nRF7002-DK development kit
+```
+path/to/mender-artifact write rootfs-image --compression none --device-type mender-nrf7002dk-zephyr-example --artifact-name mender-nrf7002dk-zephyr-example-v0.2.0 --output-path build/zephyr/mender-nrf7002dk-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
+```
+* STMicroelectronics NUCLEO-L4A6ZG development board
+```
+path/to/mender-artifact write rootfs-image --compression none --device-type mender-nucleo-l4a6zg-zephyr-example --artifact-name mender-nucleo-l4a6zg-zephyr-example-v0.2.0 --output-path build/zephyr/mender-nucleo-l4a6zg-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
+```
 
 Upload the artifact `mender-<board_name>-zephyr-example-v0.2.0.mender` to the mender server and create a new deployment.
 
-The device checks for the new deployment, downloads the artifact and installs it on the `slot1_partition`. Then it reboots to apply the update:
+The device checks for the new deployment, downloads the artifact and installs it on the update partition. Then it reboots to apply the update:
 
 ```
 [00:40:02.176,000] <inf> mender_zephyr_example: Mender client connect network
@@ -206,7 +261,7 @@ Congratulation! You have updated the device. Mender server displays the success 
 In case of failure to connect and authenticate to the server the current example application performs a rollback to the previous release.
 You can customize the behavior of the example application to add your own checks and perform the rollback in case the tests fail.
 
-### Download and execute an LLEXT module
+### Download and execute an LLEXT module [TODO: to be retested/updated]
 
 This example application supports LLEXT feature to permit loading and executing LLEXT modules using mender-mcu-client.
 
@@ -241,16 +296,32 @@ Hello, world, from an llext!
 
 The Device Troubleshoot add-on permits to display the Zephyr Shell on the Mender interface. Autocompletion and colors are available.
 
+![Troubleshoot console](https://raw.githubusercontent.com/joelguittet/mender-zephyr-example/master/.github/docs/troubleshoot.png)
+
 The Device Troubleshoot add-on also permits to upload/download files to/from the Mender server. The littlefs partition mounted at `/littlefs` is used to demonstrate this feature. To send a file to the device, destination path must start with `/littlefs`. To download a file from the device the full path is expected, starting with `/littlefs`.
+
+The Device Troubleshoot add-on feature are integrated using `troubleshoot.conf` and `troubleshoot-file-transfer.conf` Kconfig fragments, for example using the following commands.
+
+* To activate shell only
+```
+west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="troubleshoot.conf"
+```
+
+* To activate shell and file transfert support
+```
+west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="troubleshoot.conf;troubleshoot-file-transfer.conf"
+```
+
+Please note that due to llimited amount of memory available, the Device Troubleshoot integration is not recommended on ESP32-DevKitC and NUCLEO-L4A6ZG.
 
 ### Using an other zephyr evaluation board
 
-The zephyr integration into the mender-mcu-client is generic and it is not limited to STM32 MCUs.
+The zephyr integration into the mender-mcu-client is generic and it is not limited to the boards available in this repository.
 Several points discussed below should be taken into consideration to use an other hardware, including evaluation boards with other MCU families.
 
 #### Flash sectors size
 
-The flash sector size is an important criteria to select an evaluation board. The STM32L4A6ZG MCU has 2KB sectors, which is very convenient to define a custom layout. Other MCUs have variable sectors size and it can be very difficult to choose the partitions.
+The flash sector size is an important criteria to select an evaluation board. As an example the STM32L4A6ZG MCU has 2KB sectors, which is very convenient to define a custom layout. Other MCUs have variable sectors size and it can be very difficult to choose the partitions.
 
 What remains important is that partitions are aligned on sectors. Moreover `slot0_partition` and `slot1_partition` must have the same size.
 
@@ -260,13 +331,33 @@ The storage partition should be at least 4KB and must contains at least 3 sector
 
 #### Using an other network interface
 
-The example is currently using a W5500 module connected to the NUCLEO-L4A6ZG evaluation board according to the device tree overlay. It is possible to use an other module depending of your own hardware. The mender-mcu-client expect to have a TCP-IP interface but it is not constraint by the physical hardware.
+This application illustrates the usage of different kind of interfaces (Ethernet, Wi-Fi). The mender-mcu-client expect to have a TCP-IP interface but it is not constraint by the physical hardware.
 
 ### Using an other mender instance
 
 The communication with the server is done using HTTPS. To get it working, the Root CA that is providing the server certificate should be integrated and registered in the application (see `tls_credential_add` in the `src/main.c` file). Format of the expected Root CA certificate is DER.
 In this example we are using the `https://hosted.mender.io` server. While checking the details of the server certificate in your browser, you will see that is is provided by Amazon Root CA 1. Thus the Amazon Root CA 1 certificate `AmazonRootCA1.cer` retrieved at `https://www.amazontrust.com/repository` is integrated in the application.
 
+Using another instance you may need to integrate another Root CA certificate. Also note depending of the certificate properties you may need to activate additional cipher suites in the mbedTLS configuration. See below considerations when using trial mender instance for example.
+
+### Using a trial mender instance
+
+The trial mender instance which is available for free at `http://hosted.mender.io` to test mender feature requires to integrate the Google Trust Services Root R4 certificate together with Amazon Root CA 1 certificate. This is required because the artifacts are saved on a Cloudflare server instead of the Amazon S3 storage. This is achieved using the secondary root certificate support provided by the mender-mcu-client.
+
+```
+CONFIG_MENDER_NET_CA_CERTIFICATE_TAG_PRIMARY=1
+CONFIG_MENDER_NET_CA_CERTIFICATE_TAG_SECONDARY=2
+```
+
+However, default mbedTLS configuration has only symmetric cipher to keep the size of the binary small. Particularly, the support of ECDSA with SHA384 which is required to parse the Google Trust Services Root R4 certificate need to be added to the configuration. This is achieved using the following configurations.
+
+```
+CONFIG_MBEDTLS_ECP_DP_SECP384R1_ENABLED=y
+CONFIG_MBEDTLS_SHA384=y
+CONFIG_MBEDTLS_ECP_NIST_OPTIM=y
+```
+
+Those configurations are also available using the Kconfig fragment `trial.conf` in the build configuration.
 
 ## License
 
