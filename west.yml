@@ -49,9 +49,9 @@ manifest:
           - nrf_hw_models # required for nrf7002-dk board
           - nrf_wifi # required for nrf7002-dk board
           - picolibc
-          - trusted-firmware-m # required for frdm-mcxn947 board
+          - trusted-firmware-m # required for frdm-mcxn947 board # TODO check if push like that
           - zcbor # required in case mcumgr is enabled
     - name: mender-mcu-client
       remote: joelguittet
-      revision: b37e5487d5fb52affd92a69e28355299e095e035
+      revision: b37e5487d5fb52affd92a69e28355299e095e035 # TODO create a revision
       path: modules/lib/mender-mcu-client

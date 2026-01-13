@@ -123,21 +123,6 @@ static K_EVENT_DEFINE(mender_client_events);
 static struct net_mgmt_event_callback mgmt_cb;
 
 /**
- * @brief Network management event mask
- */
-/*#ifdef CONFIG_WIFI
-#define NET_EVENT_MASK NET_EVENT_WIFI_CONNECT_RESULT | NET_EVENT_WIFI_DISCONNECT_RESULT
-#else
-#define NET_EVENT_MASK NET_EVENT_IPV4_ADDR_ADD
-#endif*/ /* CONFIG_WIFI */
-#define NET_EVENT_MASK NET_EVENT_IPV4_ADDR_ADD | NET_EVENT_IPV4_ADDR_DEL
-
-/**
- * @brief Network connected status
- */
-//static bool network_connected = false;
-
-/**
  * @brief Network events
  */
 static K_EVENT_DEFINE(network_events);
@@ -199,37 +184,16 @@ net_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event, struc
             /* Print interface information */
             net_if_ipv4_addr_foreach(iface, print_dhcpv4_addr, NULL);
             /* Indicate the network is available */
-            //network_connected = true;
             k_event_post(&network_events, NETWORK_EVENT_CONNECTED);
             break;
         case NET_EVENT_IPV4_ADDR_DEL:
             /* Disconnected from network */
             LOG_INF("Got IPv4 event: 'NET_EVENT_IPV4_ADDR_DEL'");
             /* Indicate the network is not available */
-            //network_connected = false;
             k_event_post(&network_events, NETWORK_EVENT_DISCONNECTED);
             break;
-//TODO CLEAN THIS
-#if 0
-        case NET_EVENT_WIFI_CONNECT_RESULT:
-            /* Connected to Wi-Fi network */
-            LOG_INF("Connected to Wi-Fi '%s'", CONFIG_EXAMPLE_WIFI_SSID);
-            /* Indicate the network is available */
-            //network_connected = true;
-            k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_NETWORK_UP);
-            break;
-        case NET_EVENT_WIFI_DISCONNECT_RESULT:
-            /* Disconnected from Wi-Fi network */
-            LOG_INF("Disconnected from Wi-Fi '%s'", CONFIG_EXAMPLE_WIFI_SSID);
-            /* Indicate the network is not available */
-            //network_connected = false;
-            k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_NETWORK_DOWN);
-            break;
-#endif /* CONFIG_WIFI */
     }
 }
-
-#define CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES 3 //TODO Kconfig
 
 /**
  * @brief Network connnect callback
@@ -255,77 +219,6 @@ network_connect_cb(void) {
         return MENDER_FAIL;
     }
 
-#if 0
-    /* Retrieve default network interface */
-    struct net_if *iface = net_if_get_default();
-    assert(NULL != iface);
-
-#ifdef CONFIG_WIFI
-    
-    /* Check if connected to the network */
-    //if (false == net_if_is_up(iface)) {
-    //LOG_INF("TODO CLEAN, net if up = %d, network_connected = %d", net_if_is_up(iface), network_connected);
-    //TODO can be removed ? if in wifi and trying to connect while alreayd connected, what append ? which event can be monitored to say "donnected / allready connected" ?
-    struct wifi_iface_status status = {0};
-    net_mgmt(NET_REQUEST_WIFI_IFACE_STATUS, iface, &status, sizeof(struct wifi_iface_status));
-    if (WIFI_STATE_COMPLETED != status.state) {
-#else
-        if (false == network_connected) {
-#endif
-
-#ifdef CONFIG_WIFI
-
-        /* Set connection request parameters */
-        struct wifi_connect_req_params params = { 0 };
-        params.band                           = WIFI_FREQ_BAND_UNKNOWN;
-        params.channel                        = WIFI_CHANNEL_ANY;
-        params.mfp                            = WIFI_MFP_OPTIONAL;
-        params.ssid                           = CONFIG_EXAMPLE_WIFI_SSID;
-        params.ssid_length                    = sizeof(CONFIG_EXAMPLE_WIFI_SSID) - 1;
-#if defined(CONFIG_EXAMPLE_WIFI_AUTHENTICATION_MODE_WPA2_PSK)
-        params.security   = WIFI_SECURITY_TYPE_PSK;
-        params.psk        = CONFIG_EXAMPLE_WIFI_PSK;
-        params.psk_length = sizeof(CONFIG_EXAMPLE_WIFI_PSK) - 1;
-#elif defined(CONFIG_EXAMPLE_WIFI_AUTHENTICATION_MODE_WPA3_SAE)
-        params.security            = WIFI_SECURITY_TYPE_SAE;
-        params.sae_password        = CONFIG_EXAMPLE_WIFI_PSK;
-        params.sae_password_length = sizeof(CONFIG_EXAMPLE_WIFI_PSK) - 1;
-#else
-        params.security = WIFI_SECURITY_TYPE_NONE;
-#endif
-        params.timeout = 1000 * CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_TIMEOUT;
-
-        /* Request connection to the network */
-        net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params));
-
-#endif /* CONFIG_WIFI */
-
-        /* Waiting interface to connect to the network */
-        int      tries = 0;
-        uint32_t event = 0;
-        while (MENDER_CLIENT_EVENT_NETWORK_UP != (event & MENDER_CLIENT_EVENT_NETWORK_UP)) {
-
-            /* Wait until the network event */
-            event = k_event_wait(&mender_client_events,
-                                 MENDER_CLIENT_EVENT_NETWORK_UP | MENDER_CLIENT_EVENT_NETWORK_DOWN,
-                                 true,
-                                 K_SECONDS(CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_TIMEOUT));
-            if (MENDER_CLIENT_EVENT_NETWORK_UP != (event & MENDER_CLIENT_EVENT_NETWORK_UP)) {
-                tries++;
-                if (tries < CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES) {
-                    LOG_WRN("Not connected to the network (%d/%d), waiting for interface to connect", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
-#ifdef CONFIG_WIFI
-                    /* Request connection to the network */
-                    net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params));
-#endif /* CONFIG_WIFI */
-                } else {
-                    LOG_ERR("Not connected to the network (%d/%d)", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
-                    return MENDER_FAIL;
-                }
-            }
-        }
-    }
-#endif
     return MENDER_OK;
 }
 
@@ -343,25 +236,15 @@ network_release_cb(void) {
     /* This callback only indicates the mender-client doesn't request network access now */
     k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_DISCONNECT);
 
-#if 0
-
-#ifdef CONFIG_WIFI
-
-    /* Retrieve default network interface */
-    struct net_if *iface = net_if_get_default();
-    assert(NULL != iface);
-
-    /* Request disconnection of the network */
-    net_mgmt(NET_REQUEST_WIFI_DISCONNECT, iface, NULL, 0);
-
-#endif /* CONFIG_WIFI */
-#endif
     return MENDER_OK;
 }
 
 int
 network_connect(struct net_if *iface) {
 
+    int err;
+
+    /* Clear network events */
     k_event_clear(&network_events, NETWORK_EVENT_CONNECTED | NETWORK_EVENT_DISCONNECTED);
 
 #ifdef CONFIG_WIFI
@@ -386,7 +269,9 @@ network_connect(struct net_if *iface) {
 #endif
 
     /* Request connection to the network */
-    net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params));
+    if (0 != (err = net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params)))) {
+        LOG_WRN("An error occured requesting connection to the network (err=%d)", err);
+    }
 
     /* Waiting interface to connect to the network */
     int      tries  = 0;
@@ -402,10 +287,11 @@ network_connect(struct net_if *iface) {
             if (tries < CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES) {
                 LOG_WRN("Not connected to the network (%d/%d), waiting for interface to connect", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
                 /* Request connection to the network */
-                net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params));
+                if (0 != (err = net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params)))) {
+                    LOG_WRN("An error occured requesting connection to the network (err=%d)", err);
+                }
             } else {
                 LOG_ERR("Not connected to the network (%d/%d)", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
-                //TODO CLEAN: seems to be bad for nrf7002 net_mgmt(NET_REQUEST_WIFI_DISCONNECT, iface, NULL, 0);
                 return -ENODEV;
             }
         }
@@ -413,7 +299,10 @@ network_connect(struct net_if *iface) {
 
 #else
 
-    net_if_up(iface);
+    /* Up interface */
+    if (0 != (err = net_if_up(iface))) {
+        LOG_WRN("An error occured requesting interface to up (err=%d)", err);
+    }
 
     /* Waiting interface to connect to the network */
     int      tries  = 0;
@@ -430,7 +319,6 @@ network_connect(struct net_if *iface) {
                 LOG_WRN("Not connected to the network (%d/%d), waiting for interface to connect", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
             } else {
                 LOG_ERR("Not connected to the network (%d/%d)", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
-                //TODO CLEAN: seems to be bad for nrf7002 net_if_down(iface);
                 return -ENODEV;
             }
         }
@@ -451,6 +339,7 @@ network_disconnect(struct net_if *iface) {
 
 #else
 
+    /* Down interface */
     net_if_down(iface);
 
 #endif /* CONFIG_WIFI */
@@ -684,7 +573,7 @@ file_transfer_open_cb(char *path, char *mode, void **handle) {
         }
     } else {
         if ((err = fs_open(file, path, FS_O_CREATE | FS_O_WRITE)) < 0) {
-            LOG_ERR("Unable to open file '%s'  (err=%d)", path, err);
+            LOG_ERR("Unable to open file '%s' (err=%d)", path, err);
             free(file);
             return MENDER_FAIL;
         }
@@ -795,7 +684,7 @@ main(void) {
     LOG_INF("Initialization of network interface");
     struct net_if *iface = net_if_get_default();
     assert(NULL != iface);
-    net_mgmt_init_event_callback(&mgmt_cb, net_event_handler, NET_EVENT_MASK);
+    net_mgmt_init_event_callback(&mgmt_cb, net_event_handler, NET_EVENT_IPV4_ADDR_ADD | NET_EVENT_IPV4_ADDR_DEL);
     net_mgmt_add_event_callback(&mgmt_cb);
     net_dhcpv4_start(iface);
 
@@ -976,8 +865,6 @@ main(void) {
         goto RELEASE;
     }
 
-    /* Wait for mender-mcu-client events */
-    //k_event_wait(&mender_client_events, MENDER_CLIENT_EVENT_RESTART, true, K_FOREVER);
     /* Wait for mender-mcu-client events, connect and disconnect network on request, restart the application if required */
     bool connected = false;
     while (1) {
