@@ -261,6 +261,28 @@ Congratulation! You have updated the device. Mender server displays the success 
 In case of failure to connect and authenticate to the server the current example application performs a rollback to the previous release.
 You can customize the behavior of the example application to add your own checks and perform the rollback in case the tests fail.
 
+### Using Device Troubleshoot add-on
+
+The Device Troubleshoot add-on permits to display the Zephyr Shell on the Mender interface. Autocompletion and colors are available.
+
+![Troubleshoot console](https://raw.githubusercontent.com/joelguittet/mender-zephyr-example/master/.github/docs/troubleshoot.png)
+
+The Device Troubleshoot add-on also permits to upload/download files to/from the Mender server. The littlefs partition mounted at `/littlefs` is used to demonstrate this feature. To send a file to the device, destination path must start with `/littlefs`. To download a file from the device the full path is expected, starting with `/littlefs`.
+
+The Device Troubleshoot add-on feature are integrated using `troubleshoot.conf` and `troubleshoot-file-transfer.conf` Kconfig fragments, for example using the following commands.
+
+* To activate shell only
+```
+west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="troubleshoot.conf"
+```
+
+* To activate shell and file transfert support
+```
+west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="troubleshoot.conf;troubleshoot-file-transfer.conf"
+```
+
+Please note that due to llimited amount of memory available, the Device Troubleshoot integration is not recommended on ESP32-DevKitC and NUCLEO-L4A6ZG.
+
 ### Download and execute an LLEXT module [TODO: to be retested/updated]
 
 This example application supports LLEXT feature to permit loading and executing LLEXT modules using mender-mcu-client.
@@ -292,28 +314,6 @@ Hello, world, from an llext!
 [00:00:36.817,000] <inf> mender_zephyr_example: Deployment status is 'success'
 ```
 
-### Using Device Troubleshoot add-on
-
-The Device Troubleshoot add-on permits to display the Zephyr Shell on the Mender interface. Autocompletion and colors are available.
-
-![Troubleshoot console](https://raw.githubusercontent.com/joelguittet/mender-zephyr-example/master/.github/docs/troubleshoot.png)
-
-The Device Troubleshoot add-on also permits to upload/download files to/from the Mender server. The littlefs partition mounted at `/littlefs` is used to demonstrate this feature. To send a file to the device, destination path must start with `/littlefs`. To download a file from the device the full path is expected, starting with `/littlefs`.
-
-The Device Troubleshoot add-on feature are integrated using `troubleshoot.conf` and `troubleshoot-file-transfer.conf` Kconfig fragments, for example using the following commands.
-
-* To activate shell only
-```
-west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="troubleshoot.conf"
-```
-
-* To activate shell and file transfert support
-```
-west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="troubleshoot.conf;troubleshoot-file-transfer.conf"
-```
-
-Please note that due to llimited amount of memory available, the Device Troubleshoot integration is not recommended on ESP32-DevKitC and NUCLEO-L4A6ZG.
-
 ### Using an other zephyr evaluation board
 
 The zephyr integration into the mender-mcu-client is generic and it is not limited to the boards available in this repository.
@@ -327,7 +327,7 @@ What remains important is that partitions are aligned on sectors. Moreover `slot
 
 #### Configuration of the storage partition
 
-The storage partition should be at least 4KB and must contains at least 3 sectors. In the current example the size of the `storage_partition` is 8KB and the configuration is set with `CONFIG_MENDER_STORAGE_SECTOR_COUNT=4` (4 sectors of 2KB). You should adapt this if you have a different flash layout.
+The storage partition should be at least 4KB and must contains at least 3 sectors. As an example on the NUCLEO-L4A6ZG the size of the `storage_partition` is 8KB and the configuration is set with `CONFIG_MENDER_STORAGE_SECTOR_COUNT=4` (4 sectors of 2KB). You should adapt this if you have a different flash layout.
 
 #### Using an other network interface
 
