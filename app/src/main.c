@@ -270,6 +270,10 @@ network_connect(struct net_if *iface) {
 
     /* Request connection to the network */
     if (0 != (err = net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params)))) {
+        if (-EALREADY == err) {
+            LOG_INF("Network is already connected");
+            return 0;
+        }
         LOG_WRN("An error occured requesting connection to the network (err=%d)", err);
     }
 
@@ -288,6 +292,10 @@ network_connect(struct net_if *iface) {
                 LOG_WRN("Not connected to the network (%d/%d), waiting for interface to connect", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
                 /* Request connection to the network */
                 if (0 != (err = net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params)))) {
+                    if (-EALREADY == err) {
+                        LOG_INF("Network is already connected");
+                        return 0;
+                    }
                     LOG_WRN("An error occured requesting connection to the network (err=%d)", err);
                 }
             } else {
@@ -301,6 +309,10 @@ network_connect(struct net_if *iface) {
 
     /* Up interface */
     if (0 != (err = net_if_up(iface))) {
+        if (-EALREADY == err) {
+            LOG_INF("Network interface is already up");
+            return 0;
+        }
         LOG_WRN("An error occured requesting interface to up (err=%d)", err);
     }
 
