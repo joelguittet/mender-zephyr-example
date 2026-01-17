@@ -48,7 +48,7 @@ class Helpers:
         try:
             output = dut.readlines_until(regex="Running project 'mender-zephyr-example' version '[0-9.+]+'", timeout=60)
         except (TwisterHarnessTimeoutException, AssertionError):
-            raise AssertionError(f"🔴​​​ Firmware version of the device not found")
+            raise AssertionError("🔴​​​ Firmware version of the device not found")
         m = re.search(".*<inf>.*Running project 'mender-zephyr-example' version '(.+?)'.*", output[-1])
         if m:
             fw_version = m.group(1)

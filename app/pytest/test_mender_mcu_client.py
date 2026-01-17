@@ -127,7 +127,7 @@ def test_device_configure(dut: DeviceAdapter):
     deployment_status = mender_management.wait_for_deployment(deployment=deployment)
     assert deployment_status is not None, "🔴​​​ Deployment status not found"
     if deployment_status["status"] not in ("finished", "success"):
-        raise AssertionError("🔴​​​ Deployment did not complete successfully")
+        raise AssertionError(f"🔴​​​ Deployment did not complete successfully, it has unexpected status '{deployment_status["status"]}'")
     print("✅ Device configuration deployment done successfuly")
     """Wait until the device configuration is updated."""
     def get_device_configuration():
@@ -191,15 +191,19 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
     artifact = helpers.create_mender_artifact(dut.device_config.app_build_dir, key_file, device_type, artifact_name_prefix, expected_version)
     deployment_name = f"{artifact_name_prefix}-v{expected_version}"
     artifact_name = f"{artifact_name_prefix}-v{expected_version}"
-    """Deploy artifact to the device."""
+    """Upload artifact to the server."""
     mender_management.upload_artifact(artifact)
-    mender_management.deploy_device_firmware(deployment_name, artifact_name, [device])
-    """"Wait for deployment completes or fails."""
-    deployment_status = mender_management.wait_for_deployment(name=deployment_name)
-    assert deployment_status is not None, "🔴​​​ Deployment status not found"
-    if deployment_status["status"] not in ("finished", "success"):
-        raise AssertionError("🔴​​​ Deployment did not complete successfully")
-    mender_management.delete_artifact(artifact_name)
+    try:
+        """Deploy artifact to the device."""
+        mender_management.deploy_device_firmware(deployment_name, artifact_name, [device])
+        """"Wait for deployment completes or fails."""
+        deployment_status = mender_management.wait_for_deployment(name=deployment_name)
+        assert deployment_status is not None, "🔴​​​ Deployment status not found"
+        if deployment_status["status"] not in ("finished", "success"):
+            raise AssertionError(f"🔴​​​ Deployment did not complete successfully, it has unexpected status '{deployment_status["status"]}'")
+    finally:
+        """Remove artifact from the server (done even in case the above deployment fails)."""
+        mender_management.delete_artifact(artifact_name)
     print("✅ Device firmware deployment done successfuly")
     """Get the firmware version of the device."""
     fw_version = helpers.get_device_firmware_version(dut)
