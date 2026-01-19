@@ -35,7 +35,7 @@ class Helpers:
         try:
             output = dut.readlines_until(regex="MAC address of the device '[0-9A-Za-z:]+'", timeout=60)
         except (TwisterHarnessTimeoutException, AssertionError):
-            raise AssertionError(f"🔴​​​ MAC address of the device not found in {output}") # TODO remove in output + TODO remove f in front (for all where it's not required)
+            raise AssertionError("🔴​​​ MAC address of the device not found")
         m = re.search(".*<inf>.*MAC address of the device '(.+?)'.*", output[-1])
         if m:
             mac_address = m.group(1)
