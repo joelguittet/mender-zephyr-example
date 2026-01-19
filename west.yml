@@ -33,7 +33,7 @@ manifest:
       # https://github.com/zephyrproject-rtos/zephyr/issues/99762
       # revision: fd6cfbd96bd3eefe5cc055ba523c7fa07a22c9af
       #revision: fix/shell-fixture-do-not-wait
-      revision: main
+      revision: pull/102512/head
       import:
         # By using name-allowlist we can clone only the modules that are
         # strictly needed by the application
