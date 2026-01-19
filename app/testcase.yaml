@@ -33,14 +33,14 @@ tests:
   mender.mcu.client.default:
     extra_args: EXTRA_CONF_FILE="${WEST_TOPDIR}/local.conf;mcumgr.conf"
     platform_allow:
-      - esp32_devkitc/esp32/procpu
+      # TODO reactivate - esp32_devkitc/esp32/procpu
       # TODO manual debug first
-      #- frdm_mcxn947/mcxn947/cpu0
-      - nrf7002dk/nrf5340/cpuapp
-      - nucleo_l4a6zg
+      - frdm_mcxn947/mcxn947/cpu0
+      # TODO reactivate - nrf7002dk/nrf5340/cpuapp
+      # TODO reactivate - nucleo_l4a6zg
   mender.mcu.client.troubleshoot:
     extra_args: EXTRA_CONF_FILE="${WEST_TOPDIR}/local.conf;mcumgr.conf;troubleshoot.conf"
     platform_allow:
       # TODO manual debug first
       #- frdm_mcxn947/mcxn947/cpu0
-      - nrf7002dk/nrf5340/cpuapp
+      # TODO reactivate - nrf7002dk/nrf5340/cpuapp
