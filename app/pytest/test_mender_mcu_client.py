@@ -103,48 +103,48 @@ def test_device_inventory(dut: DeviceAdapter):
     print("✅ Device inventory contains expected inventory items")
 
 
-#@pytest.mark.dependency(depends=["test_device_registration"])
-#def test_device_configure(dut: DeviceAdapter):
-#    """Check if configure add-on is built-in."""
-#    if not find_in_config(Path(dut.device_config.app_build_dir) / "zephyr" / ".config", "CONFIG_MENDER_CLIENT_ADD_ON_CONFIGURE"):
-#        pytest.skip("Configure add-on is not built-in")
-#    """Get the MAC address of the device."""
-#    mac_address = helpers.get_device_mac_address(dut)
-#    """Ensure the device is authorized on the mender server."""
-#    helpers.assert_device_authenticated(dut)
-#    device = mender_management.get_device_by_mac(mac_address)
-#    assert device is not None, f"🔴​​​ Device with MAC '{mac_address}' not found on mender server"
-#    assert device["status"] == "accepted", f"🔴​​​ Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
-#    print("✅ Device has status 'accepted' on the mender server")
-#    """Generate a random configuration content with several uuids."""
-#    """Generating such configuration ensure very easily the previous one was different."""
-#    expected_configuration = {f"uuid{index+1}": str(uuid.uuid4()) for index in range(random.randint(4, 8))}
-#    """Set device configuration."""
-#    mender_management.set_device_configuration(device, expected_configuration)
-#    deployment = mender_management.deploy_device_configuration(device)
-#    assert deployment is not None, "🔴​​​ Deployment not found"
-#    """"Wait for deployment completes or fails."""
-#    deployment_status = mender_management.wait_for_deployment(deployment=deployment)
-#    assert deployment_status is not None, "🔴​​​ Deployment status not found"
-#    if deployment_status["status"] not in ("finished", "success"):
-#        raise AssertionError(f"🔴​​​ Deployment did not complete successfully, it has unexpected status '{deployment_status["status"]}'")
-#    print("✅ Device configuration deployment done successfuly")
-#    """Wait until the device configuration is updated."""
-#    def get_device_configuration():
-#        configuration = mender_management.get_device_configuration(device)
-#        if configuration is not None and configuration.get("reported_ts") and datetime.fromisoformat(configuration.get("reported_ts")) >= datetime.fromisoformat(deployment_status.get("finished")):
-#            return configuration, configuration.get("reported_ts")
-#        return None, None
-#    configuration = helpers.run_until_data_refreshed(get_device_configuration)
-#    assert configuration is not None, "🔴​​​ Device configuration not found"
-#    """Ensure of the device configuration content."""
-#    print(f"Device reported configuration: '{configuration["reported"]}'")
-#    print(f"Device expected configuration: '{expected_configuration}'")
-#    if configuration["reported"] != expected_configuration:
-#        raise AssertionError("🔴​​​ Device configuration is invalid")
-#    print("✅ Device configuration contains expected configuration items")
-#
-#
+@pytest.mark.dependency(depends=["test_device_registration"])
+def test_device_configure(dut: DeviceAdapter):
+    """Check if configure add-on is built-in."""
+    if not find_in_config(Path(dut.device_config.app_build_dir) / "zephyr" / ".config", "CONFIG_MENDER_CLIENT_ADD_ON_CONFIGURE"):
+        pytest.skip("Configure add-on is not built-in")
+    """Get the MAC address of the device."""
+    mac_address = helpers.get_device_mac_address(dut)
+    """Ensure the device is authorized on the mender server."""
+    helpers.assert_device_authenticated(dut)
+    device = mender_management.get_device_by_mac(mac_address)
+    assert device is not None, f"🔴​​​ Device with MAC '{mac_address}' not found on mender server"
+    assert device["status"] == "accepted", f"🔴​​​ Device with MAC '{mac_address}' has unexpected status '{device["status"]}'"
+    print("✅ Device has status 'accepted' on the mender server")
+    """Generate a random configuration content with several uuids."""
+    """Generating such configuration ensure very easily the previous one was different."""
+    expected_configuration = {f"uuid{index+1}": str(uuid.uuid4()) for index in range(random.randint(4, 8))}
+    """Set device configuration."""
+    mender_management.set_device_configuration(device, expected_configuration)
+    deployment = mender_management.deploy_device_configuration(device)
+    assert deployment is not None, "🔴​​​ Deployment not found"
+    """"Wait for deployment completes or fails."""
+    deployment_status = mender_management.wait_for_deployment(deployment=deployment)
+    assert deployment_status is not None, "🔴​​​ Deployment status not found"
+    if deployment_status["status"] not in ("finished", "success"):
+        raise AssertionError(f"🔴​​​ Deployment did not complete successfully, it has unexpected status '{deployment_status["status"]}'")
+    print("✅ Device configuration deployment done successfuly")
+    """Wait until the device configuration is updated."""
+    def get_device_configuration():
+        configuration = mender_management.get_device_configuration(device)
+        if configuration is not None and configuration.get("reported_ts") and datetime.fromisoformat(configuration.get("reported_ts")) >= datetime.fromisoformat(deployment_status.get("finished")):
+            return configuration, configuration.get("reported_ts")
+        return None, None
+    configuration = helpers.run_until_data_refreshed(get_device_configuration)
+    assert configuration is not None, "🔴​​​ Device configuration not found"
+    """Ensure of the device configuration content."""
+    print(f"Device reported configuration: '{configuration["reported"]}'")
+    print(f"Device expected configuration: '{expected_configuration}'")
+    if configuration["reported"] != expected_configuration:
+        raise AssertionError("🔴​​​ Device configuration is invalid")
+    print("✅ Device configuration contains expected configuration items")
+
+
 #@pytest.mark.dependency(depends=["test_device_registration"])
 #def test_device_troubleshoot_shell(dut: DeviceAdapter):
 #    """Check if troubleshoot add-on shell is built-in."""
