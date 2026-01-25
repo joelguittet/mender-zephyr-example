@@ -281,7 +281,7 @@ west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="troubleshoot.con
 west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="troubleshoot.conf;troubleshoot-file-transfer.conf"
 ```
 
-Please note that due to llimited amount of memory available, the Device Troubleshoot integration is not recommended on ESP32-DevKitC and NUCLEO-L4A6ZG.
+Please note that due to llimited amount of memory available, the Device Troubleshoot integration is not recommended on ESP32-DevKitC and NUCLEO-L4A6ZG, and tested only using nRF7002-DK and the FRDM-MCXN947 development boards.
 
 ### Download and execute an LLEXT module [TODO: to be retested/updated]
 

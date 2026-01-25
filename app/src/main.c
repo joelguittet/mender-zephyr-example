@@ -814,7 +814,7 @@ main(void) {
     LOG_INF("Mender inventory add-on registered");
 #endif /* CONFIG_MENDER_CLIENT_ADD_ON_INVENTORY */
 #ifdef CONFIG_MENDER_CLIENT_ADD_ON_TROUBLESHOOT
-    mender_troubleshoot_config_t    mender_troubleshoot_config    = { .healthcheck_interval = 0 };
+    mender_troubleshoot_config_t    mender_troubleshoot_config    = { .host = NULL, .healthcheck_interval = 0 };
     mender_troubleshoot_callbacks_t mender_troubleshoot_callbacks = {
 #ifdef CONFIG_MENDER_CLIENT_TROUBLESHOOT_FILE_TRANSFER
         .file_transfer = { .stat  = file_transfer_stat_cb,

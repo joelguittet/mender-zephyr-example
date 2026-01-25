@@ -27,13 +27,8 @@ manifest:
 
   projects:
     - name: zephyr
-      # remote: zephyrproject-rtos
       remote: zephyrproject-rtos
-      # Use latest commit on v4.3-branch to solve mcumgr image management issue
-      # https://github.com/zephyrproject-rtos/zephyr/issues/99762
-      # revision: fd6cfbd96bd3eefe5cc055ba523c7fa07a22c9af
-      #revision: fix/shell-fixture-do-not-wait
-      revision: pull/102512/head
+      revision: main
       import:
         # By using name-allowlist we can clone only the modules that are
         # strictly needed by the application
@@ -50,10 +45,8 @@ manifest:
           - nrf_hw_models # required for nrf7002-dk board
           - nrf_wifi # required for nrf7002-dk board
           - picolibc
-          - trusted-firmware-m # required for frdm-mcxn947 board # TODO check if push like that
           - zcbor # required in case mcumgr is enabled
     - name: mender-mcu-client
       remote: joelguittet
-      #revision: b37e5487d5fb52affd92a69e28355299e095e035 # TODO create a revision
-      revision: fix/improve-zephyr-connect
+      revision: master
       path: modules/lib/mender-mcu-client
