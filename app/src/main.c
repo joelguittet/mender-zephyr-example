@@ -207,8 +207,6 @@ network_connect_cb(void) {
     /* This callback can be used to configure network connection */
     /* Note that the application can connect the network before if required */
     /* This callback only indicates the mender-client requests network access now */
-    /* In this example, example_connect and example_disconnect configures Wi-Fi or Ethernet, as selected in menuconfig */
-    /* Read "Establishing Wi-Fi or Ethernet Connection" section in examples/protocols/README.md for more information */
     k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_CONNECT);
     uint32_t events = k_event_wait(&mender_client_events,
                                    MENDER_CLIENT_EVENT_CONNECTED | MENDER_CLIENT_EVENT_DISCONNECTED,
@@ -778,7 +776,7 @@ main(void) {
         LOG_ERR("Unable to initialize mender client");
         goto RESTART;
     }
-    LOG_INF("Mender client initialized");
+    LOG_INF("Mender client version '%s' initialized", mender_client_version());
 
 #ifdef CONFIG_LLEXT
     /* Register LLEXT hello-world module, no reboot after installing the module, no verification of artifact name to check the version of the module */

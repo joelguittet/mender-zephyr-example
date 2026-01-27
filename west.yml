@@ -28,7 +28,8 @@ manifest:
   projects:
     - name: zephyr
       remote: zephyrproject-rtos
-      revision: main
+      revision: fix/esp32-bootloader-dram-len
+      # last test ok: 4a15930b0e5b441c3700dbce5d198ace7c80cd4b
       import:
         # By using name-allowlist we can clone only the modules that are
         # strictly needed by the application
@@ -48,5 +49,5 @@ manifest:
           - zcbor # required in case mcumgr is enabled
     - name: mender-mcu-client
       remote: joelguittet
-      revision: 0.12.2
+      revision: 0.12.3
       path: modules/lib/mender-mcu-client
