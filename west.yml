@@ -27,7 +27,7 @@ manifest:
 
   projects:
     - name: zephyr
-      remote: zephyrproject-rtos
+      remote: joelguittet
       revision: fix/esp32-bootloader-dram-len
       # last test ok: 4a15930b0e5b441c3700dbce5d198ace7c80cd4b
       import:
