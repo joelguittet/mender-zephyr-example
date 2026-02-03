@@ -41,7 +41,7 @@ class Helpers:
             mac_address = m.group('mac')
         else:
             raise AssertionError("🔴​​​ MAC address of the device not found")
-        print(f"✅ MAC address of the device is '{mac_address}'")
+        print(f"🔵​ MAC address of the device is '{mac_address}'")
         return mac_address
 
     def get_device_firmware_version(self, dut: DeviceAdapter) -> str:
@@ -54,7 +54,7 @@ class Helpers:
             fw_version = m.group('version')
         else:
             raise AssertionError("🔴​​​ Firmware version of the device not found")
-        print(f"✅ Firmware version of the device is '{fw_version}'")
+        print(f"🔵​ Firmware version of the device is '{fw_version}'")
         return fw_version
 
     def assert_device_not_authenticated(self, dut: DeviceAdapter):
