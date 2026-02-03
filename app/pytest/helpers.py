@@ -36,9 +36,9 @@ class Helpers:
             output = dut.readlines_until(regex="MAC address of the device '[0-9A-Za-z:]+'", timeout=60)
         except (TwisterHarnessTimeoutException, AssertionError):
             raise AssertionError("🔴​​​ MAC address of the device not found")
-        m = re.search(".*<inf>.*MAC address of the device '(.+?)'.*", output[-1])
+        m = re.search("MAC address of the device '(?P<mac>[0-9A-Za-z:]+)'", output[-1])
         if m:
-            mac_address = m.group(1)
+            mac_address = m.group('mac')
         else:
             raise AssertionError("🔴​​​ MAC address of the device not found")
         print(f"✅ MAC address of the device is '{mac_address}'")
@@ -49,9 +49,9 @@ class Helpers:
             output = dut.readlines_until(regex="Running project 'mender-zephyr-example' version '[0-9.+]+'", timeout=60)
         except (TwisterHarnessTimeoutException, AssertionError):
             raise AssertionError("🔴​​​ Firmware version of the device not found")
-        m = re.search(".*<inf>.*Running project 'mender-zephyr-example' version '(.+?)'.*", output[-1])
+        m = re.search("Running project 'mender-zephyr-example' version '(?P<version>[0-9.+]+)'", output[-1])
         if m:
-            fw_version = m.group(1)
+            fw_version = m.group('version')
         else:
             raise AssertionError("🔴​​​ Firmware version of the device not found")
         print(f"✅ Firmware version of the device is '{fw_version}'")

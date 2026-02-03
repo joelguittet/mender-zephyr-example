@@ -34,7 +34,7 @@ tests:
     extra_args: EXTRA_CONF_FILE="${WEST_TOPDIR}/local.conf;mcumgr.conf"
     platform_allow:
       - esp32_devkitc/esp32/procpu
-      # FIXME: an issue prevent to use the frdm-mcxn947 board with twister, see:
+      # FIXME: an issue prevent to use the frdm-mcxn947 board with twister, see:
       # https://github.com/zephyrproject-rtos/zephyr/issues/102568
       #- frdm_mcxn947/mcxn947/cpu0
       - nrf7002dk/nrf5340/cpuapp
@@ -42,7 +42,7 @@ tests:
   mender.mcu.client.troubleshoot:
     extra_args: EXTRA_CONF_FILE="${WEST_TOPDIR}/local.conf;mcumgr.conf;troubleshoot.conf"
     platform_allow:
-      # FIXME: an issue prevent to use the frdm-mcxn947 board with twister, see:
+      # FIXME: an issue prevent to use the frdm-mcxn947 board with twister, see:
       # https://github.com/zephyrproject-rtos/zephyr/issues/102568
       #- frdm_mcxn947/mcxn947/cpu0
       - nrf7002dk/nrf5340/cpuapp

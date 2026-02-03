@@ -95,7 +95,7 @@ class MenderManagement:
         devices = self.list_devices()
         for device in devices:
             try:
-                identity_data = device.get("identity_data")
+                identity_data = device.get('identity_data')
                 # Handle both JSON string and dict cases
                 if isinstance(identity_data, str):
                     identity = json.loads(identity_data)
@@ -103,7 +103,7 @@ class MenderManagement:
                     identity = identity_data
                 else:
                     continue
-                if identity.get("mac") == mac_address:
+                if identity.get('mac') == mac_address:
                     return device
             except (KeyError, json.JSONDecodeError):
                 continue
@@ -111,9 +111,9 @@ class MenderManagement:
 
     def accept_device(self, device):
         """Accept device."""
-        auth_sets = device.get("auth_sets", [])
+        auth_sets = device.get('auth_sets', [])
         auth = auth_sets[0] if auth_sets else None
-        url = f"{self.server}/api/management/v2/devauth/devices/{device["id"]}/auth/{auth["id"]}/status"
+        url = f"{self.server}/api/management/v2/devauth/devices/{device['id']}/auth/{auth['id']}/status"
         payload = {"status": "accepted"}
         r = requests.put(url, headers=self.headers, json=payload, verify=self.ca_cert)
         r.raise_for_status()
@@ -121,7 +121,7 @@ class MenderManagement:
 
     def delete_device(self, device):
         """Delete device."""
-        url = f"{self.server}/api/management/v2/devauth/devices/{device["id"]}"
+        url = f"{self.server}/api/management/v2/devauth/devices/{device['id']}"
         r = requests.delete(url, headers=self.headers, verify=self.ca_cert)
         r.raise_for_status()
         return True
@@ -131,7 +131,7 @@ class MenderManagement:
     # ============================================================
     def get_device_inventory(self, device):
         """Retrieve current inventory data for a device."""
-        url = f"{self.server}/api/management/v1/inventory/devices/{device["id"]}"
+        url = f"{self.server}/api/management/v1/inventory/devices/{device['id']}"
         r = requests.get(url, headers=self.headers, verify=self.ca_cert)
         r.raise_for_status()
         return r.json()
@@ -141,14 +141,14 @@ class MenderManagement:
     # ============================================================
     def get_device_configuration(self, device):
         """Retrieve current configuration data for a device."""
-        url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device["id"]}"
+        url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device['id']}"
         r = requests.get(url, headers=self.headers, verify=self.ca_cert)
         r.raise_for_status()
         return r.json()
 
     def set_device_configuration(self, device, configuration):
         """Set configuration key/values for a device."""
-        url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device["id"]}"
+        url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device['id']}"
         payload = configuration
         r = requests.put(url, headers=self.headers, json=payload, verify=self.ca_cert)
         r.raise_for_status()
@@ -156,7 +156,7 @@ class MenderManagement:
 
     def deploy_device_configuration(self, device):
         """Deploy configuration key/values for a device."""
-        url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device["id"]}/deploy"
+        url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device['id']}/deploy"
         payload = {"retries": 0}
         r = requests.post(url, headers=self.headers, json=payload, verify=self.ca_cert)
         r.raise_for_status()
@@ -179,7 +179,7 @@ class MenderManagement:
         url = f"{self.server}/api/management/v1/deployments/artifacts/list"
         params = {}
         if name is not None:
-            params["name"] = name
+            params['name'] = name
         r = requests.get(url, headers=self.headers, params=params, verify=self.ca_cert)
         r.raise_for_status()
         return r.json()
@@ -188,9 +188,9 @@ class MenderManagement:
         """Delete artifact."""
         artifacts = self.list_artifacts(name)
         for artifact in artifacts:
-            if artifact.get("name") == name:
+            if artifact.get('name') == name:
                 break
-        url = f"{self.server}/api/management/v1/deployments/artifacts/{artifact["id"]}"
+        url = f"{self.server}/api/management/v1/deployments/artifacts/{artifact['id']}"
         r = requests.delete(url, headers=self.headers, verify=self.ca_cert)
         r.raise_for_status()
         return True
@@ -198,7 +198,7 @@ class MenderManagement:
     def deploy_device_firmware(self, name, artifact_name, devices):
         """Create a deployment for one or more devices."""
         url = f"{self.server}/api/management/v1/deployments/deployments"
-        payload = {"name": name, "artifact_name": artifact_name, "devices": [device["id"] for device in devices]}
+        payload = {"name": name, "artifact_name": artifact_name, "devices": [device['id'] for device in devices]}
         r = requests.post(url, headers=self.headers, json=payload, verify=self.ca_cert)
         r.raise_for_status()
         return r.json() if r.text else {}
@@ -208,17 +208,17 @@ class MenderManagement:
         url = f"{self.server}/api/management/v2/deployments/deployments"
         params = {}
         if name is not None:
-            params["name"] = name
-        if deployment is not None and deployment.get("deployment_id") is not None:
-            params["id"] = deployment["deployment_id"]
+            params['name'] = name
+        if deployment is not None and deployment.get('deployment_id') is not None:
+            params['id'] = deployment['deployment_id']
         r = requests.get(url, headers=self.headers, params=params, verify=self.ca_cert)
         r.raise_for_status()
         for item in r.json():
             if name is not None:
-                if item.get("name") == name:
+                if item.get('name') == name:
                     return item
-            if deployment is not None and deployment.get("deployment_id") is not None:
-                if item.get("id") == deployment["deployment_id"]:
+            if deployment is not None and deployment.get('deployment_id') is not None:
+                if item.get('id') == deployment['deployment_id']:
                     return item
         return None
 
@@ -228,7 +228,7 @@ class MenderManagement:
         start_time = time.time()
         while time.time() - start_time < timeout:
             deployment_status = self.get_deployment_status(name, deployment)
-            if deployment_status is not None and deployment_status.get("status") in ("finished", "success", "failure", "aborted"):
+            if deployment_status is not None and deployment_status.get('status') in ('finished', 'success', 'failure', 'aborted'):
                 return deployment_status
             time.sleep(interval)
         return deployment_status

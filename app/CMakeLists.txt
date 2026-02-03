@@ -28,7 +28,7 @@ target_sources(app PRIVATE "src/main.c")
 target_compile_definitions(app PRIVATE PROJECT_NAME="mender-zephyr-example")
 target_compile_definitions(app PRIVATE _POSIX_C_SOURCE=200809L) # Required for strdup support
 
-# Link application to bootutil library if mcumgr is used
+# Link application to bootutil library if mcumgr is used
 if (CONFIG_MCUMGR_GRP_IMG)
     zephyr_link_libraries(MCUBOOT_BOOTUTIL)
 endif()

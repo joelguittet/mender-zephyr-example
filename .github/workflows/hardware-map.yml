@@ -24,9 +24,9 @@ jobs:
   generate-hardware-map:
     name: Generate hardware map
     runs-on: self-hosted
-    # Twister is executed inside zephyrproject-rtos/ci container
+    # Twister is executed inside zephyrproject-rtos/ci container
     # The container is executed with privileged option to have full access to the host
-    # The following are bounded in the container:
+    # The following are bounded in the container:
     # - /dev: to allow access to the devices
     container:
       image: ghcr.io/zephyrproject-rtos/ci:v0.28.7
@@ -35,22 +35,22 @@ jobs:
       options: --privileged
 
     steps:
-      # Checkout mender-zephyr-example
+      # Checkout mender-zephyr-example
       - name: Checkout mender-zephyr-example
         uses: actions/checkout@v6
         with:
           submodules: recursive
           path: mender-zephyr-example
 
-      # Setup Python
+      # Setup Python
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.12
+          python-version: "3.12"
         env:
           PIP_ROOT_USER_ACTION: ignore
 
-      # Setup Zephyr project
+      # Setup Zephyr project
       - name: Setup Zephyr project
         uses: zephyrproject-rtos/action-zephyr-setup@8354324d917cd398fb48d5fdd759cd61e147f084
         with:
@@ -59,14 +59,14 @@ jobs:
           PIP_ROOT_USER_ACTION: ignore
 
       # Generate hardware map using twister
-      # The following options is used:
+      # The following options is used:
       # --generate-hardware-map: generate hardware map
       - name: Generate hardware map
         working-directory: mender-zephyr-example
         run: |
           west twister --generate-hardware-map twister-out/map.yml
 
-      # Upload hardware-map artifact
+      # Upload hardware-map artifact
       - name: Upload artifact
         uses: actions/upload-artifact@v5
         with:

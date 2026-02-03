@@ -20,7 +20,7 @@ server=$1
 device_id=$2
 command=$3
 
-# Create temporary directory for PTYs
+# Create temporary directory for PTYs
 temp_dir=$(mktemp -d /tmp/mender-cli-XXXXXX)
 
 # Start socat with explicit PTY links
@@ -28,22 +28,22 @@ socat -d -d pty,raw,echo=0,link=$temp_dir/pty1 pty,raw,echo=0,link=$temp_dir/pty
 SOCAT_PID=$!
 sleep 3
 
-# Start mender-cli terminal
+# Start mender-cli terminal
 mender-cli terminal $device_id --server $server --skip-verify < $temp_dir/pty1 > $temp_dir/pty1 2>&1 &
 MENDER_CLI_PID=$!
 sleep 10
 
-# Check if prompt is received
+# Check if prompt is received
 output=$(timeout 30s dd if=$temp_dir/pty2 iflag=nonblock status=none 2>/dev/null)
 if [[ "$output" != *"\$"* ]]; then
-    # Disconnect
+    # Disconnect
     printf "\x1d" > $temp_dir/pty2
     sleep 3
     # Stop mender-cli if still executing
     kill -TERM $MENDER_CLI_PID > /dev/null 2>&1
-    # Stop socat
+    # Stop socat
     kill -TERM $SOCAT_PID > /dev/null 2>&1
-    # Cleaning
+    # Cleaning
     rm -rf $temp_dir
     exit 1
 fi
@@ -52,20 +52,20 @@ fi
 printf "$command\n" > $temp_dir/pty2
 sleep 3
 
-# Disconnect
+# Disconnect
 printf "\x1d" > $temp_dir/pty2
 sleep 3
 
-# Read result
+# Read result
 timeout 30s dd if=$temp_dir/pty2 iflag=nonblock status=none 2>/dev/null | tail -n +2
 
 # Stop mender-cli if still executing
 kill -TERM $MENDER_CLI_PID > /dev/null 2>&1
 
-# Stop socat
+# Stop socat
 kill -TERM $SOCAT_PID > /dev/null 2>&1
 
-# Cleaning
+# Cleaning
 rm -rf $temp_dir
 
 exit 0

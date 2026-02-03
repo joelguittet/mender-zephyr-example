@@ -27,7 +27,7 @@ on:
     - cron: '0 0 * * 1'
   workflow_dispatch:
 
-# Define concurrency so that the jobs of the workflow are not mixed between
+# Define concurrency so that the jobs of the workflow are not mixed between
 # several executions in case it is launched again while one is still running
 concurrency:
   group: device-testing
@@ -39,8 +39,8 @@ jobs:
     runs-on: self-hosted
 
     steps:
-      # Checkout mender-server
-      # FIXME: the repository can be changed to mendersoftware/mender-server once the following pull-request is merged
+      # Checkout mender-server
+      # FIXME: the repository can be changed to mendersoftware/mender-server once the following pull-request is merged
       # https://github.com/mendersoftware/mender-server/pull/1164
       - name: Checkout mender-server
         uses: actions/checkout@v6
@@ -49,10 +49,10 @@ jobs:
           ref: dc763f6aa1dd7d8787142ee88c8b596946eaed43
           path: mender-server
 
-      # Start mender-server
-      # Refer to https://docs.mender.io/server-installation/evaluation-with-docker-compose
+      # Start mender-server
+      # Refer to https://docs.mender.io/server-installation/evaluation-with-docker-compose
       # mender-server username and password are setup so that test scripts can later connect to the server
-      # mender-server certificate is converted to der format to be integrated in the devices
+      # mender-server certificate is converted to der format to be integrated in the devices
       - name: Setup Mender server
         working-directory: mender-server
         run: |
@@ -66,7 +66,7 @@ jobs:
           echo "Convert mender-server certificate to der format"
           openssl x509 -in ${{ github.workspace }}/mender-server/compose/certs/mender.crt -outform der -out ${{ github.workspace }}/mender-server/compose/certs/mender.der
 
-      # Upload mender-certs artifact
+      # Upload mender-certs artifact
       # This step is used to save mender certificates so they can be used for tests
       - name: Upload artifact
         uses: actions/upload-artifact@v5
@@ -81,11 +81,11 @@ jobs:
     runs-on: self-hosted
     timeout-minutes: 120
     needs: setup
-    # Twister is executed inside zephyrproject-rtos/ci container
+    # Twister is executed inside zephyrproject-rtos/ci container
     # The container is executed with privileged option to have full access to the host
-    # The following are bounded in the container:
+    # The following are bounded in the container:
     # - /dev: to allow access to the devices
-    # - local.conf: contains configuration of the test bench such as Mender server and Wi-Fi settings
+    # - local.conf: contains configuration of the test bench such as Mender server and Wi-Fi settings
     # - map.yml: the twister hardware map corresponding to the devices physically connected to the test bench
     container:
       image: ghcr.io/zephyrproject-rtos/ci:v0.28.7
@@ -103,22 +103,22 @@ jobs:
           name: mender-certs
           path: ${{ github.workspace }}
 
-      # Install mender-artifact and mender-cli
-      # mender-artifact is used to generate artifact for firmware update
-      # mender-cli is used to connect to the troubleshoot terminal of the device
+      # Install mender-artifact and mender-cli
+      # mender-artifact is used to generate artifact for firmware update
+      # mender-cli is used to connect to the troubleshoot terminal of the device
       - name: Install mender-artifact and mender-cli
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             apt-transport-https ca-certificates curl gnupg jq
-          curl -fsSL https://downloads.mender.io/repos/debian/gpg | sudo tee /etc/apt/trusted.gpg.d/mender.asc
+          curl -fsSL https://downloads.mender.io/repos/debian/gpg | tee /etc/apt/trusted.gpg.d/mender.asc
           sed -i.bak -e "\,https://downloads.mender.io/repos/workstation-tools,d" /etc/apt/sources.list
           echo "deb [arch=$(dpkg --print-architecture)] https://downloads.mender.io/repos/workstation-tools debian/trixie/stable main" | tee /etc/apt/sources.list.d/mender.list
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             mender-artifact mender-cli
 
-      # Install LinkServer (used to flash frdm-mcxn947 board)
+      # Install LinkServer (used to flash frdm-mcxn947 board)
       - name: Install LinkServer
         run: |
           apt-get update
@@ -133,7 +133,7 @@ jobs:
         env:
           LINK_SERVER_VERSION: 25.9.134
 
-      # Install J-Link (used to flash nrf7002-dk board)
+      # Install J-Link (used to flash nrf7002-dk board)
       - name: Install J-Link
         run: |
           apt-get update
@@ -146,22 +146,22 @@ jobs:
         env:
           JLINK_VERSION: V890
 
-      # Checkout mender-zephyr-example
+      # Checkout mender-zephyr-example
       - name: Checkout mender-zephyr-example
         uses: actions/checkout@v6
         with:
           submodules: recursive
           path: mender-zephyr-example
 
-      # Setup Python
+      # Setup Python
       - name: Setup Python
         uses: actions/setup-python@v6
         with:
-          python-version: 3.12
+          python-version: "3.12"
         env:
           PIP_ROOT_USER_ACTION: ignore
 
-      # Setup Zephyr project
+      # Setup Zephyr project
       # Toolchains are installed to build the application for all supported boards:
       # - arm-zephyr-eabi: to support frdm-mcxn947, nrf7002-dk and nucleo-l4a6zg boards
       # - xtensa-espressif_esp32_zephyr-elf: to support esp32-devkitc
@@ -173,8 +173,8 @@ jobs:
         env:
           PIP_ROOT_USER_ACTION: ignore
 
-      # Fetch blobs
-      # The following blobs are fetch:
+      # Fetch blobs
+      # The following blobs are fetch:
       # - hal_espressif: to support esp32-devkitc board
       # - nrf_wifi: to support nrf7002-dk board
       - name: Fetch blobs
@@ -183,14 +183,14 @@ jobs:
           west blobs fetch hal_espressif
           west blobs fetch nrf_wifi
 
-      # Execute tests using twister
-      # The following options are used:
+      # Execute tests using twister
+      # The following options are used:
       # --allow-installed-plugin: allow using pytest-dependency
       # --enable-slow: execute test with "slow: true" in the testcase.yml file
       # --inline-logs: print logs to stdout
       # --device-testing: test on devices
       # --hardware-map: Hardware map file, specific to the testbench machine
-      # The following environment variables are defined:
+      # The following environment variables are defined:
       # - MENDER_SERVER: mender-server URL "https://docker.mender.io"
       # - MENDER_USER: mender-server username previsouly defined
       # - MENDER_PASS: mender-server password previsouly defined
@@ -207,16 +207,16 @@ jobs:
           MENDER_CA: "/__w/mender-zephyr-example/mender-zephyr-example/mender.crt"
 
       # Analyse test results
-      # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
-      - name: Analyze test results
-        if: ${{ always() && steps.execute-tests.conclusion != 'skipped' && steps.execute-tests.conclusion != 'cancelled' }}
-        working-directory: mender-zephyr-example
-        run: |
-          python3 scripts/twister_report_summary.py twister-out/twister_report.xml > twister-out/summary.md
-          cat twister-out/summary.md > $GITHUB_STEP_SUMMARY
+      # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
+      #- name: Analyze test results
+      #  if: ${{ always() && steps.execute-tests.conclusion != 'skipped' && steps.execute-tests.conclusion != 'cancelled' }}
+      #  working-directory: mender-zephyr-example
+      #  run: |
+      #    python3 scripts/twister_report_summary.py twister-out/twister_report.xml > twister-out/summary.md
+      #    cat twister-out/summary.md > $GITHUB_STEP_SUMMARY
 
       # Upload test-results artifact
-      # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
+      # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
       - name: Upload artifact
         if: ${{ always() && steps.execute-tests.conclusion != 'skipped' && steps.execute-tests.conclusion != 'cancelled' }}
         uses: actions/upload-artifact@v5
@@ -224,8 +224,8 @@ jobs:
           name: test-results
           if-no-files-found: error
           retention-days: 7
+          # mender-zephyr-example/twister-out/summary.md
           path: |
-            mender-zephyr-example/twister-out/summary.md
             mender-zephyr-example/twister-out/testplan.json
             mender-zephyr-example/twister-out/twister.json
             mender-zephyr-example/twister-out/twister.log
@@ -251,6 +251,30 @@ jobs:
         run: |
           rm -rf .west
 
+  publish-test-results:
+    name: Publish test results
+    runs-on: ubuntu-24.04
+    if: ${{ always() && !contains(needs.device-testing.result, 'cancelled') }}
+    needs: [device-testing]
+    permissions:
+      contents: read
+      issues: read
+      checks: write
+      pull-requests: write
+
+    steps:
+      # Download artifacts
+      # This step is used to retrieve test results so they can be used to publish report
+      - uses: actions/download-artifact@v6
+        with:
+          path: artifacts
+
+      # Publish test results
+      - name: Publish test results
+        uses: EnricoMi/publish-unit-test-result-action/linux@v2
+        with:
+          files: artifacts/twister_report.xml
+
   teardown:
     name: Stop Mender server
     runs-on: self-hosted
@@ -258,7 +282,7 @@ jobs:
     needs: [setup, device-testing]
 
     steps:
-      # Stop mender-server
+      # Stop mender-server
       - name: Shutdown Mender server
         working-directory: mender-server
         run: |

@@ -28,25 +28,20 @@ on:
 jobs:
   check-code-format:
     name: Check code format
-    runs-on: self-hosted
-    container:
-      image: ubuntu:24.04
-
+    runs-on: ubuntu-24.04
     steps:
-      # Install tools
+      # Install tools
       - name: Install tools
         run: |
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            ca-certificates clang-format git pcregrep
+          sudo apt-get install clang-format pcregrep
 
-      # Checkout mender-zephyr-example
+      # Checkout mender-zephyr-example
       - name: Checkout mender-zephyr-example
         uses: actions/checkout@v6
         with:
           path: mender-zephyr-example
 
-      # Check code format
+      # Check code format
       - name: Check headers
         if: ${{ always() }}
         working-directory: mender-zephyr-example
