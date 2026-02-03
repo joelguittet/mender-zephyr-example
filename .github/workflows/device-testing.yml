@@ -254,7 +254,7 @@ jobs:
   publish-test-results:
     name: Publish test results
     runs-on: ubuntu-24.04
-    if: ${{ always() && !contains(needs.device-testing.result, 'cancelled') }}
+    if: ${{ always() && !contains(needs.device-testing.result, 'skipped') && !contains(needs.device-testing.result, 'cancelled') }}
     needs: [device-testing]
     permissions:
       contents: read
@@ -278,7 +278,7 @@ jobs:
   teardown:
     name: Stop Mender server
     runs-on: self-hosted
-    if: ${{ always() && !contains(needs.setup.result, 'cancelled') }}
+    if: ${{ always() && !contains(needs.setup.result, 'skipped') && !contains(needs.setup.result, 'cancelled') }}
     needs: [setup, device-testing]
 
     steps:
