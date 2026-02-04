@@ -69,7 +69,7 @@ jobs:
       # Upload mender-certs artifact
       # This step is used to save mender certificates so they can be used for tests
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: mender-certs
           if-no-files-found: error
@@ -98,7 +98,7 @@ jobs:
     steps:
       # Download mender-certs artifact
       # This step is used to retrieve mender certificates so they can be used for tests
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           name: mender-certs
           path: ${{ github.workspace }}
@@ -219,7 +219,7 @@ jobs:
       # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
       - name: Upload artifact
         if: ${{ always() && steps.execute-tests.conclusion != 'skipped' && steps.execute-tests.conclusion != 'cancelled' }}
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: test-results
           if-no-files-found: error
@@ -265,7 +265,7 @@ jobs:
     steps:
       # Download artifacts
       # This step is used to retrieve test results so they can be used to publish report
-      - uses: actions/download-artifact@v6
+      - uses: actions/download-artifact@v7
         with:
           path: artifacts
 
@@ -273,7 +273,7 @@ jobs:
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action/linux@v2
         with:
-          files: artifacts/twister_report.xml
+          files: artifacts/test-results/twister_report.xml
 
   teardown:
     name: Stop Mender server
