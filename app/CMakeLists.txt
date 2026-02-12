@@ -17,6 +17,12 @@
 
 cmake_minimum_required(VERSION 3.20.0)
 
+# Extra modules
+list(APPEND EXTRA_ZEPHYR_MODULES
+    "${CMAKE_CURRENT_SOURCE_DIR}/../modules/cJSON"
+    "${CMAKE_CURRENT_SOURCE_DIR}/../modules/msgpack-c"
+)
+
 # Declare project
 find_package(Zephyr REQUIRED HINTS $ENV{ZEPHYR_BASE})
 project(mender-zephyr-example)

@@ -1,5 +1,5 @@
-# @file      Kconfig
-# @brief     Additional libraries Kconfig file
+# @file      module.yml
+# @brief     msgpack-c module YAML file
 #
 # Copyright joelguittet and mender-mcu-client contributors
 #
@@ -15,9 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-menu "Additional libraries"
-
-    rsource "cJSON/Kconfig"
-    rsource "msgpack-c/Kconfig"
-
-endmenu
+name: msgpack-c
+build:
+    cmake: .
+    kconfig: Kconfig
+security:
+  external-references:
+    - cpe:2.3:a:msgpack:msgpack-c:6.1.0:*:*:*:*:*:*:*
+    - pkg:github/msgpack/msgpack-c@6.1.0

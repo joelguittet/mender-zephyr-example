@@ -46,13 +46,13 @@ Together with a network IC such as the [W5500](https://wiznet.io/products/ethern
 
 ![NUCLEO-L4A6ZG and W5500 wiring](https://raw.githubusercontent.com/joelguittet/mender-zephyr-example/master/.github/docs/nucleo-l4a6zg.png)
 
-The project is built using Zephyr RTOS v4.4.x (v4.4-branch) and Zephyr SDK >= v0.17.4. [TODO: UPDATE version if required]
+The project is built using Zephyr RTOS v4.4.x and Zephyr SDK v0.17.x. [TODO: UPDATE version if required]
 
 To start using Mender, we recommend that you begin with the Getting started section in [the Mender documentation](https://docs.mender.io).
 
 To start using Zephyr, we recommend that you begin with the Getting started section in [the Zephyr documentation](https://docs.zephyrproject.org/latest/develop/getting_started/index.html). It is highly recommended to be familiar with Zephyr environment and tools to use this example.
 
-### Open the project
+### Initialize the project
 
 Initiate a new workspace using the following commands. This will download the dependencies of the example application.
 
@@ -70,11 +70,12 @@ west update
 
 ### Configuration of the application
 
-The example application should first be configured in `app/prj.conf` to set at least:
+The example application should first be configured to set at least:
 - `CONFIG_MENDER_SERVER_TENANT_TOKEN` to set the Tenant Token of your account on "https://hosted.mender.io" server.
+- `CONFIG_EXAMPLE_WIFI_SSID` to set the SSID of the Access Point (for boards supporting Wi-Fi).
+- `CONFIG_EXAMPLE_WIFI_PSK` to set the password of the network (for boards supporting Wi-Fi).
 
 You may want to customize few interesting settings:
-- `CONFIG_EXAMPLE_WIFI_SSID` and `CONFIG_EXAMPLE_WIFI_PSK` for boards supporting Wi-Fi.
 - `CONFIG_MENDER_SERVER_HOST` if using your own Mender server instance. Tenant Token is not required in this case.
 - `CONFIG_MENDER_CLIENT_AUTHENTICATION_POLL_INTERVAL` is the interval to retry authentication on the mender server.
 - `CONFIG_MENDER_CLIENT_UPDATE_POLL_INTERVAL` is the interval to check for new deployments.
@@ -143,7 +144,7 @@ After flashing the application on the development board and opening a terminal t
 [00:03:58.699,000] <inf> mender_zephyr_example: Mender client released network
 ```
 
-Which means you now have generated authentication keys on the device. Generating is a bit long (depending of the hardware) but authentication keys are stored in the device so it's done only the first time the device is flashed. You now have to accept your device on the mender interface. Once it is accepted on the mender interface the following will be displayed:
+Which means you now have generated authentication keys on the device. Generating could be a bit long (depending of the hardware and depending of the mender-mcu-client configuration) but authentication keys are stored in the device so it's done only the first time the device is flashed. You now have to accept your device on the mender interface. Once it is accepted on the mender interface the following will be displayed:
 
 ```
 [00:10:02.176,000] <inf> mender_zephyr_example: Mender client connect network
@@ -281,7 +282,7 @@ west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="troubleshoot.con
 west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="troubleshoot.conf;troubleshoot-file-transfer.conf"
 ```
 
-Please note that due to llimited amount of memory available, the Device Troubleshoot integration is not recommended on ESP32-DevKitC and NUCLEO-L4A6ZG, and tested only using nRF7002-DK and the FRDM-MCXN947 development boards.
+Please note that due to limited amount of memory available, the Device Troubleshoot integration is not recommended on ESP32-DevKitC and NUCLEO-L4A6ZG, and tested only using nRF7002-DK and the FRDM-MCXN947 development boards.
 
 ### Download and execute an LLEXT module [TODO: to be retested/updated]
 
@@ -336,7 +337,8 @@ This application illustrates the usage of different kind of interfaces (Ethernet
 ### Using an other mender instance
 
 The communication with the server is done using HTTPS. To get it working, the Root CA that is providing the server certificate should be integrated and registered in the application (see `tls_credential_add` in the `src/main.c` file). Format of the expected Root CA certificate is DER.
-In this example we are using the `https://hosted.mender.io` server. While checking the details of the server certificate in your browser, you will see that is is provided by Amazon Root CA 1. Thus the Amazon Root CA 1 certificate `AmazonRootCA1.cer` retrieved at `https://www.amazontrust.com/repository` is integrated in the application.
+
+In this example we are using the `https://hosted.mender.io` server with an Enterprise account. While checking the details of the server certificate in your browser, you will see that is is provided by Amazon Root CA 1. Thus the Amazon Root CA 1 certificate `AmazonRootCA1.cer` retrieved at `https://www.amazontrust.com/repository` is integrated in the application.
 
 Using another instance you may need to integrate another Root CA certificate. Also note depending of the certificate properties you may need to activate additional cipher suites in the mbedTLS configuration. See below considerations when using trial mender instance for example.
 
@@ -357,7 +359,11 @@ CONFIG_MBEDTLS_SHA384=y
 CONFIG_MBEDTLS_ECP_NIST_OPTIM=y
 ```
 
-Those configurations are also available using the Kconfig fragment `trial.conf` in the build configuration.
+Those configurations are also available using the Kconfig fragment `trial.conf` in the build configuration, using the following command.
+
+```
+west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="trial.conf"
+```
 
 ## License
 

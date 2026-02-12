@@ -44,7 +44,7 @@ do
 done
 
 # Check YAML, Python, CMake and configuration files
-for source_file in `git ls-tree -r HEAD --name-only | grep -E '(.*\.yml$|.*\.yaml$|.*\.py$|CMakeLists.*\.txt$|.*\.cmake$|.*\.cfg$|.*\.conf$|.clang-format$|Kconfig$)' | grep -vFf .clang-format-ignore`
+for source_file in `git ls-tree -r HEAD --name-only | grep -E '(.*\.yml$|.*\.yaml$|.*\.py$|CMakeLists.*\.txt$|.*\.cmake$|.*\.cfg$|.*\.conf$|.clang-format$|Kconfig.*$)' | grep -vFf .clang-format-ignore`
 do
     check_header ${source_file} "" "#" ""
     if [[ ! $? -eq 0 ]]; then

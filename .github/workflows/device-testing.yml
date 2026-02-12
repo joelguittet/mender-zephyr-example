@@ -34,9 +34,35 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  acquire-lock:
+    name: Acquire hardware lock
+    runs-on: self-hosted
+
+    steps:
+      # Acquire hardware lock
+      # This mechanism is used by the repositories testing mender-mcu-client on the hardware
+      # It allow to wait until other workflows are executing
+      - name: Acquire hardware lock
+        run: |
+          LOCKFILE=/var/lock/mender-mcu-client-workflow.lock
+          PIDFILE=/var/lock/mender-mcu-client-workflow.pid
+          TIMEOUT=86400 # 24 hours max wait
+          mkdir -p /var/lock
+          echo "Trying to acquire hardware lock..."
+          (
+            flock -w $TIMEOUT 9 || {
+              echo "Timeout waiting for hardware lock"
+              exit 1
+            }
+            echo $$ > $PIDFILE
+            echo "Lock acquired"
+            sleep infinity
+          ) 9>$LOCKFILE &
+
   setup:
     name: Setup Mender server
     runs-on: self-hosted
+    needs: acquire-lock
 
     steps:
       # Checkout mender-server
@@ -287,3 +313,24 @@ jobs:
         working-directory: mender-server
         run: |
           docker compose down -v --remove-orphans
+
+  release-lock:
+    runs-on: self-hosted
+    if: always()
+    needs: teardown
+
+    steps:
+      # Release hardware lock
+      - name: Release hardware lock
+        run: |
+          PIDFILE=/var/lock/mender-mcu-client-workflow.pid
+          if [ -f "$PIDFILE" ]; then
+            PID=$(cat $PIDFILE)
+            if kill -0 "$PID" 2>/dev/null; then
+              echo "Releasing lock..."
+              kill "$PID"
+            fi
+            rm -f "$PIDFILE"
+          else
+            echo "No PID file found"
+          fi

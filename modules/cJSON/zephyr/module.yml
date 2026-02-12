@@ -1,5 +1,5 @@
-# @file      CMakeLists.txt
-# @brief     Additional libraries CMakeLists file
+# @file      module.yml
+# @brief     cJSON module YAML file
 #
 # Copyright joelguittet and mender-mcu-client contributors
 #
@@ -15,5 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-add_subdirectory_ifdef(CONFIG_CJSON cJSON)
-add_subdirectory_ifdef(CONFIG_MSGPACK_C msgpack-c)
+name: cJSON
+build:
+    cmake: .
+    kconfig: Kconfig
+security:
+  external-references:
+    - cpe:2.3:a:davegamble:cjson:1.7.19:*:*:*:*:*:*:*
+    - pkg:github/DaveGamble/cJSON@1.7.19

@@ -22,12 +22,6 @@
 /delete-node/ &slot1_partition;
 /delete-node/ &storage_partition;
 
-/ {
-    chosen {
-        zephyr,code-partition = &boot_partition;
-    };
-};
-
 &flash0 {
     status = "okay";
     partitions {
