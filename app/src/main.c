@@ -33,6 +33,9 @@ LOG_MODULE_REGISTER(mender_zephyr_example, LOG_LEVEL_INF);
 #include <zephyr/net/net_mgmt.h>
 #ifdef CONFIG_WIFI
 #include <zephyr/net/wifi_mgmt.h>
+#ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT
+#include <supp_events.h>
+#endif /* CONFIG_WIFI_NM_WPA_SUPPLICANT */
 #endif /* CONFIG_WIFI */
 #include <zephyr/shell/shell.h>
 #include <zephyr/shell/shell_uart.h>
@@ -694,6 +697,12 @@ main(void) {
     LOG_INF("Initialization of network interface");
     struct net_if *iface = net_if_get_default();
     assert(NULL != iface);
+#ifdef CONFIG_WIFI
+#ifdef CONFIG_WIFI_NM_WPA_SUPPLICANT
+    /* Wait for wpa-supplicant initialization */
+    net_mgmt_event_wait_on_iface(iface, NET_EVENT_SUPPLICANT_IFACE_ADDED, NULL, NULL, NULL, K_SECONDS(30));
+#endif /* CONFIG_WIFI_NM_WPA_SUPPLICANT */
+#endif /* CONFIG_WIFI */
     net_mgmt_init_event_callback(&mgmt_cb, net_event_handler, NET_EVENT_IPV4_ADDR_ADD | NET_EVENT_IPV4_ADDR_DEL);
     net_mgmt_add_event_callback(&mgmt_cb);
     net_dhcpv4_start(iface);
