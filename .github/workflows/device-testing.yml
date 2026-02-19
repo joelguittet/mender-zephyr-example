@@ -275,15 +275,15 @@ jobs:
         with:
           files: artifacts/test-results/twister_report.xml
 
-  #teardown:
-  #  name: Stop Mender server
-  #  runs-on: self-hosted
-  #  if: ${{ always() && !contains(needs.setup.result, 'skipped') && !contains(needs.setup.result, 'cancelled') }}
-  #  needs: [setup, device-testing]
+  teardown:
+    name: Stop Mender server
+    runs-on: self-hosted
+    if: ${{ always() && !contains(needs.setup.result, 'skipped') && !contains(needs.setup.result, 'cancelled') }}
+    needs: [setup, device-testing]
 
-  #  steps:
-  #    # Stop mender-server
-  #    - name: Shutdown Mender server
-  #      working-directory: mender-server
-  #      run: |
-  #        docker compose down -v --remove-orphans
+    steps:
+      # Stop mender-server
+      - name: Shutdown Mender server
+        working-directory: mender-server
+        run: |
+          docker compose down -v --remove-orphans
