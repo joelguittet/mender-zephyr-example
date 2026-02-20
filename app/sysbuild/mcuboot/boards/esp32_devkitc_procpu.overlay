@@ -20,9 +20,9 @@
 /delete-node/ &storage_partition;
 
 / {
-	chosen {
-		zephyr,code-partition = &boot_partition;
-	};
+    chosen {
+        zephyr,code-partition = &boot_partition;
+    };
 };
 
 &flash0 {

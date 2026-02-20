@@ -61,10 +61,11 @@ jobs:
       # Generate hardware map using twister
       # The following options is used:
       # --generate-hardware-map: generate hardware map
+      # --persistent-hardware-map: tries to use persistent names for serial devices
       - name: Generate hardware map
         working-directory: mender-zephyr-example
         run: |
-          west twister --generate-hardware-map twister-out/map.yml
+          west twister --generate-hardware-map --persistent-hardware-map twister-out/map.yml
 
       # Upload hardware-map artifact
       - name: Upload artifact
