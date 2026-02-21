@@ -269,10 +269,9 @@ jobs:
       # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
       - name: Analyze test results
         # if: ${{ always() && steps.execute-tests.conclusion != 'skipped' && steps.execute-tests.conclusion != 'cancelled' }}
-        working-directory: mender-zephyr-example
         run: |
-          python3 scripts/twister_report_summary.py twister-out/twister_report.xml > twister-out/summary.md
-          cat twister-out/summary.md >> $GITHUB_STEP_SUMMARY
+          python3 mender-zephyr-example/scripts/twister_report_summary.py artifacts/test-results/twister_report.xml > artifacts/test-results/summary.md
+          cat artifacts/test-results/summary.md >> $GITHUB_STEP_SUMMARY
 
   teardown:
     name: Stop Mender server
