@@ -105,6 +105,7 @@ class Helpers:
             data, updated_ts = f()
             if data is not None and updated_ts is not None:
                 delta = interval * 1.5
+                print(f"until data refreshed, updated_ts={updated_ts}, now={datetime.now(timezone.utc)}, delta={delta}") # TODO REMOVE DEBUG
                 if datetime.fromisoformat(updated_ts) > datetime.now(timezone.utc) - timedelta(seconds=delta):
                     return data
             time.sleep(interval)
