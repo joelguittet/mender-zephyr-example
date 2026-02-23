@@ -206,6 +206,14 @@ jobs:
           MENDER_PASSWORD: "PleaseReplaceWithASecurePassword"
           MENDER_CA: "/__w/mender-zephyr-example/mender-zephyr-example/mender.crt"
 
+      # Analyse test results
+      # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
+      - name: Analyze test results
+        if: ${{ always() && steps.execute-tests.conclusion != 'skipped' && steps.execute-tests.conclusion != 'cancelled' }}
+        working-directory: mender-zephyr-example
+        run: |
+          python3 scripts/twister_report_summary.py twister-out/twister_report.xml > twister-out/summary.md
+
       # Upload test-results artifact
       # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
       - name: Upload artifact
@@ -216,6 +224,7 @@ jobs:
           if-no-files-found: error
           retention-days: 7
           path: |
+            mender-zephyr-example/twister-out/summary.md
             mender-zephyr-example/twister-out/testplan.json
             mender-zephyr-example/twister-out/twister.json
             mender-zephyr-example/twister-out/twister.log
@@ -265,12 +274,9 @@ jobs:
         with:
           files: artifacts/test-results/twister_report.xml
 
-      # Analyse test results
-      # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
-      - name: Analyze test results
-        # if: ${{ always() && steps.execute-tests.conclusion != 'skipped' && steps.execute-tests.conclusion != 'cancelled' }}
+      # Publish summary
+      - name: Publish summary
         run: |
-          python3 mender-zephyr-example/scripts/twister_report_summary.py artifacts/test-results/twister_report.xml > artifacts/test-results/summary.md
           cat artifacts/test-results/summary.md >> $GITHUB_STEP_SUMMARY
 
   teardown:
