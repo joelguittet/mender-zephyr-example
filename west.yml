@@ -28,7 +28,9 @@ manifest:
   projects:
     - name: zephyr
       remote: zephyrproject-rtos
-      revision: main
+      # TODO move to main / v4.4 when available
+      # see https://github.com/zephyrproject-rtos/zephyr/pull/103652
+      revision: pull/103652/head
       import:
         # By using name-allowlist we can clone only the modules that are
         # strictly needed by the application
@@ -49,5 +51,6 @@ manifest:
     - name: mender-mcu-client
       remote: joelguittet
       # TODO create a new version 0.12.4
-      revision: d1f38dc8e1e2d8e3602582c40cfac54314444eda
+      #revision: d1f38dc8e1e2d8e3602582c40cfac54314444eda
+      revision: 0.12.3
       path: modules/lib/mender-mcu-client
