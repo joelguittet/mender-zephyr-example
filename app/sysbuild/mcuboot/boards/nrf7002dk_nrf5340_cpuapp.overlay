@@ -34,7 +34,6 @@
         compatible = "fixed-partitions";
         #address-cells = <1>;
         #size-cells = <1>;
-        ranges;
         /* Bootloader slot: 56KB */
         boot_partition: partition@0 {
             label = "mcuboot";
@@ -60,7 +59,6 @@
         compatible = "fixed-partitions";
         #address-cells = <1>;
         #size-cells = <1>;
-        ranges;
         /* Update slot: 960KB */
         slot1_partition: partition@0 {
             label = "image-1";

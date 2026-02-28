@@ -42,7 +42,6 @@
         compatible = "fixed-partitions";
         #address-cells = <1>;
         #size-cells = <1>;
-        ranges;
         /* Storage slot: 64KB */
         storage_partition: partition@3b0000 {
             label = "storage";
