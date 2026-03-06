@@ -31,8 +31,8 @@ manifest:
       # TODO move to main / v4.4 when available
       # see https://github.com/zephyrproject-rtos/zephyr/pull/103652
       # OK for st boards:
-      #revision: pull/103652/head
-      revision: main
+      revision: pull/103652/head
+      #revision: main
       import:
         # By using name-allowlist we can clone only the modules that are
         # strictly needed by the application

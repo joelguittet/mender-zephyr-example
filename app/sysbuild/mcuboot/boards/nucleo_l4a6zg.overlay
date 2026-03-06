@@ -24,11 +24,6 @@
 };
 
 &flash0 {
-    /*
-     * FIXME: ranges should be defined in zephyr, and can be removed here once the following pull-request is merged
-     * https://github.com/zephyrproject-rtos/zephyr/pull/103652
-     */
-    ranges = <0 0x8000000 DT_SIZE_K(1024)>;
     partitions {
         compatible = "fixed-partitions";
         #address-cells = <1>;
