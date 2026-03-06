@@ -30,22 +30,20 @@ manifest:
       remote: zephyrproject-rtos
       # TODO move to main / v4.4 when available
       # see https://github.com/zephyrproject-rtos/zephyr/pull/103652
+      # OK for st boards:
       revision: pull/103652/head
+      #revision: 3a0cad96da55e9f8255fb444b71b28eef57a543d
       import:
         # By using name-allowlist we can clone only the modules that are
         # strictly needed by the application
         name-allowlist:
           - cmsis_6
           - hal_espressif # required for esp32-devkitc board
-          - hal_nordic # required for nrf7002-dk board
           - hal_nxp # required for frdm-mcxn947 board
           - hal_stm32 # required for nucleo-l4a6zg board
-          - hostap # required for nrf7002-dk board
           - littlefs
           - mbedtls
           - mcuboot
-          - nrf_hw_models # required for nrf7002-dk board
-          - nrf_wifi # required for nrf7002-dk board
           - picolibc
           - zcbor # required in case mcumgr is enabled
     - name: mender-mcu-client

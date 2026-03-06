@@ -4,3 +4,6 @@
 [submodule "modules/msgpack-c/msgpack-c"]
 	path = modules/msgpack-c/msgpack-c
 	url = https://github.com/msgpack/msgpack-c.git
+[submodule "modules/cryptoauthlib/cryptoauthlib"]
+	path = modules/cryptoauthlib/cryptoauthlib
+	url = https://github.com/MicrochipTech/cryptoauthlib.git

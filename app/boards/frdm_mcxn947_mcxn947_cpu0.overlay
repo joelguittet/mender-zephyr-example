@@ -49,7 +49,6 @@
         compatible = "fixed-partitions";
         #address-cells = <1>;
         #size-cells = <1>;
-        ranges;
         /* Bootloader slot: 64KB */
         boot_partition: partition@0 {
             label = "mcuboot";
@@ -85,7 +84,6 @@
         compatible = "fixed-partitions";
         #address-cells = <1>;
         #size-cells = <1>;
-        ranges;
         littlefs_partition: partition@0 {
             label = "littlefs";
             reg = <0x0 DT_SIZE_M(8)>;

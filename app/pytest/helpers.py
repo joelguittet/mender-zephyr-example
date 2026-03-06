@@ -18,6 +18,7 @@
 import os
 import re
 import subprocess
+import tempfile
 import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
@@ -76,7 +77,7 @@ class Helpers:
         try:
             match_no_lines(output[-1:], [r"\[401\] Unauthorized"])
         except (AssertionError):
-            raise AssertionError("🔴​​​ Device is not authenticated to the server but it should not")
+            raise AssertionError("🔴​​​ Device is not authenticated to the server but it should")
         print("✅ Device is authenticated")
 
     def assert_device_troubleshoot_connected(self, dut: DeviceAdapter):
@@ -86,14 +87,25 @@ class Helpers:
             raise AssertionError("🔴​​​ Device troubleshoot doesn't appear to be connected but it should")
         print("✅ Device troubleshoot connected")
 
-    def create_mender_artifact(self, build_dir: Path, key_file: Path, device_type: str, artifact_name_prefix: str, version: str) -> Path:
-        # Sign binary using west sign (key file is optional)
-        cmd = f"west sign --tool imgtool --build-dir {build_dir} -- --version {version}"
-        if os.path.exists(key_file):
-            cmd += f" --key {key_file}"
-        subprocess.run(cmd, shell=True, check=True)
-        # Create artifact using mender-artifact
+    def create_mender_artifact(self, build_dir: Path, key_file: Path, device_type: str, artifact_name_prefix: str, version: str, mcuboot_pad_size: str, mcuboot_primary_size: str) -> Path:
+        # zephyr.signed.file path
         zephyr_signed_bin = Path(build_dir) / "zephyr" / "zephyr.signed.bin"
+        # Work in a temporary directory
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Retrieve image information from zephyr.signed.bin file
+            cmd=f"imgtool dumpinfo {zephyr_signed_bin}"
+            result = subprocess.run(cmd, cwd=Path(tmpdir), shell=True, capture_output=True, text=True, check=True)
+            header = dict(re.findall(r"^\s*(\w+):\s*(0x[0-9a-fA-F]+)", result.stdout, re.MULTILINE))
+            # Extract image payload from zephyr.signed.bin file
+            cmd=f"dd if={zephyr_signed_bin} of=zephyr.bin bs=1 skip={int(header["hdr_size"], 16)} count={int(header["img_size"], 16)}"
+            subprocess.run(cmd, cwd=Path(tmpdir), shell=True, check=True)
+            # Overwrite zephyr.signed.bin file updating the version (key file is optional)
+            cmd=f"imgtool sign --version {version} --align 4 --pad-header --header-size {mcuboot_pad_size} --slot-size {mcuboot_primary_size}"
+            if os.path.exists(key_file):
+                cmd += f" --key {key_file}"
+            cmd += f" zephyr.bin {zephyr_signed_bin}"
+            subprocess.run(cmd, cwd=Path(tmpdir), shell=True, check=True)
+        # Create artifact using mender-artifact
         artifact_file = Path(build_dir) / "zephyr" / f"{artifact_name_prefix}-v{version}.mender"
         cmd = f"mender-artifact write rootfs-image --compression none --device-type {device_type} --artifact-name {artifact_name_prefix}-v{version} --output-path {artifact_file} --file {zephyr_signed_bin}"
         subprocess.run(cmd, shell=True, check=True)
@@ -105,7 +117,6 @@ class Helpers:
             data, updated_ts = f()
             if data is not None and updated_ts is not None:
                 delta = interval * 1.5
-                print(f"until data refreshed, updated_ts={updated_ts}, now={datetime.now(timezone.utc)}, delta={delta}") # TODO REMOVE DEBUG
                 if datetime.fromisoformat(updated_ts) > datetime.now(timezone.utc) - timedelta(seconds=delta):
                     return data
             time.sleep(interval)

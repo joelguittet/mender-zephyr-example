@@ -78,14 +78,25 @@
     };
 };
 
+&arduino_i2c {
+    status = "okay";
+
+    /* ATECC608A Crypto Element */
+    atecc608a@60 {
+        compatible = "atmel,atecc608";
+        reg = <0x60>;
+    };
+};
+
 &arduino_spi {
     status = "okay";
+
+    /* W5500 SPI/Ethernet Controller */
     eth_w5500: eth_w5500@0 {
         compatible = "wiznet,w5500";
         reg = <0x0>;
-        spi-max-frequency = <8000000>;
-        int-gpios = <&arduino_header ARDUINO_HEADER_R3_D9 GPIO_ACTIVE_LOW>;
-        reset-gpios = <&arduino_header ARDUINO_HEADER_R3_D8 GPIO_ACTIVE_LOW>;
+        spi-max-frequency = <20000000>;
+        int-gpios = <&arduino_header ARDUINO_HEADER_R3_D2 GPIO_ACTIVE_LOW>;
         /* MAC address is used to identify the device on the mender-server */
         local-mac-address = [00 08 DC 01 02 03];
     };

@@ -37,8 +37,6 @@ LOG_MODULE_REGISTER(mender_zephyr_example, LOG_LEVEL_INF);
 #include <supp_events.h>
 #endif /* CONFIG_WIFI_NM_WPA_SUPPLICANT */
 #endif /* CONFIG_WIFI */
-#include <zephyr/shell/shell.h>
-#include <zephyr/shell/shell_uart.h>
 #include <zephyr/sys/reboot.h>
 
 #ifdef CONFIG_MENDER_CLIENT_ADD_ON_TROUBLESHOOT
@@ -52,6 +50,10 @@ LOG_MODULE_REGISTER(mender_zephyr_example, LOG_LEVEL_INF);
 #include <zephyr/llext/llext.h>
 #include <zephyr/llext/buf_loader.h>
 #endif /* CONFIG_LLEXT */
+
+#ifdef CONFIG_MENDER_PLATFORM_TLS_TYPE_CRYPTOAUTHLIB
+#include <cryptoauthlib.h>
+#endif /* CONFIG_MENDER_PLATFORM_TLS_TYPE_CRYPTOAUTHLIB */
 
 #ifdef CONFIG_NET_SOCKETS_SOCKOPT_TLS
 #include <zephyr/net/tls_credentials.h>
@@ -692,6 +694,13 @@ hello_world_module_cb(char *id, char *artifact_name, char *type, cJSON *meta_dat
  */
 int
 main(void) {
+
+#ifdef CONFIG_MENDER_PLATFORM_TLS_TYPE_CRYPTOAUTHLIB
+    /* Initialize cryptoauthlib */
+    LOG_INF("Initialization of cryptoauthlib");
+    cfg_ateccx08a_i2c_default.cfg_data = DEVICE_DT_NAME(DT_NODELABEL(arduino_i2c));
+    assert(ATCA_SUCCESS == atcab_init(&cfg_ateccx08a_i2c_default));
+#endif /* CONFIG_MENDER_PLATFORM_TLS_TYPE_CRYPTOAUTHLIB */
 
     /* Initialize network */
     LOG_INF("Initialization of network interface");

@@ -34,17 +34,11 @@ This board has Dual Arm Cortex-M33 cores and NPU and it targets AI and Machine L
 
 ![FRDM-MCXN947](https://raw.githubusercontent.com/joelguittet/mender-zephyr-example/master/.github/docs/frdm-mcxn947.png)
 
-* [Nordic Semiconductor nRF7002-DK](https://www.nordicsemi.com/Products/Development-hardware/nRF7002-DK) development kit
-
-This board is the development kit for nRF7002 Wi-Fi 6 companion IC. It is based on nRF5340 MCU. While support using the Nordic Connect SDK environement is also provided throw the [mender-ncs-example](https://github.com/joelguittet/mender-ncs-example) repository, it is also possible to build a vanilla Zephyr application.
-
-![nRF7002-DK](https://raw.githubusercontent.com/joelguittet/mender-zephyr-example/master/.github/docs/nrf7002-dk.png)
-
 * [STMicroelectronics NUCLEO-L4A6ZG](https://www.st.com/en/evaluation-tools/nucleo-l4a6zg.html) development board
 
-Together with a network IC such as the [W5500](https://wiznet.io/products/ethernet-chips/w5500). The device tree overlay `app/boards/nucleo_l4a6zg.overlay` specifies the wiring of the module W5500 used in the project, as illustrated on the following image, and it is possible to adapt it to your own hardware.
+Together with an [ATECC608B](https://www.microchip.com/en-us/product/atecc608b) to provide device authentication and [W5500](https://wiznet.io/products/ethernet-chips/w5500) for Ethernet connectivity. The device tree overlay `app/boards/nucleo_l4a6zg.overlay` specifies the wiring of the crypto element and Ethernet controller used in the project.
 
-![NUCLEO-L4A6ZG and W5500 wiring](https://raw.githubusercontent.com/joelguittet/mender-zephyr-example/master/.github/docs/nucleo-l4a6zg.png)
+![NUCLEO-L4A6ZG](https://raw.githubusercontent.com/joelguittet/mender-zephyr-example/master/.github/docs/nucleo-l4a6zg.png)
 
 The project is built using Zephyr RTOS v4.4.x and Zephyr SDK v0.17.x. [TODO: UPDATE version if required]
 
@@ -92,10 +86,6 @@ Some boards depends on binary blobs. You can download them using the following c
 ```
 west blobs fetch hal_espressif
 ```
-* Nordic Semiconductor nRF7002-DK development kit
-```
-west blobs fetch nrf_wifi
-```
 
 The application relies on mcuboot and requires to build a signed binary file to be flashed on the evaluation board.
 
@@ -108,10 +98,6 @@ west build -b esp32_devkitc/esp32/procpu --sysbuild app
 * NXP FRDM-MCXN947 development board
 ```
 west build -b frdm_mcxn947/mcxn947/cpu0 --sysbuild app
-```
-* Nordic Semiconductor nRF7002-DK development kit
-```
-west build -b nrf7002dk/nrf5340/cpuapp --sysbuild app
 ```
 * STMicroelectronics NUCLEO-L4A6ZG development board
 ```
@@ -170,10 +156,6 @@ west build -b esp32_devkitc/esp32/procpu --sysbuild app
 ```
 west build -b frdm_mcxn947/mcxn947/cpu0 --sysbuild app
 ```
-* Nordic Semiconductor nRF7002-DK development kit
-```
-west build -b nrf7002dk/nrf5340/cpuapp --sysbuild app
-```
 * STMicroelectronics NUCLEO-L4A6ZG development board
 ```
 west build -b nucleo_l4a6zg --sysbuild app
@@ -194,10 +176,6 @@ path/to/mender-artifact write rootfs-image --compression none --device-type mend
 * NXP FRDM-MCXN947 development board
 ```
 path/to/mender-artifact write rootfs-image --compression none --device-type mender-frdm-mcxn947-zephyr-example --artifact-name mender-frdm-mcxn947-zephyr-example-v0.2.0 --output-path build/zephyr/mender-frdm-mcxn947-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
-```
-* Nordic Semiconductor nRF7002-DK development kit
-```
-path/to/mender-artifact write rootfs-image --compression none --device-type mender-nrf7002dk-zephyr-example --artifact-name mender-nrf7002dk-zephyr-example-v0.2.0 --output-path build/zephyr/mender-nrf7002dk-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
 ```
 * STMicroelectronics NUCLEO-L4A6ZG development board
 ```
@@ -282,7 +260,7 @@ west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="troubleshoot.con
 west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="troubleshoot.conf;troubleshoot-file-transfer.conf"
 ```
 
-Please note that due to limited amount of memory available, the Device Troubleshoot integration is not recommended on ESP32-DevKitC and NUCLEO-L4A6ZG, and tested only using nRF7002-DK and the FRDM-MCXN947 development boards.
+Please note that due to limited amount of memory available, the Device Troubleshoot integration is not recommended on ESP32-DevKitC and NUCLEO-L4A6ZG, and tested only using the FRDM-MCXN947 development board.
 
 ### Download and execute an LLEXT module [TODO: to be retested/updated]
 
@@ -364,6 +342,35 @@ Those configurations are also available using the Kconfig fragment `trial.conf` 
 ```
 west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="trial.conf"
 ```
+
+
+## Testing
+
+[Twister](https://docs.zephyrproject.org/latest/develop/test/twister.html) and [Pytest](https://docs.pytest.org/en/stable) are used in Github actions workflows to execute tests on real target.
+
+For such purpose, Github action runner is installed on a Debian machine running the workflows. The Debian machine uses `ghcr.io/zephyrproject-rtos/ci` container which provides a good environment to build Zephyr RTOS projects in such context.
+
+When testing is executed, a dedicated mender-server instance is instantiated, then tests are performed using this instance before it is shutdown and deleted.
+
+The Debian machine has a local configuration `local.conf` file used to build the firmware which contains the following settings:
+
+```
+CONFIG_MENDER_SERVER_HOST="https://docker.mender.io"
+CONFIG_MENDER_SERVER_TENANT_TOKEN=""
+CONFIG_EXAMPLE_USE_CUSTOM_CERTIFICATE=y
+CONFIG_EXAMPLE_CERTIFICATE_PATH="/__w/mender-zephyr-example/mender-zephyr-example/mender.der"
+CONFIG_EXAMPLE_WIFI_SSID="<ssid of local network>"
+CONFIG_EXAMPLE_WIFI_PSK="<psk of local network>"
+```
+
+The Debian machine has also a `map.yml` file to provide board settings for twister to run testing.
+
+Tests cover device registration, inventory, configuration, troubleshooting shell, firmware update and decomissioning.
+
+Tests are executed for each pull-request opened on the repository. Results are reported in the pull-request.
+
+The workflows and test files can be reused for your own projects.
+
 
 ## License
 

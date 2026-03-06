@@ -21,7 +21,7 @@ import pytest
 import random
 import re
 import uuid
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from twister_harness import DeviceAdapter
 from twister_harness.helpers.utils import find_in_config
@@ -73,6 +73,7 @@ def test_device_inventory(dut: DeviceAdapter):
     """Wait until the device inventory is updated."""
     def get_device_inventory():
         inventory = mender_management.get_device_inventory(device)
+        print(f"🔵 Device inventory at {datetime.now(timezone.utc)} is: {inventory}")
         if inventory is not None and inventory.get('updated_ts'):
             return inventory, inventory.get('updated_ts')
         return None, None
@@ -126,6 +127,7 @@ def test_device_configure(dut: DeviceAdapter):
     """Wait until the device configuration is updated."""
     def get_device_configuration():
         configuration = mender_management.get_device_configuration(device)
+        print(f"🔵 Device configuration at {datetime.now(timezone.utc)} is: {configuration}")
         if configuration is not None and configuration.get('reported_ts') and datetime.fromisoformat(configuration.get('reported_ts')) >= datetime.fromisoformat(deployment_status.get('finished')):
             return configuration, configuration.get('reported_ts')
         return None, None
@@ -179,10 +181,12 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
     # Key file is optional and will be empty in case signature is not enabled
     # This is the case on esp32-devkitc board for which only the Espressif port of mcuboot supports signature verification
     expected_version = "0.2.0+0"
+    mcuboot_pad_size = find_in_config(Path(dut.device_config.app_build_dir) / 'zephyr' / '.config', 'CONFIG_ROM_START_OFFSET')
+    mcuboot_primary_size = find_in_config(Path(dut.device_config.app_build_dir) / 'zephyr' / '.config', 'CONFIG_FLASH_LOAD_SIZE')
     key_file = find_in_config(Path(dut.device_config.build_dir) / 'mcuboot' / 'zephyr' / '.config', 'CONFIG_BOOT_SIGNATURE_KEY_FILE')
     device_type = find_in_config(Path(dut.device_config.app_build_dir) / 'zephyr' / '.config', 'CONFIG_EXAMPLE_DEVICE_TYPE')
     artifact_name_prefix = find_in_config(Path(dut.device_config.app_build_dir) / 'zephyr' / '.config', 'CONFIG_EXAMPLE_ARTIFACT_NAME_PREFIX')
-    artifact = helpers.create_mender_artifact(dut.device_config.app_build_dir, key_file, device_type, artifact_name_prefix, expected_version)
+    artifact = helpers.create_mender_artifact(dut.device_config.app_build_dir, key_file, device_type, artifact_name_prefix, expected_version, mcuboot_pad_size, mcuboot_primary_size)
     deployment_name = f"{artifact_name_prefix}-v{expected_version}"
     artifact_name = f"{artifact_name_prefix}-v{expected_version}"
     """Upload artifact to the server."""

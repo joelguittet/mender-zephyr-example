@@ -1,5 +1,5 @@
-# @file      nrf7002dk_nrf5340_cpuapp.conf
-# @brief     nrf7002dk board mcuboot configuration file
+# @file      module.yml
+# @brief     cryptoauthlib module YAML file
 #
 # Copyright joelguittet and mender-mcu-client contributors
 #
@@ -15,9 +15,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-# General
-CONFIG_MAIN_STACK_SIZE=16384
-
-# Logging
-CONFIG_LOG=y
-CONFIG_LOG_MODE_IMMEDIATE=y
+name: cryptoauthlib
+build:
+    cmake: .
+    kconfig: Kconfig
+security:
+  external-references:
+    - cpe:2.3:a:microchip:cryptoauthlib:20250916:*:*:*:*:*:*:*
+    - pkg:github/MicrochipTech/cryptoauthlib@v3.7.9

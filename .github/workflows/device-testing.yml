@@ -81,7 +81,7 @@ jobs:
     runs-on: self-hosted
     timeout-minutes: 120
     needs: setup
-    # Twister is executed inside zephyrproject-rtos/ci container
+    # Twister is executed inside ghcr.io/zephyrproject-rtos/ci container
     # The container is executed with privileged option to have full access to the host
     # The following are bounded in the container:
     # - /dev: to allow access to the devices
@@ -94,6 +94,12 @@ jobs:
         - /home/testbench/mender-zephyr-example/local.conf:/__w/mender-zephyr-example/mender-zephyr-example/local.conf
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/mender-zephyr-example/map.yml
       options: --privileged
+    # Permissions
+    # - contents: read, actions: read and checks: write are required to use dorny/test-reporter@v2
+    permissions:
+      contents: read
+      actions: read
+      checks: write
 
     steps:
       # Download mender-certs artifact
@@ -133,19 +139,6 @@ jobs:
         env:
           LINK_SERVER_VERSION: 25.9.134
 
-      # Install J-Link (used to flash nrf7002-dk board)
-      - name: Install J-Link
-        run: |
-          apt-get update
-          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            libxcb-render-util0 libxcb-shape0 libxcb-icccm4 libxcb-keysyms1 libxcb-image0 libxkbcommon-x11-0 udev curl
-          /lib/systemd/systemd-udevd --daemon
-          curl -d "accept_license_agreement=accepted&submit=Download+software" -X POST -O "https://www.segger.com/downloads/jlink/JLink_Linux_${JLINK_VERSION}_x86_64.deb"
-          dpkg -i JLink_Linux_${JLINK_VERSION}_x86_64.deb
-          rm JLink_Linux_${JLINK_VERSION}_x86_64.deb
-        env:
-          JLINK_VERSION: V890
-
       # Checkout mender-zephyr-example
       - name: Checkout mender-zephyr-example
         uses: actions/checkout@v6
@@ -163,7 +156,7 @@ jobs:
 
       # Setup Zephyr project
       # Toolchains are installed to build the application for all supported boards:
-      # - arm-zephyr-eabi: to support frdm-mcxn947, nrf7002-dk and nucleo-l4a6zg boards
+      # - arm-zephyr-eabi: to support frdm-mcxn947 and nucleo-l4a6zg boards
       # - xtensa-espressif_esp32_zephyr-elf: to support esp32-devkitc
       - name: Setup Zephyr project
         uses: zephyrproject-rtos/action-zephyr-setup@8354324d917cd398fb48d5fdd759cd61e147f084
@@ -176,12 +169,10 @@ jobs:
       # Fetch blobs
       # The following blobs are fetch:
       # - hal_espressif: to support esp32-devkitc board
-      # - nrf_wifi: to support nrf7002-dk board
       - name: Fetch blobs
         working-directory: mender-zephyr-example
         run: |
           west blobs fetch hal_espressif
-          west blobs fetch nrf_wifi
 
       # Execute tests using twister
       # The following options are used:
@@ -206,13 +197,16 @@ jobs:
           MENDER_PASSWORD: "PleaseReplaceWithASecurePassword"
           MENDER_CA: "/__w/mender-zephyr-example/mender-zephyr-example/mender.crt"
 
-      # Analyse test results
-      # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
-      - name: Analyze test results
+      # Publish test results
+      - name: Publish test results
         if: ${{ always() && steps.execute-tests.conclusion != 'skipped' && steps.execute-tests.conclusion != 'cancelled' }}
-        working-directory: mender-zephyr-example
-        run: |
-          python3 scripts/twister_report_summary.py twister-out/twister_report.xml > twister-out/summary.md
+        uses: dorny/test-reporter@v2
+        with:
+          working-directory: mender-ncs-test-ci
+          name: 🧪 Zephyr Twister Test Report
+          path: twister-out/twister_report.xml
+          reporter: java-junit
+          report-title: 🧪 Zephyr Twister Test Report
 
       # Upload test-results artifact
       # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
@@ -224,7 +218,6 @@ jobs:
           if-no-files-found: error
           retention-days: 7
           path: |
-            mender-zephyr-example/twister-out/summary.md
             mender-zephyr-example/twister-out/testplan.json
             mender-zephyr-example/twister-out/twister.json
             mender-zephyr-example/twister-out/twister.log
@@ -255,6 +248,8 @@ jobs:
     runs-on: ubuntu-24.04
     if: ${{ always() && !contains(needs.device-testing.result, 'skipped') && !contains(needs.device-testing.result, 'cancelled') }}
     needs: [device-testing]
+    # Permissions
+    # - contents: read, issues: read checks: write and pull-requests: write are required to use EnricoMi/publish-unit-test-result-action/linux@v2
     permissions:
       contents: read
       issues: read
@@ -273,11 +268,6 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action/linux@v2
         with:
           files: artifacts/test-results/twister_report.xml
-
-      # Publish summary
-      - name: Publish summary
-        run: |
-          cat artifacts/test-results/summary.md >> $GITHUB_STEP_SUMMARY
 
   teardown:
     name: Stop Mender server
