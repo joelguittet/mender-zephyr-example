@@ -202,7 +202,7 @@ jobs:
         if: ${{ always() && steps.execute-tests.conclusion != 'skipped' && steps.execute-tests.conclusion != 'cancelled' }}
         uses: dorny/test-reporter@v2
         with:
-          working-directory: mender-ncs-test-ci
+          working-directory: mender-zephyr-example
           name: 🧪 Zephyr Twister Test Report
           path: twister-out/twister_report.xml
           reporter: java-junit
