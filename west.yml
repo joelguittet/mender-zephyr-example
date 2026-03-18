@@ -29,9 +29,6 @@ manifest:
     - name: zephyr
       remote: zephyrproject-rtos
       # TODO move to main / v4.4 when available
-      # see https://github.com/zephyrproject-rtos/zephyr/pull/103652
-      # OK for st boards:
-      #revision: pull/103652/head
       revision: main
       import:
         # By using name-allowlist we can clone only the modules that are
@@ -49,7 +46,5 @@ manifest:
     - name: mender-mcu-client
       remote: joelguittet
       # TODO create a new version 0.12.4
-      revision: master
-      # REQUIRED with st branch for nuleo board flash issue
-      #revision: 0.12.3
+      revision: feature/update-platform-storage-zephyr-partition-macros
       path: modules/lib/mender-mcu-client

@@ -29,7 +29,7 @@ jobs:
     # The following are bounded in the container:
     # - /dev: to allow access to the devices
     container:
-      image: ghcr.io/zephyrproject-rtos/ci:v0.28.7
+      image: ghcr.io/zephyrproject-rtos/ci:v0.29.0
       volumes:
         - /dev:/dev
       options: --privileged

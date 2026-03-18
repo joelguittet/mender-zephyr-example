@@ -25,15 +25,14 @@
 
 &flash0 {
     //TODO should be part of zephyr
-    ranges = <0x0 0x8000000 DT_SIZE_K(1024)>;
-    #address-cells = <1>;
-    #size-cells = <1>;
+    //ranges = <0x0 0x8000000 DT_SIZE_K(1024)>;
+    //#address-cells = <1>;
+    //#size-cells = <1>;
     partitions {
-        ranges;
+        //ranges;
         compatible = "fixed-partitions";
         #address-cells = <1>;
         #size-cells = <1>;
-        ranges;
         /* Bootloader slot: 56KB */
         boot_partition: partition@0 {
             label = "mcuboot";

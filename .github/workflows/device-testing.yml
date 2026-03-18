@@ -88,7 +88,7 @@ jobs:
     # - local.conf: contains configuration of the test bench such as Mender server and Wi-Fi settings
     # - map.yml: the twister hardware map corresponding to the devices physically connected to the test bench
     container:
-      image: ghcr.io/zephyrproject-rtos/ci:v0.28.7
+      image: ghcr.io/zephyrproject-rtos/ci:v0.29.0
       volumes:
         - /dev:/dev
         - /home/testbench/mender-zephyr-example/local.conf:/__w/mender-zephyr-example/mender-zephyr-example/local.conf
