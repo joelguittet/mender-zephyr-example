@@ -192,7 +192,6 @@ jobs:
         working-directory: mender-zephyr-example
         id: execute-tests
         run: |
-          export ESPTOOL_PORT=/dev/serial/by-id/usb-Silicon_Labs_CP2102_USB_to_UART_Bridge_Controller_0001-if00-port0
           west twister -T app -v --allow-installed-plugin --enable-slow --inline-logs --device-testing --hardware-map /__w/mender-zephyr-example/mender-zephyr-example/map.yml
         env:
           MENDER_SERVER: "https://docker.mender.io"
