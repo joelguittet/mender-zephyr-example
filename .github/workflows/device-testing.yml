@@ -174,8 +174,6 @@ jobs:
         run: |
           west blobs fetch hal_espressif
 
-      # TODO REMOVE EXPORT ESPTOOL THIS IS A TEST
-
       # Execute tests using twister
       # The following options are used:
       # --allow-installed-plugin: allow using pytest-dependency

@@ -40,7 +40,7 @@ Together with an [ATECC608B](https://www.microchip.com/en-us/product/atecc608b) 
 
 ![NUCLEO-L4A6ZG](https://raw.githubusercontent.com/joelguittet/mender-zephyr-example/master/.github/docs/nucleo-l4a6zg.png)
 
-The project is built using Zephyr RTOS v4.4.x and Zephyr SDK v0.17.x. [TODO: UPDATE version if required]
+The project is built using Zephyr RTOS v4.4.0 and Zephyr SDK v1.0.0.
 
 To start using Mender, we recommend that you begin with the Getting started section in [the Mender documentation](https://docs.mender.io).
 
