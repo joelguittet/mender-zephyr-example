@@ -124,13 +124,12 @@ jobs:
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             mender-artifact mender-cli
 
-      # Install Raspberry Pi openocd (used to flash rpi_pico2 board)
-      - name: Install Raspberry Pi openocd
+      # Install Raspberry Pi's downstream fork of OpenOCD (used to flash rpi_pico2 board)
+      - name: Install Raspberry Pi's downstream fork of OpenOCD
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-            git build-essential autoconf automake libtool pkg-config libusb-1.0-0-dev libhidapi-dev \
-            libftdi1-dev libjaylink-dev libcapstone-dev libgpiod-dev libusb-dev tcl
+            git build-essential autoconf automake libtool pkg-config libusb-1.0-0-dev libhidapi-dev libjim-dev tcl
           cd $(mktemp -d)
           git clone https://github.com/raspberrypi/openocd.git
           cd openocd
