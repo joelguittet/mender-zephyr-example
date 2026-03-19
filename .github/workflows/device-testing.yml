@@ -182,6 +182,9 @@ jobs:
       - name: Install openocd configuration files
         working-directory: mender-zephyr-example
         run: |
+          ls -l
+          ls -l zephyr-sdk/hosttools/sysroots/x86_64-pokysdk-linux/usr/share/openocd
+          ls -l zephyr-sdk/hosttools/sysroots/x86_64-pokysdk-linux/usr/share/openocd/scripts/target
           wget https://raw.githubusercontent.com/raspberrypi/openocd/e23a6bbc635aa426668c040abda8c2d38628e8d4/tcl/target/rp2350.cfg -O zephyr-sdk/hosttools/sysroots/x86_64-pokysdk-linux/usr/share/openocd/scripts/target/rp2350.cfg
 
       # Execute tests using twister
