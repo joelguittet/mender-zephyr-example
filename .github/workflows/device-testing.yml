@@ -180,7 +180,6 @@ jobs:
       # The following configuration files are installed:
       # - rp2350.cfg: to support rpi_pico2 board
       - name: Install openocd configuration files
-        working-directory: mender-zephyr-example
         run: |
           ls -l
           ls -l zephyr-sdk/hosttools/sysroots/x86_64-pokysdk-linux/usr/share/openocd
