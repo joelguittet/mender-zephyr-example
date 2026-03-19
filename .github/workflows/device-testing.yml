@@ -173,9 +173,16 @@ jobs:
       - name: Fetch blobs
         working-directory: mender-zephyr-example
         run: |
-          find / -name rp2040.cfg
           west blobs fetch hal_espressif
           west blobs fetch hal_infineon
+
+      # Install openocd configuration files
+      # The following configuration files are installed:
+      # - rp2350.cfg: to support rpi_pico2 board
+      - name: Install openocd configuration files
+        working-directory: mender-zephyr-example
+        run: |
+          wget https://raw.githubusercontent.com/raspberrypi/openocd/e23a6bbc635aa426668c040abda8c2d38628e8d4/tcl/target/rp2350.cfg -O zephyr-sdk/hosttools/sysroots/x86_64-pokysdk-linux/usr/share/openocd/scripts/target/rp2350.cfg
 
       # Execute tests using twister
       # The following options are used:
