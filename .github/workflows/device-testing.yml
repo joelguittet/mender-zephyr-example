@@ -132,9 +132,9 @@ jobs:
             git build-essential autoconf automake libtool pkg-config libusb-1.0-0-dev libhidapi-dev \
             libftdi1-dev libjaylink-dev libcapstone-dev libgpiod-dev libusb-dev tcl
           git clone https://github.com/raspberrypi/openocd.git
+          cd openocd
           git checkout $OPENOCD_VERSION
           git submodule update --init --recursive
-          cd openocd
           ./bootstrap
           ./configure --enable-cmsis-dap --enable-raspberrypi
           make -j$(nproc)
