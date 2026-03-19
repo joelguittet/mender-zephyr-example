@@ -124,19 +124,20 @@ jobs:
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             mender-artifact mender-cli
 
-      # Install LinkServer (used to flash frdm-mcxn947 board)
-      - name: Install LinkServer
+      # Install Raspberry Pi openocd (used to flash rpi_pico2 board)
+      - name: Install Raspberry Pi openocd
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             git build-essential autoconf automake libtool pkg-config libusb-1.0-0-dev libhidapi-dev \
             libftdi1-dev libjaylink-dev libcapstone-dev libgpiod-dev libusb-dev tcl
+          cd $(mktemp -d)
           git clone https://github.com/raspberrypi/openocd.git
           cd openocd
           git checkout $OPENOCD_VERSION
           git submodule update --init --recursive
           ./bootstrap
-          ./configure --enable-cmsis-dap --enable-raspberrypi
+          ./configure --enable-cmsis-dap
           make -j$(nproc)
           make install
           which openocd
@@ -144,8 +145,8 @@ jobs:
         env:
           OPENOCD_VERSION: e23a6bbc635aa426668c040abda8c2d38628e8d4
 
-      # Install Raspberry Pi openocd (used to flash rpi_pico2 board)
-      - name: Install Raspberry Pi openocd
+      # Install LinkServer (used to flash frdm-mcxn947 board)
+      - name: Install LinkServer
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
