@@ -173,6 +173,7 @@ jobs:
       - name: Fetch blobs
         working-directory: mender-zephyr-example
         run: |
+          find / -name rp2040.cfg
           west blobs fetch hal_espressif
           west blobs fetch hal_infineon
 
