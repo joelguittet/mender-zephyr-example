@@ -169,10 +169,12 @@ jobs:
       # Fetch blobs
       # The following blobs are fetch:
       # - hal_espressif: to support esp32-devkitc board
+      # - hal_infineon: to support rpi_pico2 board
       - name: Fetch blobs
         working-directory: mender-zephyr-example
         run: |
           west blobs fetch hal_espressif
+          west blobs fetch hal_infineon
 
       # Execute tests using twister
       # The following options are used:

@@ -121,8 +121,10 @@ def test_device_configure(dut: DeviceAdapter):
     """"Wait for deployment completes or fails."""
     deployment_status = mender_management.wait_for_deployment(deployment=deployment)
     assert deployment_status is not None, "🔴​​​ Deployment status not found"
-    if deployment_status['status'] not in ('finished', 'success'):
-        raise AssertionError(f"🔴​​​ Deployment did not complete successfully, it has unexpected status '{deployment_status['status']}'")
+    if deployment_status['status'] != 'finished':
+        raise AssertionError(f"🔴​​​ Deployment did not complete successfully, it has unexpected status '{deployment_status}'")
+    if deployment_status.get('statistics').get('status').get('success') != 1:
+        raise AssertionError(f"🔴​​​ Deployment did not complete successfully, it has unexpected status '{deployment_status}'")
     print("✅ Device configuration deployment done successfuly")
     """Wait until the device configuration is updated."""
     def get_device_configuration():
@@ -197,8 +199,10 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
         """"Wait for deployment completes or fails."""
         deployment_status = mender_management.wait_for_deployment(name=deployment_name)
         assert deployment_status is not None, "🔴​​​ Deployment status not found"
-        if deployment_status['status'] not in ('finished', 'success'):
-            raise AssertionError(f"🔴​​​ Deployment did not complete successfully, it has unexpected status '{deployment_status['status']}'")
+        if deployment_status['status'] != 'finished':
+            raise AssertionError(f"🔴​​​ Deployment did not complete successfully, it has unexpected status '{deployment_status}'")
+        if deployment_status.get('statistics').get('status').get('success') != 1:
+            raise AssertionError(f"🔴​​​ Deployment did not complete successfully, it has unexpected status '{deployment_status}'")
     finally:
         """Remove artifact from the server (done even in case the above deployment fails)."""
         mender_management.delete_artifact(artifact_name)

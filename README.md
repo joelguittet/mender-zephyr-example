@@ -40,6 +40,12 @@ Together with an [ATECC608B](https://www.microchip.com/en-us/product/atecc608b) 
 
 ![NUCLEO-L4A6ZG](https://raw.githubusercontent.com/joelguittet/mender-zephyr-example/master/.github/docs/nucleo-l4a6zg.png)
 
+* [RaspberryPi Pico 2W](https://www.raspberrypi.com/documentation/microcontrollers/pico-series.html) development board
+
+Together with a [RaspberryPi Debug Probe](https://www.raspberrypi.com/documentation/microcontrollers/debug-probe.html) to provide a convenient way to flash and debug the project.
+
+![RaspberryPi Pico 2W](https://raw.githubusercontent.com/joelguittet/mender-zephyr-example/master/.github/docs/rpi_pico2.jpg)
+
 The project is built using Zephyr RTOS v4.4.0 and Zephyr SDK v1.0.0.
 
 To start using Mender, we recommend that you begin with the Getting started section in [the Mender documentation](https://docs.mender.io).
@@ -86,6 +92,10 @@ Some boards depends on binary blobs. You can download them using the following c
 ```
 west blobs fetch hal_espressif
 ```
+* RaspberryPi Pico 2W development board
+```
+west blobs fetch hal_infineon
+```
 
 The application relies on mcuboot and requires to build a signed binary file to be flashed on the evaluation board.
 
@@ -103,11 +113,22 @@ west build -b frdm_mcxn947/mcxn947/cpu0 --sysbuild app
 ```
 west build -b nucleo_l4a6zg --sysbuild app
 ```
+* RaspberryPi Pico 2W development board
+```
+west build -b rpi_pico2/rp2350a/m33/w --sysbuild app
+```
 
 Finaly flash the board using the following command. Both mcuboot and the application will be flashed.
 
+* Espressif ESP32-DevKitC development board
+* NXP FRDM-MCXN947 development board
+* STMicroelectronics NUCLEO-L4A6ZG development board
 ```
 west flash
+```
+* RaspberryPi Pico 2W development board
+```
+west flash --openocd /usr/local/bin/openocd
 ```
 
 ### Execution of the application [TODO: update logs]
@@ -160,6 +181,10 @@ west build -b frdm_mcxn947/mcxn947/cpu0 --sysbuild app
 ```
 west build -b nucleo_l4a6zg --sysbuild app
 ```
+* RaspberryPi Pico 2W development board
+```
+west build -b rpi_pico2/rp2350a/m33/w --sysbuild app
+```
 
 Then create a new artifact using the following command line:
 
@@ -180,6 +205,10 @@ path/to/mender-artifact write rootfs-image --compression none --device-type mend
 * STMicroelectronics NUCLEO-L4A6ZG development board
 ```
 path/to/mender-artifact write rootfs-image --compression none --device-type mender-nucleo-l4a6zg-zephyr-example --artifact-name mender-nucleo-l4a6zg-zephyr-example-v0.2.0 --output-path build/zephyr/mender-nucleo-l4a6zg-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
+```
+* RaspberryPi Pico 2W development board
+```
+path/to/mender-artifact write rootfs-image --compression none --device-type mender-rpi_pico2-zephyr-example --artifact-name mender-rpi_pico2-zephyr-example-v0.2.0 --output-path build/zephyr/mender-rpi_pico2-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
 ```
 
 Upload the artifact `mender-<board_name>-zephyr-example-v0.2.0.mender` to the mender server and create a new deployment.
@@ -260,7 +289,7 @@ west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="troubleshoot.con
 west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="troubleshoot.conf;troubleshoot-file-transfer.conf"
 ```
 
-Please note that due to limited amount of memory available, the Device Troubleshoot integration is not recommended on ESP32-DevKitC and NUCLEO-L4A6ZG, and tested only using the FRDM-MCXN947 development board.
+Please note that due to limited amount of memory available, the Device Troubleshoot integration is not recommended on ESP32-DevKitC and NUCLEO-L4A6ZG, and tested only using the FRDM-MCXN947 and RaspberryPi Pico 2W development boards.
 
 ### Download and execute an LLEXT module [TODO: to be retested/updated]
 

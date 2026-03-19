@@ -230,7 +230,7 @@ class MenderManagement:
         while time.time() - start_time < timeout:
             deployment_status = self.get_deployment_status(name, deployment)
             print(f"🔵 Device deployment status at {datetime.now(timezone.utc)} is: {deployment_status}")
-            if deployment_status is not None and deployment_status.get('status') in ('finished', 'success', 'failure', 'aborted'):
+            if deployment_status is not None and deployment_status.get('status') == 'finished':
                 return deployment_status
             time.sleep(interval)
         return deployment_status
