@@ -129,6 +129,26 @@ jobs:
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            git build-essential autoconf automake libtool pkg-config libusb-1.0-0-dev libhidapi-dev \
+            libftdi1-dev libjaylink-dev libcapstone-dev libgpiod-dev libusb-dev tcl
+          git clone https://github.com/raspberrypi/openocd.git
+          git checkout $OPENOCD_VERSION
+          git submodule update --init --recursive
+          cd openocd
+          ./bootstrap
+          ./configure --enable-cmsis-dap --enable-raspberrypi
+          make -j$(nproc)
+          make install
+          which openocd
+          openocd --version
+        env:
+          OPENOCD_VERSION: e23a6bbc635aa426668c040abda8c2d38628e8d4
+
+      # Install Raspberry Pi openocd (used to flash rpi_pico2 board)
+      - name: Install Raspberry Pi openocd
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             whiptail libusb-1.0-0-dev dfu-util usbutils hwdata udev wget
           /lib/systemd/systemd-udevd --daemon
           wget https://www.nxp.com/lgfiles/updates/mcuxpresso/LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin
@@ -179,12 +199,12 @@ jobs:
       # Install openocd configuration files
       # The following configuration files are installed:
       # - rp2350.cfg: to support rpi_pico2 board
-      - name: Install openocd configuration files
-        run: |
-          ls -l
-          ls -l zephyr-sdk/hosttools/sysroots/x86_64-pokysdk-linux/usr/share/openocd
-          ls -l zephyr-sdk/hosttools/sysroots/x86_64-pokysdk-linux/usr/share/openocd/scripts/target
-          wget https://raw.githubusercontent.com/raspberrypi/openocd/e23a6bbc635aa426668c040abda8c2d38628e8d4/tcl/target/rp2350.cfg -O zephyr-sdk/hosttools/sysroots/x86_64-pokysdk-linux/usr/share/openocd/scripts/target/rp2350.cfg
+      #- name: Install openocd configuration files
+      #  run: |
+      #    ls -l
+      #    ls -l zephyr-sdk/hosttools/sysroots/x86_64-pokysdk-linux/usr/share/openocd
+      #    ls -l zephyr-sdk/hosttools/sysroots/x86_64-pokysdk-linux/usr/share/openocd/scripts/target
+      #    wget https://raw.githubusercontent.com/raspberrypi/openocd/e23a6bbc635aa426668c040abda8c2d38628e8d4/tcl/target/rp2350.cfg -O zephyr-sdk/hosttools/sysroots/x86_64-pokysdk-linux/usr/share/openocd/scripts/target/rp2350.cfg
 
       # Execute tests using twister
       # The following options are used:
