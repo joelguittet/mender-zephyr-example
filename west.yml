@@ -27,7 +27,8 @@ manifest:
 
   projects:
     - name: zephyr
-      remote: zephyrproject-rtos
+      #remote: zephyrproject-rtos
+      remote: joelguittet
       # TODO move to main / v4.4 when available
       revision: feature/rpi-pico-openocd
       import:
