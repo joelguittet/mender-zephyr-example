@@ -29,7 +29,7 @@ manifest:
     - name: zephyr
       remote: zephyrproject-rtos
       # TODO move to main / v4.4 when available
-      revision: main
+      revision: feature/rpi-pico-openocd
       import:
         # By using name-allowlist we can clone only the modules that are
         # strictly needed by the application

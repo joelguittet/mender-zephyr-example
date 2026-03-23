@@ -979,6 +979,7 @@ RESTART:
 
     /* Restart */
     LOG_INF("Restarting system");
+    log_flush();
     sys_reboot(SYS_REBOOT_WARM);
 
     return 0;
