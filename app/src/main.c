@@ -23,6 +23,7 @@
 #include <version.h>
 
 #include <zephyr/logging/log.h>
+#include <zephyr/logging/log_ctrl.h>
 LOG_MODULE_REGISTER(mender_zephyr_example, LOG_LEVEL_INF);
 
 #include <zephyr/kernel.h>

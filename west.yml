@@ -45,6 +45,7 @@ manifest:
           - mbedtls
           - mcuboot
           - picolibc
+          - tf-psa-crypto # required for mbedtls
           - zcbor # required in case mcumgr is enabled
     - name: mender-mcu-client
       remote: joelguittet
