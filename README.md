@@ -379,7 +379,7 @@ west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="trial.conf"
 
 For such purpose, Github action runner is installed on a Debian machine running the workflows. The Debian machine uses `ghcr.io/zephyrproject-rtos/ci` container which provides a good environment to build Zephyr RTOS projects in such context.
 
-When testing is executed, a dedicated mender-server instance is instantiated, then tests are performed using this instance before it is shutdown and deleted.
+When testing is executed, a dedicated mender-server instance is used. mender-server certificate to allow device and tests connecting to the server are provided. mender-server username and password are provided throw the Github Actions secrets.
 
 The Debian machine has a local configuration `local.conf` file used to build the firmware which contains the following settings:
 

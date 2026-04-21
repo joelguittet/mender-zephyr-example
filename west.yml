@@ -27,10 +27,8 @@ manifest:
 
   projects:
     - name: zephyr
-      #remote: zephyrproject-rtos
-      remote: joelguittet
-      # TODO move to main / v4.4 when available
-      revision: feature/rpi-pico-openocd
+      remote: zephyrproject-rtos
+      revision: v4.4.0
       import:
         # By using name-allowlist we can clone only the modules that are
         # strictly needed by the application
@@ -49,6 +47,5 @@ manifest:
           - zcbor # required in case mcumgr is enabled
     - name: mender-mcu-client
       remote: joelguittet
-      # TODO create a new version 0.12.4
-      revision: feature/update-platform-storage-zephyr-partition-macros
+      revision: enhancement/platform-tls-psa-crypto-volatile-keys-support
       path: modules/lib/mender-mcu-client

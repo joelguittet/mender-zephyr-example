@@ -27,6 +27,7 @@
 LOG_MODULE_REGISTER(mender_zephyr_example, LOG_LEVEL_INF);
 
 #include <zephyr/kernel.h>
+#include <zephyr/drivers/gpio.h>
 #ifdef CONFIG_MCUMGR_GRP_IMG
 #include <zephyr/mgmt/mcumgr/grp/img_mgmt/img_mgmt.h>
 #endif /* CONFIG_MCUMGR_GRP_IMG */
@@ -775,6 +776,16 @@ main(void) {
     /* Retrieve device type */
     char *device_type = CONFIG_EXAMPLE_DEVICE_TYPE;
 
+    /* Button sw0 is used to fore recommissioning */
+    bool                      recommissioning = false;
+    const struct gpio_dt_spec button          = GPIO_DT_SPEC_GET_OR(DT_ALIAS(sw0), gpios, { 0 });
+    if (gpio_is_ready_dt(&button)) {
+        assert(0 == gpio_pin_configure_dt(&button, GPIO_INPUT));
+        if (gpio_pin_get_dt(&button)) {
+            recommissioning = true;
+        }
+    }
+
     /* Initialize mender-client */
     mender_keystore_t         identity[]              = { { .name = "mac", .value = mac_address }, { .name = NULL, .value = NULL } };
     mender_client_config_t    mender_client_config    = { .identity                     = identity,
@@ -784,7 +795,7 @@ main(void) {
                                                           .tenant_token                 = NULL,
                                                           .authentication_poll_interval = 0,
                                                           .update_poll_interval         = 0,
-                                                          .recommissioning              = false };
+                                                          .recommissioning              = recommissioning };
     mender_client_callbacks_t mender_client_callbacks = { .network_connect        = network_connect_cb,
                                                           .network_release        = network_release_cb,
                                                           .authentication_success = authentication_success_cb,
@@ -896,77 +907,58 @@ main(void) {
 
     /* Wait for mender-mcu-client events, connect and disconnect network on request, restart the application if required */
     bool connected = false;
+    bool restart   = false;
     while (1) {
-        uint32_t events
-            = k_event_wait(&mender_client_events, MENDER_CLIENT_EVENT_CONNECT | MENDER_CLIENT_EVENT_DISCONNECT | MENDER_CLIENT_EVENT_RESTART, false, K_FOREVER);
+        k_timeout_t ticks = restart ? K_SECONDS(10) : K_FOREVER;
+        uint32_t    events
+            = k_event_wait(&mender_client_events, MENDER_CLIENT_EVENT_CONNECT | MENDER_CLIENT_EVENT_DISCONNECT | MENDER_CLIENT_EVENT_RESTART, false, ticks);
         k_event_clear(&mender_client_events, events);
         if (MENDER_CLIENT_EVENT_CONNECT == (events & MENDER_CLIENT_EVENT_CONNECT)) {
-            /* Connect to the network */
-            LOG_INF("Connecting to the network");
-            if (0 != network_connect(iface)) {
-                k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_DISCONNECTED);
-                LOG_ERR("Unable to connect network");
+            if (!connected) {
+                /* Connect to the network */
+                LOG_INF("Connecting to the network");
+                if (0 != network_connect(iface)) {
+                    k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_DISCONNECTED);
+                    LOG_ERR("Unable to connect network");
+                } else {
+                    connected = true;
+                    k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_CONNECTED);
+                    LOG_INF("Connected to the network");
+                }
             } else {
-                connected = true;
                 k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_CONNECTED);
                 LOG_INF("Connected to the network");
             }
         } else if (MENDER_CLIENT_EVENT_DISCONNECT == (events & MENDER_CLIENT_EVENT_DISCONNECT)) {
-            events = k_event_wait(&mender_client_events, MENDER_CLIENT_EVENT_CONNECT, false, K_SECONDS(10));
-            k_event_clear(&mender_client_events, events);
-            if (MENDER_CLIENT_EVENT_CONNECT == (events & MENDER_CLIENT_EVENT_CONNECT)) {
-                /* Reconnection requested while not disconnected yet */
-                k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_CONNECTED);
-                LOG_INF("Connected to the network");
-            } else {
-                /* Disconnect the network */
-                LOG_INF("Disconnecting network");
-                if (0 != network_disconnect(iface)) {
-                    LOG_ERR("Unable to disconnect network");
-                } else {
-                    connected = false;
-                    LOG_INF("Disconnected of the network");
-                }
-            }
-        }
-        if (MENDER_CLIENT_EVENT_RESTART == (events & MENDER_CLIENT_EVENT_RESTART)) {
-            while (1) {
-                events = k_event_wait(&mender_client_events, MENDER_CLIENT_EVENT_CONNECT | MENDER_CLIENT_EVENT_DISCONNECT, false, K_SECONDS(10));
+            if (connected) {
+                events = k_event_wait(&mender_client_events, MENDER_CLIENT_EVENT_CONNECT, false, K_SECONDS(10));
                 k_event_clear(&mender_client_events, events);
                 if (MENDER_CLIENT_EVENT_CONNECT == (events & MENDER_CLIENT_EVENT_CONNECT)) {
-                    /* Reconnection requested before restarting */
-                    if (!connected) {
-                        /* Connect to the network */
-                        LOG_INF("Connecting to the network");
-                        if (0 != network_connect(iface)) {
-                            k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_DISCONNECTED);
-                            LOG_ERR("Unable to connect network");
-                        } else {
-                            connected = true;
-                            k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_CONNECTED);
-                            LOG_INF("Connected to the network");
-                        }
-                    } else {
-                        k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_CONNECTED);
-                        LOG_INF("Connected to the network");
-                    }
-                } else if (MENDER_CLIENT_EVENT_DISCONNECT == (events & MENDER_CLIENT_EVENT_DISCONNECT)) {
-                    /* Disonnection requested before restarting */
-                    if (connected) {
-                        /* Disconnect the network */
-                        LOG_INF("Disconnecting network");
-                        if (0 != network_disconnect(iface)) {
-                            LOG_ERR("Unable to disconnect network");
-                        } else {
-                            connected = false;
-                            LOG_INF("Disconnected of the network");
-                        }
-                    }
+                    /* Reconnection requested while not disconnected yet */
+                    k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_CONNECTED);
+                    LOG_INF("Connected to the network");
                 } else {
-                    /* Application will restart now */
-                    goto RELEASE;
+                    /* Disconnect the network */
+                    LOG_INF("Disconnecting network");
+                    if (0 != network_disconnect(iface)) {
+                        LOG_ERR("Unable to disconnect network");
+                    } else {
+                        connected = false;
+                        k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_DISCONNECTED);
+                        LOG_INF("Disconnected of the network");
+                    }
                 }
+            } else {
+                k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_DISCONNECTED);
+                LOG_INF("Disconnected of the network");
             }
+        } else if (true == restart) {
+            /* Application will restart now */
+            goto RELEASE;
+        }
+        if (MENDER_CLIENT_EVENT_RESTART == (events & MENDER_CLIENT_EVENT_RESTART)) {
+            /* Set restart pending flag */
+            restart = true;
         }
     }
 

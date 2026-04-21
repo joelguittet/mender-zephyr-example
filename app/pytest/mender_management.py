@@ -87,9 +87,20 @@ class MenderManagement:
     def list_devices(self):
         """Return all devices known by Mender."""
         url = f"{self.server}/api/management/v2/devauth/devices"
-        r = requests.get(url, headers=self.headers, verify=self.ca_cert)
-        r.raise_for_status()
-        return r.json()
+        try:
+            r = requests.get(url, headers=self.headers, verify=self.ca_cert)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print(f"🔴​ HTTP error occured: {e}")
+            try:
+                print("🔴 Server response:", r.json())
+            except ValueError:
+                print("🔴 Server response:", r.text)
+            raise
+        except requests.exceptions.RequestException as e:
+            print(f"🔴 Network error occurred: {e}")
+            raise
+        return r.json() if r.text else {}
 
     def get_device_by_mac(self, mac_address):
         """Return a single device and auth_set by MAC address."""
@@ -116,15 +127,37 @@ class MenderManagement:
         auth = auth_sets[0] if auth_sets else None
         url = f"{self.server}/api/management/v2/devauth/devices/{device['id']}/auth/{auth['id']}/status"
         payload = {"status": "accepted"}
-        r = requests.put(url, headers=self.headers, json=payload, verify=self.ca_cert)
-        r.raise_for_status()
+        try:
+            r = requests.put(url, headers=self.headers, json=payload, verify=self.ca_cert)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print(f"🔴​ HTTP error occured: {e}")
+            try:
+                print("🔴 Server response:", r.json())
+            except ValueError:
+                print("🔴 Server response:", r.text)
+            raise
+        except requests.exceptions.RequestException as e:
+            print(f"🔴 Network error occurred: {e}")
+            raise
         return True
 
     def delete_device(self, device):
         """Delete device."""
         url = f"{self.server}/api/management/v2/devauth/devices/{device['id']}"
-        r = requests.delete(url, headers=self.headers, verify=self.ca_cert)
-        r.raise_for_status()
+        try:
+            r = requests.delete(url, headers=self.headers, verify=self.ca_cert)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print(f"🔴​ HTTP error occured: {e}")
+            try:
+                print("🔴 Server response:", r.json())
+            except ValueError:
+                print("🔴 Server response:", r.text)
+            raise
+        except requests.exceptions.RequestException as e:
+            print(f"🔴 Network error occurred: {e}")
+            raise
         return True
 
     # ============================================================
@@ -133,9 +166,20 @@ class MenderManagement:
     def get_device_inventory(self, device):
         """Retrieve current inventory data for a device."""
         url = f"{self.server}/api/management/v1/inventory/devices/{device['id']}"
-        r = requests.get(url, headers=self.headers, verify=self.ca_cert)
-        r.raise_for_status()
-        return r.json()
+        try:
+            r = requests.get(url, headers=self.headers, verify=self.ca_cert)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print(f"🔴​ HTTP error occured: {e}")
+            try:
+                print("🔴 Server response:", r.json())
+            except ValueError:
+                print("🔴 Server response:", r.text)
+            raise
+        except requests.exceptions.RequestException as e:
+            print(f"🔴 Network error occurred: {e}")
+            raise
+        return r.json() if r.text else {}
 
     # ============================================================
     # CONFIGURATION
@@ -143,25 +187,58 @@ class MenderManagement:
     def get_device_configuration(self, device):
         """Retrieve current configuration data for a device."""
         url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device['id']}"
-        r = requests.get(url, headers=self.headers, verify=self.ca_cert)
-        r.raise_for_status()
-        return r.json()
+        try:
+            r = requests.get(url, headers=self.headers, verify=self.ca_cert)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print(f"🔴​ HTTP error occured: {e}")
+            try:
+                print("🔴 Server response:", r.json())
+            except ValueError:
+                print("🔴 Server response:", r.text)
+            raise
+        except requests.exceptions.RequestException as e:
+            print(f"🔴 Network error occurred: {e}")
+            raise
+        return r.json() if r.text else {}
 
     def set_device_configuration(self, device, configuration):
         """Set configuration key/values for a device."""
         url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device['id']}"
         payload = configuration
-        r = requests.put(url, headers=self.headers, json=payload, verify=self.ca_cert)
-        r.raise_for_status()
+        try:
+            r = requests.put(url, headers=self.headers, json=payload, verify=self.ca_cert)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print(f"🔴​ HTTP error occured: {e}")
+            try:
+                print("🔴 Server response:", r.json())
+            except ValueError:
+                print("🔴 Server response:", r.text)
+            raise
+        except requests.exceptions.RequestException as e:
+            print(f"🔴 Network error occurred: {e}")
+            raise
         return True
 
     def deploy_device_configuration(self, device):
         """Deploy configuration key/values for a device."""
         url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device['id']}/deploy"
         payload = {"retries": 0}
-        r = requests.post(url, headers=self.headers, json=payload, verify=self.ca_cert)
-        r.raise_for_status()
-        return r.json()
+        try:
+            r = requests.post(url, headers=self.headers, json=payload, verify=self.ca_cert)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print(f"🔴​ HTTP error occured: {e}")
+            try:
+                print("🔴 Server response:", r.json())
+            except ValueError:
+                print("🔴 Server response:", r.text)
+            raise
+        except requests.exceptions.RequestException as e:
+            print(f"🔴 Network error occurred: {e}")
+            raise
+        return r.json() if r.text else {}
 
     # ============================================================
     # DEPLOYMENTS
@@ -169,11 +246,23 @@ class MenderManagement:
     def upload_artifact(self, filepath, description=None):
         """Upload a new artifact (deployment package)."""
         url = f"{self.server}/api/management/v1/deployments/artifacts"
-        files = {"artifact": open(filepath, "rb")}
-        data = {"description": description} if description else {}
-        r = requests.post(url, headers=self.headers, files=files, data=data, verify=self.ca_cert)
-        r.raise_for_status()
-        return r.json() if r.text else {}
+        with open(filepath, "rb") as file:
+            files = {"artifact": file}
+            data = {"description": description} if description else {}
+            try:
+                r = requests.post(url, headers=self.headers, files=files, data=data, verify=self.ca_cert)
+                r.raise_for_status()
+            except requests.exceptions.HTTPError as e:
+                print(f"🔴​ HTTP error occured: {e}")
+                try:
+                    print("🔴 Server response:", r.json())
+                except ValueError:
+                    print("🔴 Server response:", r.text)
+                raise
+            except requests.exceptions.RequestException as e:
+                print(f"🔴 Network error occurred: {e}")
+                raise
+            return r.json() if r.text else {}
 
     def list_artifacts(self, name=None):
         """List artifacts."""
@@ -181,9 +270,20 @@ class MenderManagement:
         params = {}
         if name is not None:
             params['name'] = name
-        r = requests.get(url, headers=self.headers, params=params, verify=self.ca_cert)
-        r.raise_for_status()
-        return r.json()
+        try:
+            r = requests.get(url, headers=self.headers, params=params, verify=self.ca_cert)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print(f"🔴​ HTTP error occured: {e}")
+            try:
+                print("🔴 Server response:", r.json())
+            except ValueError:
+                print("🔴 Server response:", r.text)
+            raise
+        except requests.exceptions.RequestException as e:
+            print(f"🔴 Network error occurred: {e}")
+            raise
+        return r.json() if r.text else {}
 
     def delete_artifact(self, name):
         """Delete artifact."""
@@ -192,16 +292,38 @@ class MenderManagement:
             if artifact.get('name') == name:
                 break
         url = f"{self.server}/api/management/v1/deployments/artifacts/{artifact['id']}"
-        r = requests.delete(url, headers=self.headers, verify=self.ca_cert)
-        r.raise_for_status()
+        try:
+            r = requests.delete(url, headers=self.headers, verify=self.ca_cert)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print(f"🔴​ HTTP error occured: {e}")
+            try:
+                print("🔴 Server response:", r.json())
+            except ValueError:
+                print("🔴 Server response:", r.text)
+            raise
+        except requests.exceptions.RequestException as e:
+            print(f"🔴 Network error occurred: {e}")
+            raise
         return True
 
     def deploy_device_firmware(self, name, artifact_name, devices):
         """Create a deployment for one or more devices."""
         url = f"{self.server}/api/management/v1/deployments/deployments"
         payload = {"name": name, "artifact_name": artifact_name, "devices": [device['id'] for device in devices]}
-        r = requests.post(url, headers=self.headers, json=payload, verify=self.ca_cert)
-        r.raise_for_status()
+        try:
+            r = requests.post(url, headers=self.headers, json=payload, verify=self.ca_cert)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print(f"🔴​ HTTP error occured: {e}")
+            try:
+                print("🔴 Server response:", r.json())
+            except ValueError:
+                print("🔴 Server response:", r.text)
+            raise
+        except requests.exceptions.RequestException as e:
+            print(f"🔴 Network error occurred: {e}")
+            raise
         return r.json() if r.text else {}
 
     def get_deployment_status(self, name=None, deployment=None):
@@ -212,8 +334,19 @@ class MenderManagement:
             params['name'] = name
         if deployment is not None and deployment.get('deployment_id') is not None:
             params['id'] = deployment['deployment_id']
-        r = requests.get(url, headers=self.headers, params=params, verify=self.ca_cert)
-        r.raise_for_status()
+        try:
+            r = requests.get(url, headers=self.headers, params=params, verify=self.ca_cert)
+            r.raise_for_status()
+        except requests.exceptions.HTTPError as e:
+            print(f"🔴​ HTTP error occured: {e}")
+            try:
+                print("🔴 Server response:", r.json())
+            except ValueError:
+                print("🔴 Server response:", r.text)
+            raise
+        except requests.exceptions.RequestException as e:
+            print(f"🔴 Network error occurred: {e}")
+            raise
         for item in r.json():
             if name is not None:
                 if item.get('name') == name:

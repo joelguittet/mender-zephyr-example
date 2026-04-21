@@ -52,7 +52,7 @@ jobs:
 
       # Setup Zephyr project
       - name: Setup Zephyr project
-        uses: zephyrproject-rtos/action-zephyr-setup@8354324d917cd398fb48d5fdd759cd61e147f084
+        uses: zephyrproject-rtos/action-zephyr-setup@v1
         with:
           app-path: mender-zephyr-example
         env:
@@ -69,7 +69,7 @@ jobs:
 
       # Upload hardware-map artifact
       - name: Upload artifact
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: hardware-map
           if-no-files-found: error

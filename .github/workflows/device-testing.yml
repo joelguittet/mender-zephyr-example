@@ -24,7 +24,7 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
   schedule:
-    - cron: '0 2 * * 1'
+    - cron: '0 0 * * 1'
   workflow_dispatch:
 
 # Define concurrency so that the jobs of the workflow are not mixed between
@@ -34,81 +34,34 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  setup:
-    name: Setup Mender server
-    runs-on: self-hosted
-
-    steps:
-      # Checkout mender-server
-      # FIXME: the repository can be changed to mendersoftware/mender-server once the following pull-request is merged
-      # https://github.com/mendersoftware/mender-server/pull/1164
-      - name: Checkout mender-server
-        uses: actions/checkout@v6
-        with:
-          repository: joelguittet/mender-server
-          ref: dc763f6aa1dd7d8787142ee88c8b596946eaed43
-          path: mender-server
-
-      # Start mender-server
-      # Refer to https://docs.mender.io/server-installation/evaluation-with-docker-compose
-      # mender-server username and password are setup so that test scripts can later connect to the server
-      # mender-server certificate is converted to der format to be integrated in the devices
-      - name: Setup Mender server
-        working-directory: mender-server
-        run: |
-          echo "Starting mender-server containers"
-          export MENDER_IMAGE_TAG=v4.0.1
-          docker compose up -d
-          echo "Setup mender-server username and password"
-          MENDER_USERNAME=admin@docker.mender.io
-          MENDER_PASSWORD=PleaseReplaceWithASecurePassword
-          docker compose run --name create-user useradm create-user --username "$MENDER_USERNAME" --password "$MENDER_PASSWORD"
-          echo "Convert mender-server certificate to der format"
-          openssl x509 -in ${{ github.workspace }}/mender-server/compose/certs/mender.crt -outform der -out ${{ github.workspace }}/mender-server/compose/certs/mender.der
-
-      # Upload mender-certs artifact
-      # This step is used to save mender certificates so they can be used for tests
-      - name: Upload artifact
-        uses: actions/upload-artifact@v6
-        with:
-          name: mender-certs
-          if-no-files-found: error
-          retention-days: 1
-          path: ${{ github.workspace }}/mender-server/compose/certs
-
   device-testing:
     name: Test execution
     runs-on: self-hosted
     timeout-minutes: 120
-    needs: setup
     # Twister is executed inside ghcr.io/zephyrproject-rtos/ci container
     # The container is executed with privileged option to have full access to the host
     # The following are bounded in the container:
     # - /dev: to allow access to the devices
     # - local.conf: contains configuration of the test bench such as Mender server and Wi-Fi settings
     # - map.yml: the twister hardware map corresponding to the devices physically connected to the test bench
+    # - mender.crt/mender.der: mender-server certificate to allow device and tests connecting to the server
     container:
       image: ghcr.io/zephyrproject-rtos/ci:v0.29.0
       volumes:
         - /dev:/dev
         - /home/testbench/mender-zephyr-example/local.conf:/__w/mender-zephyr-example/mender-zephyr-example/local.conf
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/mender-zephyr-example/map.yml
+        - /home/testbench/mender-server/compose/certs/mender.crt:/__w/mender-zephyr-example/mender-zephyr-example/mender.crt
+        - /home/testbench/mender-server/compose/certs/mender.der:/__w/mender-zephyr-example/mender-zephyr-example/mender.der
       options: --privileged
     # Permissions
-    # - contents: read, actions: read and checks: write are required to use dorny/test-reporter@v2
+    # - contents: read, actions: read and checks: write are required to use dorny/test-reporter@v3
     permissions:
       contents: read
       actions: read
       checks: write
 
     steps:
-      # Download mender-certs artifact
-      # This step is used to retrieve mender certificates so they can be used for tests
-      - uses: actions/download-artifact@v7
-        with:
-          name: mender-certs
-          path: ${{ github.workspace }}
-
       # Install mender-artifact and mender-cli
       # mender-artifact is used to generate artifact for firmware update
       # mender-cli is used to connect to the troubleshoot terminal of the device
@@ -176,10 +129,10 @@ jobs:
 
       # Setup Zephyr project
       # Toolchains are installed to build the application for all supported boards:
-      # - arm-zephyr-eabi: to support frdm-mcxn947 and nucleo-l4a6zg boards
+      # - arm-zephyr-eabi: to support frdm-mcxn947, nucleo-l4a6zg and rpi_pico2 boards
       # - xtensa-espressif_esp32_zephyr-elf: to support esp32-devkitc
       - name: Setup Zephyr project
-        uses: zephyrproject-rtos/action-zephyr-setup@8354324d917cd398fb48d5fdd759cd61e147f084
+        uses: zephyrproject-rtos/action-zephyr-setup@v1
         with:
           app-path: mender-zephyr-example
           toolchains: arm-zephyr-eabi:xtensa-espressif_esp32_zephyr-elf
@@ -196,6 +149,7 @@ jobs:
           west blobs fetch hal_espressif
           west blobs fetch hal_infineon
 
+      # TODO CLEAN
       # Install openocd configuration files
       # The following configuration files are installed:
       # - rp2350.cfg: to support rpi_pico2 board
@@ -225,14 +179,14 @@ jobs:
           west twister -T app -v --allow-installed-plugin --enable-slow --inline-logs --device-testing --hardware-map /__w/mender-zephyr-example/mender-zephyr-example/map.yml
         env:
           MENDER_SERVER: "https://docker.mender.io"
-          MENDER_USERNAME: "admin@docker.mender.io"
-          MENDER_PASSWORD: "PleaseReplaceWithASecurePassword"
+          MENDER_USERNAME: ${{ secrets.MENDER_USERNAME }}
+          MENDER_PASSWORD: ${{ secrets.MENDER_PASSWORD }}
           MENDER_CA: "/__w/mender-zephyr-example/mender-zephyr-example/mender.crt"
 
       # Publish test results
       - name: Publish test results
         if: ${{ always() && steps.execute-tests.conclusion != 'skipped' && steps.execute-tests.conclusion != 'cancelled' }}
-        uses: dorny/test-reporter@v2
+        uses: dorny/test-reporter@v3
         with:
           working-directory: mender-zephyr-example
           name: 🧪 Zephyr Twister Test Report
@@ -244,7 +198,7 @@ jobs:
       # This step is always executed, so that we can get logs even in case of failure during the execution of the tests
       - name: Upload artifact
         if: ${{ always() && steps.execute-tests.conclusion != 'skipped' && steps.execute-tests.conclusion != 'cancelled' }}
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: test-results
           if-no-files-found: error
@@ -261,6 +215,19 @@ jobs:
             mender-zephyr-example/twister-out/**/handler.log
             mender-zephyr-example/twister-out/**/report.xml
             mender-zephyr-example/twister-out/**/twister_harness.log
+
+      # Cleanup dangling devices and artifacts on mender-server
+      - name: Cleanup dangling devices and artifacts on mender-server
+        if: ${{ always() }}
+        run: |
+          # Login to mender-server
+          TOKEN=$(curl -s -X POST https://docker.mender.io/api/management/v1/useradm/auth/login --cacert /__w/mender-zephyr-example/mender-zephyr-example/mender.crt -H "Content-Type: application/json" -H "Accept: application/jwt" -H "Authorization: Basic $(printf "%s" "${{ secrets.MENDER_USERNAME }}:${{ secrets.MENDER_PASSWORD }}" | base64)")
+          # Abort all the active and pending deployments
+          curl -s https://docker.mender.io/api/management/v1/inventory/devices?inventory/device_type=mender-zephyr-example --cacert /__w/mender-zephyr-example/mender-zephyr-example/mender.crt -H "Authorization: Bearer $TOKEN" | jq -r '.[] | .id' | while read id; do echo "Abort deployment for device with id '$id'"; curl -s -X DELETE https://docker.mender.io/api/management/v1/deployments/deployments/devices/$id --cacert /__w/mender-zephyr-example/mender-zephyr-example/mender.crt -H "Authorization: Bearer $TOKEN"; done
+          # Remove artifacts
+          curl -s https://docker.mender.io/api/management/v2/deployments/artifacts?device_type=mender-zephyr-example --cacert /__w/mender-zephyr-example/mender-zephyr-example/mender.crt -H "Authorization: Bearer $TOKEN" | jq -r '.[] | .id' | while read id; do echo "Removing artifact with id '$id'"; curl -s -X DELETE https://docker.mender.io/api/management/v1/deployments/artifacts/$id --cacert /__w/mender-zephyr-example/mender-zephyr-example/mender.crt -H "Authorization: Bearer $TOKEN"; done
+          # Remove devices
+          curl -s https://docker.mender.io/api/management/v1/inventory/devices?inventory/device_type=mender-zephyr-example --cacert /__w/mender-zephyr-example/mender-zephyr-example/mender.crt -H "Authorization: Bearer $TOKEN" | jq -r '.[] | .id' | while read id; do echo "Removing device with id '$id'"; curl -s -X DELETE https://docker.mender.io/api/management/v2/devauth/devices/$id --cacert /__w/mender-zephyr-example/mender-zephyr-example/mender.crt -H "Authorization: Bearer $TOKEN"; done
 
       # Cleanup twister results
       - name: Cleanup twister results
@@ -279,7 +246,7 @@ jobs:
     name: Publish test results
     runs-on: ubuntu-24.04
     if: ${{ always() && !contains(needs.device-testing.result, 'skipped') && !contains(needs.device-testing.result, 'cancelled') }}
-    needs: [device-testing]
+    needs: device-testing
     # Permissions
     # - contents: read, issues: read checks: write and pull-requests: write are required to use EnricoMi/publish-unit-test-result-action/linux@v2
     permissions:
@@ -291,7 +258,7 @@ jobs:
     steps:
       # Download artifacts
       # This step is used to retrieve test results so they can be used to publish report
-      - uses: actions/download-artifact@v7
+      - uses: actions/download-artifact@v8
         with:
           path: artifacts
 
@@ -300,16 +267,3 @@ jobs:
         uses: EnricoMi/publish-unit-test-result-action/linux@v2
         with:
           files: artifacts/test-results/twister_report.xml
-
-  teardown:
-    name: Stop Mender server
-    runs-on: self-hosted
-    if: ${{ always() && !contains(needs.setup.result, 'skipped') && !contains(needs.setup.result, 'cancelled') }}
-    needs: [setup, device-testing]
-
-    steps:
-      # Stop mender-server
-      - name: Shutdown Mender server
-        working-directory: mender-server
-        run: |
-          docker compose down -v --remove-orphans
