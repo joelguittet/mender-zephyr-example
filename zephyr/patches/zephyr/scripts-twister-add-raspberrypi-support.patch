@@ -1,0 +1,32 @@
+From 11de36d7590271de0ed9cbe85ff8bb230027bf99 Mon Sep 17 00:00:00 2001
+From: Joel Guittet <joelguittet@gmail.com>
+Date: Mon, 23 Mar 2026 09:16:36 +0100
+Subject: [PATCH 1/1] scripts: twister: add raspberrypi openocd hw adapter
+ option
+
+The Raspberry Pi requires a specific openocd version with rp2xxx
+driver support.
+
+Signed-off-by: Joel Guittet <joelguittet@gmail.com>
+---
+ .../src/twister_harness/device/hardware_adapter.py            | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/scripts/pylib/pytest-twister-harness/src/twister_harness/device/hardware_adapter.py b/scripts/pylib/pytest-twister-harness/src/twister_harness/device/hardware_adapter.py
+index 766218c4c0e..44dbedcf3ff 100644
+--- a/scripts/pylib/pytest-twister-harness/src/twister_harness/device/hardware_adapter.py
++++ b/scripts/pylib/pytest-twister-harness/src/twister_harness/device/hardware_adapter.py
+@@ -103,6 +103,10 @@ class HardwareAdapter(DeviceAdapter):
+             elif runner == "openocd" and self.device_config.product == "LPC-LINK2 CMSIS-DAP":
+                 extra_args.append("--cmd-pre-init")
+                 extra_args.append(f'adapter serial {board_id}')
++            elif runner == "openocd" and (
++                self.device_config.product == "Raspberry Pi Debug Probe (CMSIS-DAP)"
++            ):
++                extra_args.append("--openocd /usr/local/bin/openocd")
+             elif runner == 'jlink' or (
+                 runner == 'stm32cubeprogrammer' and self.device_config.product != "BOOT-SERIAL"
+             ):
+-- 
+2.43.0
+

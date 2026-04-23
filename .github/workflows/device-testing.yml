@@ -132,7 +132,9 @@ jobs:
       # - arm-zephyr-eabi: to support frdm-mcxn947, nucleo-l4a6zg and rpi_pico2 boards
       # - xtensa-espressif_esp32_zephyr-elf: to support esp32-devkitc
       - name: Setup Zephyr project
-        uses: zephyrproject-rtos/action-zephyr-setup@v1
+        # TODO switch to zephyrproject-rtos after west patch supprot is merged
+        #uses: zephyrproject-rtos/action-zephyr-setup@v1
+        uses: joelguittet/action-zephyr-setup@e635c09c0c6684e888210d528abfbb6455f8f60a
         with:
           app-path: mender-zephyr-example
           toolchains: arm-zephyr-eabi:xtensa-espressif_esp32_zephyr-elf
