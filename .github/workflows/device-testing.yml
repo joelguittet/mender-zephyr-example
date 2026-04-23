@@ -238,6 +238,15 @@ jobs:
         run: |
           rm -rf twister-out
 
+      # Cleanup Zephyr patches
+      - name: Cleanup Zephyr patches
+        if: ${{ always() }}
+        working-directory: mender-zephyr-example
+        run: |
+          if [ -f "zephyr/patches.yml" ]; then
+            west patch clear
+          fi
+
       # Cleanup Zephyr environment
       - name: Cleanup Zephyr environment
         if: ${{ always() }}
