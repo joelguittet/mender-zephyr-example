@@ -118,11 +118,11 @@ static const unsigned char ca_certificate_secondary[] = {
  * @brief Mender client events
  */
 static K_EVENT_DEFINE(mender_client_events);
-#define MENDER_CLIENT_EVENT_CONNECT      (1 << 0)
-#define MENDER_CLIENT_EVENT_CONNECTED    (1 << 1)
-#define MENDER_CLIENT_EVENT_DISCONNECT   (1 << 2)
-#define MENDER_CLIENT_EVENT_DISCONNECTED (1 << 3)
-#define MENDER_CLIENT_EVENT_RESTART      (1 << 4)
+#define MENDER_CLIENT_EVENT_CONNECT           (1 << 0)
+#define MENDER_CLIENT_EVENT_CONNECTED         (1 << 1)
+#define MENDER_CLIENT_EVENT_CONNECTION_FAILED (1 << 2)
+#define MENDER_CLIENT_EVENT_DISCONNECT        (1 << 3)
+#define MENDER_CLIENT_EVENT_RESTART           (1 << 4)
 
 /**
  * @brief Network management callback
@@ -216,7 +216,7 @@ network_connect_cb(void) {
     /* This callback only indicates the mender-client requests network access now */
     k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_CONNECT);
     uint32_t events = k_event_wait(&mender_client_events,
-                                   MENDER_CLIENT_EVENT_CONNECTED | MENDER_CLIENT_EVENT_DISCONNECTED,
+                                   MENDER_CLIENT_EVENT_CONNECTED | MENDER_CLIENT_EVENT_CONNECTION_FAILED,
                                    false,
                                    K_SECONDS(2 * CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES * CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_TIMEOUT));
     k_event_clear(&mender_client_events, events);
@@ -918,7 +918,7 @@ main(void) {
                 /* Connect to the network */
                 LOG_INF("Connecting to the network");
                 if (0 != network_connect(iface)) {
-                    k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_DISCONNECTED);
+                    k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_CONNECTION_FAILED);
                     LOG_ERR("Unable to connect network");
                 } else {
                     connected = true;
@@ -944,12 +944,10 @@ main(void) {
                         LOG_ERR("Unable to disconnect network");
                     } else {
                         connected = false;
-                        k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_DISCONNECTED);
                         LOG_INF("Disconnected of the network");
                     }
                 }
             } else {
-                k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_DISCONNECTED);
                 LOG_INF("Disconnected of the network");
             }
         } else if (true == restart) {

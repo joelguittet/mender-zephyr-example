@@ -1,3 +1,20 @@
+# @file      patches.yml
+# @brief     Patch files metadata
+#
+# Copyright joelguittet and mender-mcu-client contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 patches:
   - path: zephyr/scripts-twister-add-raspberrypi-support.patch
     sha256sum: e1214cd8a22a4b7ea7afe4a9c93081d0a5b66c5d98bbf97d8a5b911817ad13b3
@@ -9,3 +26,12 @@ patches:
     comments: |
       Add raspberrypi openocd hw adapter option.
       Static path to /usr/local/bin/openocd is used.
+  - path: zephyr/drivers-ethernet-nxp-enet-qos-start-stop.patch
+    sha256sum: a9a8ed600805b9d7e2bb15f4a5391a64fb9f58767f45482a59642655b392281b
+    module: zephyr
+    author: Joel Guittet
+    email: joelguittet@gmail.com
+    date: 2026-04-24
+    upstreamable: true
+    comments: |
+      Add start/stop support to NXP ENET QOS Ethernet driver.
