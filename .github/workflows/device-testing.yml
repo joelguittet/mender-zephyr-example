@@ -244,7 +244,7 @@ jobs:
         working-directory: mender-zephyr-example
         run: |
           if [ -f "zephyr/patches.yml" ]; then
-            west patch clear
+            west patch clean
           fi
 
       # Cleanup Zephyr environment
