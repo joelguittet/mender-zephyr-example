@@ -16,16 +16,6 @@
 # limitations under the License.
 
 patches:
-  - path: zephyr/scripts-twister-add-raspberrypi-support.patch
-    sha256sum: e1214cd8a22a4b7ea7afe4a9c93081d0a5b66c5d98bbf97d8a5b911817ad13b3
-    module: zephyr
-    author: Joel Guittet
-    email: joelguittet@gmail.com
-    date: 2026-03-23
-    upstreamable: false
-    comments: |
-      Add raspberrypi openocd hw adapter option.
-      Static path to /usr/local/bin/openocd is used.
   - path: zephyr/drivers-ethernet-nxp-enet-qos-start-stop.patch
     sha256sum: a9a8ed600805b9d7e2bb15f4a5391a64fb9f58767f45482a59642655b392281b
     module: zephyr
