@@ -221,6 +221,7 @@ jobs:
       # Cleanup dangling devices and artifacts on mender-server
       - name: Cleanup dangling devices and artifacts on mender-server
         if: ${{ always() }}
+        shell: bash
         run: |
           # Login to mender-server
           TOKEN=$(curl -s -X POST https://docker.mender.io/api/management/v1/useradm/auth/login --cacert /__w/mender-zephyr-example/mender-zephyr-example/mender.crt -H "Content-Type: application/json" -H "Accept: application/jwt" -H "Authorization: Basic $(printf "%s" "${{ secrets.MENDER_USERNAME }}:${{ secrets.MENDER_PASSWORD }}" | base64)")
