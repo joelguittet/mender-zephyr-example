@@ -130,7 +130,7 @@ jobs:
       # Setup Zephyr project
       # Toolchains are installed to build the application for all supported boards:
       # - arm-zephyr-eabi: to support frdm-mcxn947, nucleo-l4a6zg and rpi_pico2 boards
-      # - xtensa-espressif_esp32_zephyr-elf: to support esp32-devkitc
+      # - xtensa-espressif_esp32_zephyr-elf: to support esp32s3-devkitc
       - name: Setup Zephyr project
         # TODO switch to zephyrproject-rtos after west patch supprot is merged
         #uses: zephyrproject-rtos/action-zephyr-setup@v1
@@ -143,7 +143,7 @@ jobs:
 
       # Fetch blobs
       # The following blobs are fetch:
-      # - hal_espressif: to support esp32-devkitc board
+      # - hal_espressif: to support esp32s3-devkitc board
       # - hal_infineon: to support rpi_pico2 board
       - name: Fetch blobs
         working-directory: mender-zephyr-example
@@ -225,7 +225,7 @@ jobs:
         run: |
           # Login to mender-server
           TOKEN=$(curl -s -X POST https://docker.mender.io/api/management/v1/useradm/auth/login --cacert /__w/mender-zephyr-example/mender-zephyr-example/mender.crt -H "Content-Type: application/json" -H "Accept: application/jwt" -H "Authorization: Basic $(printf "%s" "${{ secrets.MENDER_USERNAME }}:${{ secrets.MENDER_PASSWORD }}" | base64)")
-          DEVICE_TYPES=(mender-esp32-devkitc-zephyr-example mender-frdm-mcxn947-zephyr-example mender-nucleo-l4a6zg-zephyr-example mender-rpi_pico2-zephyr-example)
+          DEVICE_TYPES=(mender-esp32s3-devkitc-zephyr-example mender-frdm-mcxn947-zephyr-example mender-nucleo-l4a6zg-zephyr-example mender-rpi_pico2-zephyr-example)
           for device_type in "${DEVICE_TYPES[@]}"; do
             # Abort all the active and pending deployments
             curl -s https://docker.mender.io/api/management/v1/inventory/devices?inventory/device_type=${device_type} --cacert /__w/mender-zephyr-example/mender-zephyr-example/mender.crt -H "Authorization: Bearer $TOKEN" | jq -r '.[] | .id' | while read id; do echo "Abort deployment for device type '$device_type' with id '$id'"; curl -s -X DELETE https://docker.mender.io/api/management/v1/deployments/deployments/devices/$id --cacert /__w/mender-zephyr-example/mender-zephyr-example/mender.crt -H "Authorization: Bearer $TOKEN"; done

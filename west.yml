@@ -34,7 +34,7 @@ manifest:
         # strictly needed by the application
         name-allowlist:
           - cmsis_6
-          - hal_espressif # required for esp32-devkitc board
+          - hal_espressif # required for esp32s3-devkitc board
           - hal_infineon # required for rpi_pico2 board
           - hal_nxp # required for frdm-mcxn947 board
           - hal_rpi_pico # required for rpi_pico2 board

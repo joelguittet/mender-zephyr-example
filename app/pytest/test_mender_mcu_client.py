@@ -181,7 +181,7 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
     print("✅ Device has status 'accepted' on the mender server")
     """Create a new firmware update."""
     # Key file is optional and will be empty in case signature is not enabled
-    # This is the case on esp32-devkitc board for which only the Espressif port of mcuboot supports signature verification
+    # This is the case on esp32s3-devkitc board for which only the Espressif port of mcuboot supports signature verification
     expected_version = "0.2.0+0"
     mcuboot_pad_size = find_in_config(Path(dut.device_config.app_build_dir) / 'zephyr' / '.config', 'CONFIG_ROM_START_OFFSET')
     mcuboot_primary_size = find_in_config(Path(dut.device_config.app_build_dir) / 'zephyr' / '.config', 'CONFIG_FLASH_LOAD_SIZE')
