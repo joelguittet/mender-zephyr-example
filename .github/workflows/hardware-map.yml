@@ -58,6 +58,14 @@ jobs:
         env:
           PIP_ROOT_USER_ACTION: ignore
 
+      # Apply Zephyr patches
+      - name: Cleanup Zephyr patches
+        working-directory: mender-zephyr-example
+        run: |
+          if [ -f "zephyr/patches.yml" ]; then
+            west patch apply
+          fi
+
       # Generate hardware map using twister
       # The following options is used:
       # --generate-hardware-map: generate hardware map
@@ -83,6 +91,15 @@ jobs:
         working-directory: mender-zephyr-example
         run: |
           rm -rf twister-out
+
+      # Cleanup Zephyr patches
+      - name: Cleanup Zephyr patches
+        if: ${{ always() }}
+        working-directory: mender-zephyr-example
+        run: |
+          if [ -f "zephyr/patches.yml" ]; then
+            west patch clean
+          fi
 
       # Cleanup Zephyr environment
       - name: Cleanup build
