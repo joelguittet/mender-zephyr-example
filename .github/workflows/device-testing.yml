@@ -130,12 +130,12 @@ jobs:
       # Setup Zephyr project
       # Toolchains are installed to build the application for all supported boards:
       # - arm-zephyr-eabi: to support frdm-mcxn947, nucleo-l4a6zg and rpi_pico2 boards
-      # - xtensa-espressif_esp32_zephyr-elf: to support esp32s3-devkitc
+      # - xtensa-espressif_esp32s3_zephyr-elf: to support esp32s3-devkitc
       - name: Setup Zephyr project
         uses: zephyrproject-rtos/action-zephyr-setup@v1
         with:
           app-path: mender-zephyr-example
-          toolchains: arm-zephyr-eabi:xtensa-espressif_esp32_zephyr-elf
+          toolchains: arm-zephyr-eabi:xtensa-espressif_esp32s3_zephyr-elf
         env:
           PIP_ROOT_USER_ACTION: ignore
 
