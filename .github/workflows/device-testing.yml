@@ -140,7 +140,7 @@ jobs:
           PIP_ROOT_USER_ACTION: ignore
 
       # Apply Zephyr patches
-      - name: Cleanup Zephyr patches
+      - name: Apply Zephyr patches
         working-directory: mender-zephyr-example
         run: |
           if [ -f "zephyr/patches.yml" ]; then
