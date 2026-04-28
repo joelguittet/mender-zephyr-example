@@ -1,4 +1,4 @@
-From 290880c5101aee030e680148c1d36a9673f83a60 Mon Sep 17 00:00:00 2001
+From 85fa2fc2d7457740de203d1012537774bbdc79af Mon Sep 17 00:00:00 2001
 From: Joel Guittet <joelguittet@gmail.com>
 Date: Mon, 23 Mar 2026 09:16:36 +0100
 Subject: [PATCH 1/2] scripts: twister: base_params in the hardware map config
@@ -108,7 +108,7 @@ index 288b567e6d0..df711beb4ee 100644
  def test_if_get_command_returns_proper_string_with_runner_params_1(patched_which, device: HardwareAdapter) -> None:
      device.device_config.build_dir = Path('build')
 diff --git a/scripts/pylib/twister/twisterlib/handlers.py b/scripts/pylib/twister/twisterlib/handlers.py
-index 96a6e5bd6ab..e6723324198 100755
+index 96a6e5bd6ab..6a9b92fe763 100755
 --- a/scripts/pylib/twister/twisterlib/handlers.py
 +++ b/scripts/pylib/twister/twisterlib/handlers.py
 @@ -560,12 +560,10 @@ class DeviceHandler(Handler):
@@ -121,7 +121,7 @@ index 96a6e5bd6ab..e6723324198 100755
 -                    or runner == "openocd"
 -                    and product == "STLINK-V3"
 -                ):
-+                elif runner == 'openocd' and self.device_config.product in [
++                elif runner == 'openocd' and product in [
 +                    'STM32 STLink',
 +                    'STLINK-V3',
 +                ]:
@@ -313,7 +313,7 @@ index b1643786022..23b7d5cccd8 100644
 2.43.0
 
 
-From 1ff5c246a3f600936e1dff5acfdc0c3c2b5b0215 Mon Sep 17 00:00:00 2001
+From 0ddec3ddbe811a74c290d0fe121962df542d2963 Mon Sep 17 00:00:00 2001
 From: Joel Guittet <joelguittet@gmail.com>
 Date: Tue, 28 Apr 2026 18:24:39 +0200
 Subject: [PATCH 2/2] scripts: twister: add raspberry pi debug probe
@@ -344,7 +344,7 @@ index b787e14473a..0106054b7a8 100644
                  extra_args.append(f'cmsis_dap_serial {board_id}')
              elif runner == "openocd" and self.device_config.product == "LPC-LINK2 CMSIS-DAP":
 diff --git a/scripts/pylib/twister/twisterlib/handlers.py b/scripts/pylib/twister/twisterlib/handlers.py
-index e6723324198..08fe0cace6a 100755
+index 6a9b92fe763..c592af95ef7 100755
 --- a/scripts/pylib/twister/twisterlib/handlers.py
 +++ b/scripts/pylib/twister/twisterlib/handlers.py
 @@ -566,7 +566,10 @@ class DeviceHandler(Handler):
@@ -352,7 +352,7 @@ index e6723324198..08fe0cace6a 100755
                      command_extra_args.append("--cmd-pre-init")
                      command_extra_args.append(f"hla_serial {board_id}")
 -                elif runner == "openocd" and product == "EDBG CMSIS-DAP":
-+                elif runner == 'openocd' and self.device_config.product in [
++                elif runner == 'openocd' and product in [
 +                    'EDBG CMSIS-DAP',
 +                    'Raspberry Pi Debug Probe (CMSIS-DAP)',
 +                ]:
