@@ -1,4 +1,4 @@
-From 8e9f2a34b80c68377545ab1d42e8eeb0525292a6 Mon Sep 17 00:00:00 2001
+From 290880c5101aee030e680148c1d36a9673f83a60 Mon Sep 17 00:00:00 2001
 From: Joel Guittet <joelguittet@gmail.com>
 Date: Mon, 23 Mar 2026 09:16:36 +0100
 Subject: [PATCH 1/2] scripts: twister: base_params in the hardware map config
@@ -12,16 +12,16 @@ with rp2xxx driver support.
 Signed-off-by: Joel Guittet <joelguittet@gmail.com>
 ---
  .../device/hardware_adapter.py                |  3 ++
- .../src/twister_harness/plugin.py             |  5 +++
- .../twister_harness/twister_harness_config.py |  6 +++
- .../tests/device/hardware_adapter_test.py     | 12 ++++++
- scripts/pylib/twister/twisterlib/handlers.py  | 22 ++++++----
+ .../src/twister_harness/plugin.py             |  5 ++++
+ .../twister_harness/twister_harness_config.py |  6 ++++
+ .../tests/device/hardware_adapter_test.py     | 12 ++++++++
+ scripts/pylib/twister/twisterlib/handlers.py  | 17 ++++++-----
  .../pylib/twister/twisterlib/hardwaredata.py  |  1 +
- .../pylib/twister/twisterlib/hardwaremap.py   |  2 +
- scripts/schemas/twister/hwmap-schema.yaml     |  4 ++
- scripts/tests/twister/test_handlers.py        | 43 +++++++++++++------
- scripts/tests/twister/test_hardwaremap.py     |  2 +
- 10 files changed, 78 insertions(+), 22 deletions(-)
+ .../pylib/twister/twisterlib/hardwaremap.py   |  2 ++
+ scripts/schemas/twister/hwmap-schema.yaml     |  4 +++
+ scripts/tests/twister/test_handlers.py        | 30 +++++++++++--------
+ scripts/tests/twister/test_hardwaremap.py     |  2 ++
+ 10 files changed, 63 insertions(+), 19 deletions(-)
 
 diff --git a/scripts/pylib/pytest-twister-harness/src/twister_harness/device/hardware_adapter.py b/scripts/pylib/pytest-twister-harness/src/twister_harness/device/hardware_adapter.py
 index 766218c4c0e..b787e14473a 100644
@@ -108,10 +108,10 @@ index 288b567e6d0..df711beb4ee 100644
  def test_if_get_command_returns_proper_string_with_runner_params_1(patched_which, device: HardwareAdapter) -> None:
      device.device_config.build_dir = Path('build')
 diff --git a/scripts/pylib/twister/twisterlib/handlers.py b/scripts/pylib/twister/twisterlib/handlers.py
-index 96a6e5bd6ab..08fe0cace6a 100755
+index 96a6e5bd6ab..e6723324198 100755
 --- a/scripts/pylib/twister/twisterlib/handlers.py
 +++ b/scripts/pylib/twister/twisterlib/handlers.py
-@@ -560,15 +560,16 @@ class DeviceHandler(Handler):
+@@ -560,12 +560,10 @@ class DeviceHandler(Handler):
                  elif runner == "esp32":
                      command_extra_args.append("--esp-device")
                      command_extra_args.append(board_id)
@@ -127,15 +127,8 @@ index 96a6e5bd6ab..08fe0cace6a 100755
 +                ]:
                      command_extra_args.append("--cmd-pre-init")
                      command_extra_args.append(f"hla_serial {board_id}")
--                elif runner == "openocd" and product == "EDBG CMSIS-DAP":
-+                elif runner == 'openocd' and self.device_config.product in [
-+                    'EDBG CMSIS-DAP',
-+                    'Raspberry Pi Debug Probe (CMSIS-DAP)',
-+                ]:
-                     command_extra_args.append("--cmd-pre-init")
-                     command_extra_args.append(f"cmsis_dap_serial {board_id}")
-                 elif runner == "openocd" and product == "LPC-LINK2 CMSIS-DAP":
-@@ -586,10 +587,15 @@ class DeviceHandler(Handler):
+                 elif runner == "openocd" and product == "EDBG CMSIS-DAP":
+@@ -586,10 +584,15 @@ class DeviceHandler(Handler):
                      command.append('--dev-id')
                      command.append(board_id)
  
@@ -200,7 +193,7 @@ index e0bf63a27e0..59dae1f8a95 100644
        type: array
        items:
 diff --git a/scripts/tests/twister/test_handlers.py b/scripts/tests/twister/test_handlers.py
-index d0d8b177afa..7a28c93e024 100644
+index d0d8b177afa..029199a568f 100644
 --- a/scripts/tests/twister/test_handlers.py
 +++ b/scripts/tests/twister/test_handlers.py
 @@ -819,7 +819,8 @@ TESTDATA_13 = [
@@ -209,7 +202,7 @@ index d0d8b177afa..7a28c93e024 100644
          ['west', 'flash', '--no-rebuild', '-d', '$build_dir',
 -         '--runner', 'runner', 'param1', 'param2']
 +         '--runner', 'runner', '--base-param1', '--base-param2',
-+         '--', '--runnner-param1', '--runnner-param2']
++         '--', '--runner-param1', '--runner-param2']
      ),
  
      (
@@ -219,7 +212,7 @@ index d0d8b177afa..7a28c93e024 100644
          ['west', 'flash', '--no-rebuild', '-d', '$build_dir',
 -         '--runner', 'pyocd', 'param1', 'param2', '--', '--dev-id', 12345]
 +         '--runner', 'pyocd', '--base-param1', '--base-param2',
-+         '--', '--dev-id', 12345, '--runnner-param1', '--runnner-param2']
++         '--', '--dev-id', 12345, '--runner-param1', '--runner-param2']
      ),
      (
          None,
@@ -229,7 +222,7 @@ index d0d8b177afa..7a28c93e024 100644
          ['west', 'flash', '--no-rebuild', '-d', '$build_dir',
 -         '--runner', 'nrfjprog', 'param1', 'param2', '--', '--dev-id', 12345]
 +         '--runner', 'nrfjprog', '--base-param1', '--base-param2',
-+         '--', '--dev-id', 12345, '--runnner-param1', '--runnner-param2']
++         '--', '--dev-id', 12345, '--runner-param1', '--runner-param2']
      ),
      (
          None,
@@ -240,7 +233,7 @@ index d0d8b177afa..7a28c93e024 100644
 -         '--runner', 'openocd', 'param1', 'param2',
 -         '--', '--cmd-pre-init', 'hla_serial 12345']
 +         '--runner', 'openocd', '--base-param1', '--base-param2',
-+         '--', '--cmd-pre-init', 'hla_serial 12345', '--runnner-param1', '--runnner-param2']
++         '--', '--cmd-pre-init', 'hla_serial 12345', '--runner-param1', '--runner-param2']
      ),
      (
          None,
@@ -251,62 +244,42 @@ index d0d8b177afa..7a28c93e024 100644
 -         '--runner', 'openocd', 'param1', 'param2',
 -         '--', '--cmd-pre-init', 'hla_serial 12345']
 +         '--runner', 'openocd', '--base-param1', '--base-param2',
-+         '--', '--cmd-pre-init', 'hla_serial 12345', '--runnner-param1', '--runnner-param2']
++         '--', '--cmd-pre-init', 'hla_serial 12345', '--runner-param1', '--runner-param2']
      ),
      (
          None,
-@@ -862,8 +865,17 @@ TESTDATA_13 = [
+@@ -862,8 +865,8 @@ TESTDATA_13 = [
          'EDBG CMSIS-DAP',
          None,
          ['west', 'flash', '--no-rebuild', '-d', '$build_dir',
 -         '--runner', 'openocd', 'param1', 'param2',
 -         '--', '--cmd-pre-init', 'cmsis_dap_serial 12345']
 +         '--runner', 'openocd', '--base-param1', '--base-param2',
-+         '--', '--cmd-pre-init', 'cmsis_dap_serial 12345', '--runnner-param1', '--runnner-param2']
-+    ),
-+    (
-+        None,
-+        'openocd',
-+        'Raspberry Pi Debug Probe (CMSIS-DAP)',
-+        None,
-+        ['west', 'flash', '--no-rebuild', '-d', '$build_dir',
-+         '--runner', 'openocd', '--base-param1', '--base-param2',
-+         '--', '--cmd-pre-init', 'cmsis_dap_serial 12345', '--runnner-param1', '--runnner-param2']
++         '--', '--cmd-pre-init', 'cmsis_dap_serial 12345', '--runner-param1', '--runner-param2']
      ),
      (
          None,
-@@ -872,7 +884,8 @@ TESTDATA_13 = [
+@@ -872,7 +875,8 @@ TESTDATA_13 = [
          None,
          ['west', 'flash', '--no-rebuild', '-d', '$build_dir',
           '--runner', 'jlink', '--dev-id', 12345,
 -         'param1', 'param2']
 +         '--base-param1', '--base-param2',
-+         '--', '--runnner-param1', '--runnner-param2']
++         '--', '--runner-param1', '--runner-param2']
      ),
      (
          None,
-@@ -881,7 +894,8 @@ TESTDATA_13 = [
+@@ -881,7 +885,8 @@ TESTDATA_13 = [
          None,
          ['west', 'flash', '--no-rebuild', '-d', '$build_dir',
           '--runner', 'stm32cubeprogrammer', '--dev-id', 12345,
 -         'param1', 'param2']
 +         '--base-param1', '--base-param2',
-+         '--', '--runnner-param1', '--runnner-param2']
++         '--', '--runner-param1', '--runner-param2']
      ),
      (
          None,
-@@ -909,8 +923,8 @@ TESTDATA_13_2 = [(True), (False)]
-     ids=['default', '--west-flash', 'one west flash value',
-          'multiple west flash values', 'generic runner', 'pyocd',
-          'nrfjprog', 'openocd, STM32 STLink', 'openocd, STLINK-v3',
--         'openocd, EDBG CMSIS-DAP', 'jlink', 'stm32cubeprogrammer',
--         'flash_command', 'flash_command with args']
-+         'openocd, EDBG CMSIS-DAP', 'openocd, Raspberry Pi Debug Probe (CMSIS-DAP)',
-+         'jlink', 'stm32cubeprogrammer', 'flash_command', 'flash_command with args']
- )
- @pytest.mark.parametrize('hardware_probe', TESTDATA_13_2, ids=['probe', 'id'])
- def test_devicehandler_create_command(
-@@ -935,7 +949,8 @@ def test_devicehandler_create_command(
+@@ -935,7 +940,8 @@ def test_devicehandler_create_command(
          product=hardware_product_name,
          probe_id=12345 if hardware_probe else None,
          id=12345 if not hardware_probe else None,
@@ -340,7 +313,7 @@ index b1643786022..23b7d5cccd8 100644
 2.43.0
 
 
-From 49cd2a4bbededa18f605ef8f40c0c386eae74e36 Mon Sep 17 00:00:00 2001
+From 1ff5c246a3f600936e1dff5acfdc0c3c2b5b0215 Mon Sep 17 00:00:00 2001
 From: Joel Guittet <joelguittet@gmail.com>
 Date: Tue, 28 Apr 2026 18:24:39 +0200
 Subject: [PATCH 2/2] scripts: twister: add raspberry pi debug probe
@@ -349,8 +322,10 @@ Select the expected board id for Raspberry Pi Debug Probe hardware.
 
 Signed-off-by: Joel Guittet <joelguittet@gmail.com>
 ---
- .../src/twister_harness/device/hardware_adapter.py           | 5 ++++-
- 1 file changed, 4 insertions(+), 1 deletion(-)
+ .../src/twister_harness/device/hardware_adapter.py  |  5 ++++-
+ scripts/pylib/twister/twisterlib/handlers.py        |  5 ++++-
+ scripts/tests/twister/test_handlers.py              | 13 +++++++++++--
+ 3 files changed, 19 insertions(+), 4 deletions(-)
 
 diff --git a/scripts/pylib/pytest-twister-harness/src/twister_harness/device/hardware_adapter.py b/scripts/pylib/pytest-twister-harness/src/twister_harness/device/hardware_adapter.py
 index b787e14473a..0106054b7a8 100644
@@ -368,6 +343,53 @@ index b787e14473a..0106054b7a8 100644
                  extra_args.append('--cmd-pre-init')
                  extra_args.append(f'cmsis_dap_serial {board_id}')
              elif runner == "openocd" and self.device_config.product == "LPC-LINK2 CMSIS-DAP":
+diff --git a/scripts/pylib/twister/twisterlib/handlers.py b/scripts/pylib/twister/twisterlib/handlers.py
+index e6723324198..08fe0cace6a 100755
+--- a/scripts/pylib/twister/twisterlib/handlers.py
++++ b/scripts/pylib/twister/twisterlib/handlers.py
+@@ -566,7 +566,10 @@ class DeviceHandler(Handler):
+                 ]:
+                     command_extra_args.append("--cmd-pre-init")
+                     command_extra_args.append(f"hla_serial {board_id}")
+-                elif runner == "openocd" and product == "EDBG CMSIS-DAP":
++                elif runner == 'openocd' and self.device_config.product in [
++                    'EDBG CMSIS-DAP',
++                    'Raspberry Pi Debug Probe (CMSIS-DAP)',
++                ]:
+                     command_extra_args.append("--cmd-pre-init")
+                     command_extra_args.append(f"cmsis_dap_serial {board_id}")
+                 elif runner == "openocd" and product == "LPC-LINK2 CMSIS-DAP":
+diff --git a/scripts/tests/twister/test_handlers.py b/scripts/tests/twister/test_handlers.py
+index 029199a568f..64458aa6206 100644
+--- a/scripts/tests/twister/test_handlers.py
++++ b/scripts/tests/twister/test_handlers.py
+@@ -868,6 +868,15 @@ TESTDATA_13 = [
+          '--runner', 'openocd', '--base-param1', '--base-param2',
+          '--', '--cmd-pre-init', 'cmsis_dap_serial 12345', '--runner-param1', '--runner-param2']
+     ),
++    (
++        None,
++        'openocd',
++        'Raspberry Pi Debug Probe (CMSIS-DAP)',
++        None,
++        ['west', 'flash', '--no-rebuild', '-d', '$build_dir',
++         '--runner', 'openocd', '--base-param1', '--base-param2',
++         '--', '--cmd-pre-init', 'cmsis_dap_serial 12345', '--runner-param1', '--runner-param2']
++    ),
+     (
+         None,
+         'jlink',
+@@ -914,8 +923,8 @@ TESTDATA_13_2 = [(True), (False)]
+     ids=['default', '--west-flash', 'one west flash value',
+          'multiple west flash values', 'generic runner', 'pyocd',
+          'nrfjprog', 'openocd, STM32 STLink', 'openocd, STLINK-v3',
+-         'openocd, EDBG CMSIS-DAP', 'jlink', 'stm32cubeprogrammer',
+-         'flash_command', 'flash_command with args']
++         'openocd, EDBG CMSIS-DAP', 'openocd, Raspberry Pi Debug Probe (CMSIS-DAP)',
++         'jlink', 'stm32cubeprogrammer', 'flash_command', 'flash_command with args']
+ )
+ @pytest.mark.parametrize('hardware_probe', TESTDATA_13_2, ids=['probe', 'id'])
+ def test_devicehandler_create_command(
 -- 
 2.43.0
 
