@@ -16,16 +16,15 @@
 # limitations under the License.
 
 patches:
-  - path: zephyr/scripts-twister-add-raspberrypi-support.patch
-    sha256sum: ff37ae304c2030864d19ca21957f485d070237934ba6d8e4e64b9ae26a05a53a
+  - path: zephyr/scripts-twister-add-base-params-support.patch
+    sha256sum: 08fb57df3ccf10b0b3ab2a0665afae15689e293527c5c3dffd209cca2f195b69
     module: zephyr
     author: Joel Guittet
     email: joelguittet@gmail.com
-    date: 2026-03-23
+    date: 2026-04-28
     upstreamable: false
     comments: |
-      Add raspberrypi openocd hw adapter option.
-      Static path to /usr/local/bin/openocd is used.
+      Add twister support for base_params in the hardwaremap config file.
   - path: zephyr/drivers-ethernet-nxp-enet-qos-start-stop.patch
     sha256sum: a9a8ed600805b9d7e2bb15f4a5391a64fb9f58767f45482a59642655b392281b
     module: zephyr

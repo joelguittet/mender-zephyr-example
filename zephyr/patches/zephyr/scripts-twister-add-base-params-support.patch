@@ -1,0 +1,190 @@
+From 4746f9f81203b289d31f4beafb9d9dcddc54545f Mon Sep 17 00:00:00 2001
+From: Joel Guittet <joelguittet@gmail.com>
+Date: Mon, 23 Mar 2026 09:16:36 +0100
+Subject: [PATCH 1/1] scripts: twister: base_params in the hardware map config
+ file
+
+Add the ability to configure additional runner parameters.
+
+For instance the Raspberry Pi boards require a specific openocd version
+with rp2xxx driver support.
+
+Signed-off-by: Joel Guittet <joelguittet@gmail.com>
+---
+ .../src/twister_harness/device/hardware_adapter.py   |  3 +++
+ .../src/twister_harness/twister_harness_config.py    |  6 ++++++
+ .../tests/device/hardware_adapter_test.py            | 12 ++++++++++++
+ scripts/pylib/twister/twisterlib/handlers.py         |  5 +++++
+ scripts/pylib/twister/twisterlib/hardwaredata.py     |  1 +
+ scripts/pylib/twister/twisterlib/hardwaremap.py      |  2 ++
+ scripts/schemas/twister/hwmap-schema.yaml            |  4 ++++
+ scripts/tests/twister/test_handlers.py               |  1 +
+ scripts/tests/twister/test_hardwaremap.py            |  2 ++
+ 9 files changed, 36 insertions(+)
+
+diff --git a/scripts/pylib/pytest-twister-harness/src/twister_harness/device/hardware_adapter.py b/scripts/pylib/pytest-twister-harness/src/twister_harness/device/hardware_adapter.py
+index 766218c4c0e..b787e14473a 100644
+--- a/scripts/pylib/pytest-twister-harness/src/twister_harness/device/hardware_adapter.py
++++ b/scripts/pylib/pytest-twister-harness/src/twister_harness/device/hardware_adapter.py
+@@ -78,6 +78,9 @@ class HardwareAdapter(DeviceAdapter):
+         extra_args: list[str] = []
+         runner = self.device_config.runner
+         base_args.extend(['--runner', runner])
++        if self.device_config.base_params:
++            for param in self.device_config.base_params:
++                base_args.append(param)
+         if self.device_config.runner_params:
+             for param in self.device_config.runner_params:
+                 extra_args.append(param)
+diff --git a/scripts/pylib/pytest-twister-harness/src/twister_harness/twister_harness_config.py b/scripts/pylib/pytest-twister-harness/src/twister_harness/twister_harness_config.py
+index 8439652ee31..49938449378 100644
+--- a/scripts/pylib/pytest-twister-harness/src/twister_harness/twister_harness_config.py
++++ b/scripts/pylib/pytest-twister-harness/src/twister_harness/twister_harness_config.py
+@@ -33,6 +33,7 @@ class DeviceConfig:
+     platform: str = ''
+     serial_configs: list[DeviceSerialConfig] = field(default_factory=list)
+     runner: str = ''
++    base_params: list[str] = field(default_factory=list, repr=False)
+     runner_params: list[str] = field(default_factory=list, repr=False)
+     id: str = ''
+     product: str = ''
+@@ -99,6 +100,10 @@ class TwisterHarnessConfig:
+         elif test_params.flash_command:
+             flash_command = [w.strip() for w in next(csv.reader([test_params.flash_command]))]
+ 
++        base_params: list[str] = []
++        if config.option.base_params:
++            base_params = [w.strip() for w in config.option.base_params]
++
+         runner_params: list[str] = []
+         if config.option.runner_params:
+             runner_params = [w.strip() for w in config.option.runner_params]
+@@ -136,6 +141,7 @@ class TwisterHarnessConfig:
+                 platform=dut.platform or config.option.platform or test_params.platform,
+                 serial_configs=serial_configs,
+                 runner=config.option.runner or test_params.runner or dut.runner,
++                base_params=base_params or dut.base_params,
+                 runner_params=runner_params or dut.runner_params,
+                 id=config.option.device_id or dut.id,
+                 product=config.option.device_product or dut.product,
+diff --git a/scripts/pylib/pytest-twister-harness/tests/device/hardware_adapter_test.py b/scripts/pylib/pytest-twister-harness/tests/device/hardware_adapter_test.py
+index 288b567e6d0..df711beb4ee 100644
+--- a/scripts/pylib/pytest-twister-harness/tests/device/hardware_adapter_test.py
++++ b/scripts/pylib/pytest-twister-harness/tests/device/hardware_adapter_test.py
+@@ -131,6 +131,18 @@ def test_if_get_command_returns_proper_string_8(patched_which, device: HardwareA
+     ]
+ 
+ 
++@mock.patch('shutil.which', return_value='west')
++def test_if_get_command_returns_proper_string_with_base_params(patched_which, device: HardwareAdapter) -> None:
++    device.device_config.build_dir = Path('build')
++    device.device_config.base_params = ['--base-param1', '--base-param2']
++    device.generate_command()
++    assert isinstance(device.command, list)
++    assert device.command == [
++        'west', 'flash', '--no-rebuild', '--build-dir', 'build',
++        '--runner', 'runner', '--base-param1', '--base-param2'
++    ]
++
++
+ @mock.patch('shutil.which', return_value='west')
+ def test_if_get_command_returns_proper_string_with_runner_params_1(patched_which, device: HardwareAdapter) -> None:
+     device.device_config.build_dir = Path('build')
+diff --git a/scripts/pylib/twister/twisterlib/handlers.py b/scripts/pylib/twister/twisterlib/handlers.py
+index 96a6e5bd6ab..04dba84b217 100755
+--- a/scripts/pylib/twister/twisterlib/handlers.py
++++ b/scripts/pylib/twister/twisterlib/handlers.py
+@@ -586,6 +586,11 @@ class DeviceHandler(Handler):
+                     command.append('--dev-id')
+                     command.append(board_id)
+ 
++                # Receive parameters from base_params field.
++                if hardware.base_params:
++                    for param in hardware.base_params:
++                        command.append(param)
++
+                 # Receive parameters from runner_params field.
+                 if hardware.runner_params:
+                     for param in hardware.runner_params:
+diff --git a/scripts/pylib/twister/twisterlib/hardwaredata.py b/scripts/pylib/twister/twisterlib/hardwaredata.py
+index 51654eefc67..38afafe8a38 100644
+--- a/scripts/pylib/twister/twisterlib/hardwaredata.py
++++ b/scripts/pylib/twister/twisterlib/hardwaredata.py
+@@ -19,6 +19,7 @@ class HardwareData:
+     product: str | None = None
+     serial_pty: str | None = None
+     connected: bool = False
++    base_params: str | None = None
+     runner_params: str | None = None
+     pre_script: str | None = None
+     post_script: str | None = None
+diff --git a/scripts/pylib/twister/twisterlib/hardwaremap.py b/scripts/pylib/twister/twisterlib/hardwaremap.py
+index 6d486b703ec..9f3c4c576d3 100644
+--- a/scripts/pylib/twister/twisterlib/hardwaremap.py
++++ b/scripts/pylib/twister/twisterlib/hardwaremap.py
+@@ -261,6 +261,7 @@ class HardwareMap:
+                 raise ValueError(f"Invalid platform value: {platform}")
+             id = dut.get('id')
+             runner = dut.get('runner')
++            base_params = dut.get('base_params')
+             runner_params = dut.get('runner_params')
+             serial = dut.get('serial')
+             serial_baud = dut.get('serial_baud', None) or dut.get('baud', None)
+@@ -274,6 +275,7 @@ class HardwareMap:
+                 new_dut = DUT(platform=plat,
+                               product=product,
+                               runner=runner,
++                              base_params=base_params,
+                               runner_params=runner_params,
+                               id=id,
+                               serial_pty=serial_pty,
+diff --git a/scripts/schemas/twister/hwmap-schema.yaml b/scripts/schemas/twister/hwmap-schema.yaml
+index e0bf63a27e0..59dae1f8a95 100644
+--- a/scripts/schemas/twister/hwmap-schema.yaml
++++ b/scripts/schemas/twister/hwmap-schema.yaml
+@@ -18,6 +18,10 @@ items:
+       type: string
+     runner:
+       type: string
++    base_params:
++      type: array
++      items:
++        type: string
+     runner_params:
+       type: array
+       items:
+diff --git a/scripts/tests/twister/test_handlers.py b/scripts/tests/twister/test_handlers.py
+index d0d8b177afa..104abc1df63 100644
+--- a/scripts/tests/twister/test_handlers.py
++++ b/scripts/tests/twister/test_handlers.py
+@@ -935,6 +935,7 @@ def test_devicehandler_create_command(
+         product=hardware_product_name,
+         probe_id=12345 if hardware_probe else None,
+         id=12345 if not hardware_probe else None,
++        base_params=['param1', 'param2'],
+         runner_params=['param1', 'param2'],
+         west_flash_cmd=None
+     )
+diff --git a/scripts/tests/twister/test_hardwaremap.py b/scripts/tests/twister/test_hardwaremap.py
+index b1643786022..23b7d5cccd8 100644
+--- a/scripts/tests/twister/test_hardwaremap.py
++++ b/scripts/tests/twister/test_hardwaremap.py
+@@ -49,6 +49,7 @@ TESTDATA_1 = [
+             'product': 'dummy product',
+             'serial_pty': 'dummy serial pty',
+             'connected': True,
++            'base_params': ['dummy', 'base', 'params'],
+             'runner_params': ['dummy', 'runner', 'params'],
+             'pre_script': 'dummy pre script',
+             'post_script': 'dummy post script',
+@@ -70,6 +71,7 @@ TESTDATA_1 = [
+             'product': 'dummy product',
+             'serial_pty': 'dummy serial pty',
+             'connected': True,
++            'base_params': ['dummy', 'base', 'params'],
+             'runner_params': ['dummy', 'runner', 'params'],
+             'pre_script': 'dummy pre script',
+             'post_script': 'dummy post script',
+-- 
+2.43.0
+
