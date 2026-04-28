@@ -17,7 +17,7 @@
 
 patches:
   - path: zephyr/scripts-twister-add-base-params-support.patch
-    sha256sum: 22b9a095c381ae44bf33c625987d276876a9e038975ad12895d7c7811a838f74
+    sha256sum: 9f4e2b0326513bbe9a062c34d46d805adce0aec47931b0eabeaf922860648e84
     module: zephyr
     author: Joel Guittet
     email: joelguittet@gmail.com
