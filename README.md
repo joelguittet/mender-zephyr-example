@@ -22,11 +22,11 @@
 
 This project is used with one of the following setup.
 
-* [Espressif ESP32-DevKitC](https://www.espressif.com/en/products/devkits/esp32-devkitc/overview) development board
+* [Espressif ESP32S3-DevKitC](https://docs.espressif.com/projects/esp-dev-kits/en/latest/esp32s3/esp32-s3-devkitc-1/index.html) development board
 
 This board is well known and has a very low cost, providing a perfect choice to start developing applications using the embedded Wi-Fi interface.
 
-![ESP32-DevKitC](https://raw.githubusercontent.com/joelguittet/mender-zephyr-example/master/.github/docs/esp32-devkitc.png)
+![ESP32S3-DevKitC](https://raw.githubusercontent.com/joelguittet/mender-zephyr-example/master/.github/docs/esp32s3-devkitc.png)
 
 * [NXP FRDM-MCXN947](https://www.nxp.com/design/design-center/development-boards-and-designs/FRDM-MCXN947) development board
 
@@ -88,7 +88,7 @@ Other settings are available in the Kconfig. You can also refer to the mender-mc
 
 Some boards depends on binary blobs. You can download them using the following commands.
 
-* Espressif ESP32-DevKitC development board
+* Espressif ESP32S3-DevKitC development board
 ```
 west blobs fetch hal_espressif
 ```
@@ -101,9 +101,9 @@ The application relies on mcuboot and requires to build a signed binary file to 
 
 Use the following commands to build mcuboot and the application all together using sysbuild, depending of the board being used:
 
-* Espressif ESP32-DevKitC development board
+* Espressif ESP32S3-DevKitC development board
 ```
-west build -b esp32_devkitc/esp32/procpu --sysbuild app
+west build -b esp32s3_devkitc/esp32s3/procpu --sysbuild app
 ```
 * NXP FRDM-MCXN947 development board
 ```
@@ -120,7 +120,7 @@ west build -b rpi_pico2/rp2350a/m33/w --sysbuild app
 
 Finaly flash the board using the following command. Both mcuboot and the application will be flashed.
 
-* Espressif ESP32-DevKitC development board
+* Espressif ESP32S3-DevKitC development board
 * NXP FRDM-MCXN947 development board
 * STMicroelectronics NUCLEO-L4A6ZG development board
 ```
@@ -169,9 +169,9 @@ First retrieve [mender-artifact](https://docs.mender.io/downloads#mender-artifac
 
 Change `VERSION` file to `VERSION_MAJOR=0` and `VERSION_MINOR=2`, rebuild the firmware using the same command already used.
 
-* Espressif ESP32-DevKitC development board
+* Espressif ESP32S3-DevKitC development board
 ```
-west build -b esp32_devkitc/esp32/procpu --sysbuild app
+west build -b esp32s3_devkitc/esp32s3/procpu --sysbuild app
 ```
 * NXP FRDM-MCXN947 development board
 ```
@@ -194,9 +194,9 @@ path/to/mender-artifact write rootfs-image --compression none --device-type mend
 
 Where `<board_name>` is the name of the board:
 
-* Espressif ESP32-DevKitC development board
+* Espressif ESP32S3-DevKitC development board
 ```
-path/to/mender-artifact write rootfs-image --compression none --device-type mender-esp32-devkitc-zephyr-example --artifact-name mender-esp32-devkitc-zephyr-example-v0.2.0 --output-path build/zephyr/mender-esp32-devkitc-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
+path/to/mender-artifact write rootfs-image --compression none --device-type mender-esp32s3-devkitc-zephyr-example --artifact-name mender-esp32s3-devkitc-zephyr-example-v0.2.0 --output-path build/zephyr/mender-esp32s3-devkitc-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
 ```
 * NXP FRDM-MCXN947 development board
 ```
@@ -289,7 +289,7 @@ west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="troubleshoot.con
 west build -b <board_name> --sysbuild app -- -DEXTRA_CONF_FILE="troubleshoot.conf;troubleshoot-file-transfer.conf"
 ```
 
-Please note that due to limited amount of memory available, the Device Troubleshoot integration is not recommended on ESP32-DevKitC and NUCLEO-L4A6ZG, and tested only using the FRDM-MCXN947 and RaspberryPi Pico 2W development boards.
+Please note that due to limited amount of memory available, the Device Troubleshoot integration is not recommended on ESP32S3-DevKitC and NUCLEO-L4A6ZG, and tested only using the FRDM-MCXN947 and RaspberryPi Pico 2W development boards.
 
 ### Download and execute an LLEXT module [TODO: to be retested/updated]
 

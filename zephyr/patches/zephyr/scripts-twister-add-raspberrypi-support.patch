@@ -23,7 +23,7 @@ index 766218c4c0e..44dbedcf3ff 100644
 +            elif runner == "openocd" and (
 +                self.device_config.product == "Raspberry Pi Debug Probe (CMSIS-DAP)"
 +            ):
-+                extra_args.append("--openocd /usr/local/bin/openocd")
++                base_args.append("--openocd /usr/local/bin/openocd")
              elif runner == 'jlink' or (
                  runner == 'stm32cubeprogrammer' and self.device_config.product != "BOOT-SERIAL"
              ):

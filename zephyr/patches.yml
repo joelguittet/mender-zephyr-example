@@ -17,7 +17,7 @@
 
 patches:
   - path: zephyr/scripts-twister-add-raspberrypi-support.patch
-    sha256sum: e1214cd8a22a4b7ea7afe4a9c93081d0a5b66c5d98bbf97d8a5b911817ad13b3
+    sha256sum: 58b5d05220d0351dcd265cd4fda9f0f237569c55bad3fbfcac6152745f22ec11
     module: zephyr
     author: Joel Guittet
     email: joelguittet@gmail.com
