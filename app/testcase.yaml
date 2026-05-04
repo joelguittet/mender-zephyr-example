@@ -36,7 +36,7 @@ tests:
       - esp32s3_devkitc/esp32s3/procpu
       # TODO: an issue prevent to use the frdm-mcxn947 board with twister, see:
       # https://github.com/zephyrproject-rtos/zephyr/issues/102568
-      - frdm_mcxn947/mcxn947/cpu0
+      #- frdm_mcxn947/mcxn947/cpu0
       - nucleo_l4a6zg
       - rpi_pico2/rp2350a/m33/w
   mender.mcu.client.troubleshoot:
@@ -45,5 +45,5 @@ tests:
       - esp32s3_devkitc/esp32s3/procpu
       # TODO: an issue prevent to use the frdm-mcxn947 board with twister, see:
       # https://github.com/zephyrproject-rtos/zephyr/issues/102568
-      - frdm_mcxn947/mcxn947/cpu0
+      #- frdm_mcxn947/mcxn947/cpu0
       - rpi_pico2/rp2350a/m33/w
