@@ -189,26 +189,26 @@ west build -b rpi_pico2/rp2350a/m33/w --sysbuild app
 Then create a new artifact using the following command line:
 
 ```
-path/to/mender-artifact write rootfs-image --compression none --device-type mender-<board_name>-zephyr-example --artifact-name mender-<board_name>-zephyr-example-v0.2.0 --output-path build/zephyr/mender-<board_name>-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
+mender-artifact write rootfs-image --compression none --device-type mender-<board_name>-zephyr-example --artifact-name mender-<board_name>-zephyr-example-v0.2.0 --output-path build/zephyr/mender-<board_name>-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
 ```
 
 Where `<board_name>` is the name of the board:
 
 * Espressif ESP32S3-DevKitC development board
 ```
-path/to/mender-artifact write rootfs-image --compression none --device-type mender-esp32s3-devkitc-zephyr-example --artifact-name mender-esp32s3-devkitc-zephyr-example-v0.2.0 --output-path build/zephyr/mender-esp32s3-devkitc-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
+mender-artifact write rootfs-image --compression none --device-type mender-esp32s3-devkitc-zephyr-example --artifact-name mender-esp32s3-devkitc-zephyr-example-v0.2.0 --output-path build/zephyr/mender-esp32s3-devkitc-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
 ```
 * NXP FRDM-MCXN947 development board
 ```
-path/to/mender-artifact write rootfs-image --compression none --device-type mender-frdm-mcxn947-zephyr-example --artifact-name mender-frdm-mcxn947-zephyr-example-v0.2.0 --output-path build/zephyr/mender-frdm-mcxn947-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
+mender-artifact write rootfs-image --compression none --device-type mender-frdm-mcxn947-zephyr-example --artifact-name mender-frdm-mcxn947-zephyr-example-v0.2.0 --output-path build/zephyr/mender-frdm-mcxn947-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
 ```
 * STMicroelectronics NUCLEO-L4A6ZG development board
 ```
-path/to/mender-artifact write rootfs-image --compression none --device-type mender-nucleo-l4a6zg-zephyr-example --artifact-name mender-nucleo-l4a6zg-zephyr-example-v0.2.0 --output-path build/zephyr/mender-nucleo-l4a6zg-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
+mender-artifact write rootfs-image --compression none --device-type mender-nucleo-l4a6zg-zephyr-example --artifact-name mender-nucleo-l4a6zg-zephyr-example-v0.2.0 --output-path build/zephyr/mender-nucleo-l4a6zg-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
 ```
 * RaspberryPi Pico 2W development board
 ```
-path/to/mender-artifact write rootfs-image --compression none --device-type mender-rpi_pico2-zephyr-example --artifact-name mender-rpi_pico2-zephyr-example-v0.2.0 --output-path build/zephyr/mender-rpi_pico2-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
+mender-artifact write rootfs-image --compression none --device-type mender-rpi_pico2-zephyr-example --artifact-name mender-rpi_pico2-zephyr-example-v0.2.0 --output-path build/zephyr/mender-rpi_pico2-zephyr-example-v0.2.0.mender --file build/zephyr/zephyr.signed.bin
 ```
 
 Upload the artifact `mender-<board_name>-zephyr-example-v0.2.0.mender` to the mender server and create a new deployment.
@@ -304,7 +304,7 @@ west build -d build-llext -b nucleo_l4a6zg samples/subsys/llext/modules
 Then create a new artifact using the following command line:
 
 ```
-path/to/mender-artifact write module-image --compression none --device-type mender-zephyr-example --artifact-name hello-world-v1 --type hello-world --output-path build-llext/zephyr/mender-module-hello-world-v1.mender --file build-llext/zephyr/hello_world.llext
+mender-artifact write module-image --compression none --device-type mender-zephyr-example --artifact-name hello-world-v1 --type hello-world --output-path build-llext/zephyr/mender-module-hello-world-v1.mender --file build-llext/zephyr/hello_world.llext
 ```
 
 Upload the artifact `mender-module-hello-world-v1.mender` to the mender server and create a new deployment.

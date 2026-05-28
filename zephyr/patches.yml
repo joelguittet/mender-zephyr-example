@@ -22,9 +22,10 @@ patches:
     author: Joel Guittet
     email: joelguittet@gmail.com
     date: 2026-04-28
-    upstreamable: false
+    upstreamable: true
     comments: |
-      Add twister support for base_params in the hardwaremap config file.
+      Add twister support for base_params in the hardware map config file.
+      Reference pull-request: https://github.com/zephyrproject-rtos/zephyr/pull/107147
   - path: zephyr/drivers-ethernet-nxp-enet-qos-start-stop.patch
     sha256sum: a9a8ed600805b9d7e2bb15f4a5391a64fb9f58767f45482a59642655b392281b
     module: zephyr
@@ -34,3 +35,4 @@ patches:
     upstreamable: true
     comments: |
       Add start/stop support to NXP ENET QOS Ethernet driver.
+      Reference pull-request: https://github.com/zephyrproject-rtos/zephyr/pull/107854

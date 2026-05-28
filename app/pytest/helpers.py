@@ -82,7 +82,7 @@ class Helpers:
 
     def assert_device_troubleshoot_connected(self, dut: DeviceAdapter):
         try:
-            output = dut.readlines_until(regex="Troubleshoot client connected", timeout=600)
+            dut.readlines_until(regex="Troubleshoot client connected", timeout=600)
         except (TwisterHarnessTimeoutException, AssertionError):
             raise AssertionError("🔴​​​ Device troubleshoot doesn't appear to be connected but it should")
         print("✅ Device troubleshoot connected")
