@@ -276,4 +276,4 @@ jobs:
       - name: Publish test results
         uses: EnricoMi/publish-unit-test-result-action/linux@v2
         with:
-          files: artifacts/test-results/twister_report.xml
+          files: artifacts/twister_report.xml
