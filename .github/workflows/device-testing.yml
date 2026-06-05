@@ -47,6 +47,7 @@ jobs:
   device-testing:
     name: Device testing
     runs-on: self-hosted
+    needs: setup
     timeout-minutes: 120
     # Twister is executed inside ghcr.io/zephyrproject-rtos/ci container
     # The container is executed with privileged option to have full access to the host
@@ -267,6 +268,7 @@ jobs:
     name: Teardown test bench
     runs-on: self-hosted
     if: ${{ always() }}
+    needs: device-testing
 
     steps:
       # Power OFF boards
