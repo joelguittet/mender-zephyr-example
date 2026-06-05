@@ -44,6 +44,7 @@ jobs:
     # - /dev: to allow access to the devices
     # - local.conf: contains configuration of the test bench such as Mender server and Wi-Fi settings
     # - map.yml: the twister hardware map corresponding to the devices physically connected to the test bench
+    # - power-on.sh/power-off.sh: scripts used to control usb power to supply the boards on the test bench
     # - mender.crt/mender.der: mender-server certificate to allow device and tests connecting to the server
     container:
       image: ghcr.io/zephyrproject-rtos/ci:v0.29.0
@@ -51,6 +52,8 @@ jobs:
         - /dev:/dev
         - /home/testbench/mender-zephyr-example/local.conf:/__w/mender-zephyr-example/mender-zephyr-example/local.conf
         - /home/testbench/mender-zephyr-example/map.yml:/__w/mender-zephyr-example/mender-zephyr-example/map.yml
+        - /home/testbench/mender-zephyr-example/power-on.sh:/__w/mender-zephyr-example/mender-zephyr-example/power-on.sh
+        - /home/testbench/mender-zephyr-example/power-off.sh:/__w/mender-zephyr-example/mender-zephyr-example/power-off.sh
         - /home/testbench/mender-server/compose/certs/mender.crt:/__w/mender-zephyr-example/mender-zephyr-example/mender.crt
         - /home/testbench/mender-server/compose/certs/mender.der:/__w/mender-zephyr-example/mender-zephyr-example/mender.der
       options: --privileged
@@ -157,6 +160,11 @@ jobs:
           west blobs fetch hal_espressif
           west blobs fetch hal_infineon
 
+      # Power ON boards
+      - name: Power ON boards
+        run: |
+          ./power-on.sh
+
       # Execute tests using twister
       # The following options are used:
       # --allow-installed-plugin: allow using pytest-dependency
@@ -179,6 +187,12 @@ jobs:
           MENDER_USERNAME: ${{ secrets.MENDER_USERNAME }}
           MENDER_PASSWORD: ${{ secrets.MENDER_PASSWORD }}
           MENDER_CA: "/__w/mender-zephyr-example/mender-zephyr-example/mender.crt"
+
+      # Power OFF boards
+      - name: Power OFF boards
+        if: ${{ always() }}
+        run: |
+          ./power-off.sh
 
       # Publish test results
       - name: Publish test results
