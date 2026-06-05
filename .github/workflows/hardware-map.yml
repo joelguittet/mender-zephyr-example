@@ -21,6 +21,16 @@ on:
   workflow_dispatch:
 
 jobs:
+  setup:
+    name: Setup test bench
+    runs-on: self-hosted
+
+    steps:
+      # Power ON boards
+      - name: Power ON boards
+        run: |
+          /home/testbench/mender-zephyr-example/power-on.sh
+
   generate-hardware-map:
     name: Generate hardware map
     runs-on: self-hosted
@@ -106,3 +116,14 @@ jobs:
         if: ${{ always() }}
         run: |
           rm -rf .west
+
+  teardown:
+    name: Teardown test bench
+    runs-on: self-hosted
+    if: ${{ always() }}
+
+    steps:
+      # Power OFF boards
+      - name: Power OFF boards
+        run: |
+          /home/testbench/mender-zephyr-example/power-off.sh
