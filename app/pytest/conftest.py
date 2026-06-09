@@ -25,7 +25,19 @@ def run_uhubctl(location, port, action):
     server = os.getenv("USBPOWER_SERVER", "server")
     username = os.getenv("USBPOWER_USERNAME", "username")
     password = os.getenv("USBPOWER_PASSWORD", "password")
-    subprocess.run(["sshpass", "-P", password, "ssh", "-oStrictHostKeyChecking=no", f"{username}@{server}", "sudo", "/usr/sbin/uhubctl", "-l", location, "-p", port, "-a", action,], check=True)
+    try:
+        result = subprocess.run(["sshpass", "-P", password, "ssh", "-oStrictHostKeyChecking=no", f"{username}@{server}", "sudo", "/usr/sbin/uhubctl", "-l", location, "-p", port, "-a", action,], text=True, capture_output=True, check=True)
+        print("STDOUT:")
+        print(result.stdout)
+        print("STDERR:")
+        print(result.stderr)
+    except subprocess.CalledProcessError as e:
+        print(f"Return code: {e.returncode}")
+        print("STDOUT:")
+        print(e.stdout)
+        print("STDERR:")
+        print(e.stderr)
+        raise
 
 
 @pytest.fixture(autouse=True)
