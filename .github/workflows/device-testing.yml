@@ -73,6 +73,14 @@ jobs:
       checks: write
 
     steps:
+      # Install tools
+      # sshpass is used to connect to the proxmox-host controlling board power
+      - name: Install tools
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            sshpass
+
       # Install mender-artifact and mender-cli
       # mender-artifact is used to generate artifact for firmware update
       # mender-cli is used to connect to the troubleshoot terminal of the device
