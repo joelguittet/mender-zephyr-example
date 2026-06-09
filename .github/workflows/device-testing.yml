@@ -73,9 +73,9 @@ jobs:
       checks: write
 
     steps:
-      # Install tools
+      # Install miscellaneous tools
       # sshpass is used to connect to the proxmox-host controlling board power
-      - name: Install tools
+      - name: Install miscellaneous tools
         run: |
           apt-get update
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
