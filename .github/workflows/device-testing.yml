@@ -186,6 +186,9 @@ jobs:
         run: |
           west twister -T app -v --allow-installed-plugin --enable-slow --inline-logs --device-testing --hardware-map /__w/mender-zephyr-example/mender-zephyr-example/map.yml
         env:
+          USBPOWER_SERVER: "proxmox-host"
+          USBPOWER_USERNAME: ${{ secrets.USBPOWER_USERNAME }}
+          USBPOWER_PASSWORD: ${{ secrets.USBPOWER_PASSWORD }}
           MENDER_SERVER: "https://docker.mender.io"
           MENDER_USERNAME: ${{ secrets.MENDER_USERNAME }}
           MENDER_PASSWORD: ${{ secrets.MENDER_PASSWORD }}
