@@ -15,7 +15,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 import logging
 import pytest
 import random
@@ -34,6 +33,7 @@ logger = logging.getLogger(__name__)
 mender_cli = MenderCli()
 mender_management = MenderManagement()
 helpers = Helpers()
+
 
 @pytest.mark.order('first')
 @pytest.mark.dependency()
