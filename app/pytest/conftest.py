@@ -1,5 +1,5 @@
-# @file      helpers.py
-# @brief     Helpers
+# @file      conftest.py
+# @brief     conftest pytest file
 #
 # Copyright joelguittet and mender-mcu-client contributors
 #
@@ -21,13 +21,16 @@ from twister_harness import DeviceAdapter
 
 
 def run_uhubctl(location, port, action):
-    subprocess.run(["uhubctl", "-l", location, "-p", str(port), "-a", action,], check=True)
+    server = os.getenv("USBPOWER_SERVER", "server")
+    username = os.getenv("USBPOWER_USERNAME", "username")
+    password = os.getenv("USBPOWER_PASSWORD", "password")
+    subprocess.run(["sshpass", "-P", password, "ssh", f"{username}@{server}", "sudo" "/usr/sbin/uhubctl", "-l", location, "-p", port, "-a", action,], check=True)
 
 
 @pytest.fixture(autouse=True)
 def powered_target(dut: DeviceAdapter):
-    print(dut.device_config)
-    location = "33-22"
+    print(f"DEV_CONF={dut.device_config}")
+    location = "3-2"
     port = "1"
     run_uhubctl(location, port, "on")
     try:
