@@ -35,19 +35,21 @@ concurrency:
 
 jobs:
   setup:
-    name: Setup test bench
-    runs-on: self-hosted
-
-    steps:
-      # Power ON boards
-      - name: Power ON boards
-        run: |
-          /home/testbench/mender-zephyr-example/power-on.sh
+    # TODO CLEAN
+    #name: Setup test bench
+    #runs-on: self-hosted
+#
+    #steps:
+    #  # Power ON boards
+    #  - name: Power ON boards
+    #    run: |
+    #      /home/testbench/mender-zephyr-example/power-on.sh
 
   device-testing:
     name: Device testing
     runs-on: self-hosted
-    needs: setup
+    # TODO CLEAN
+    #needs: setup
     timeout-minutes: 120
     # Twister is executed inside ghcr.io/zephyrproject-rtos/ci container
     # The container is executed with privileged option to have full access to the host
@@ -274,19 +276,19 @@ jobs:
         if: ${{ always() }}
         run: |
           rm -rf .west
-
-  teardown:
-    name: Teardown test bench
-    runs-on: self-hosted
-    if: ${{ always() }}
-    needs: device-testing
-
-    steps:
-      # Power OFF boards
-      - name: Power OFF boards
-        run: |
-          /home/testbench/mender-zephyr-example/power-off.sh
-
+# TODO CLEAN
+  #teardown:
+  #  name: Teardown test bench
+  #  runs-on: self-hosted
+  #  if: ${{ always() }}
+  #  needs: device-testing
+#
+  #  steps:
+  #    # Power OFF boards
+  #    - name: Power OFF boards
+  #      run: |
+  #        /home/testbench/mender-zephyr-example/power-off.sh
+#
   publish-test-results:
     name: Publish test results
     runs-on: ubuntu-24.04
