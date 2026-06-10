@@ -19,6 +19,7 @@
 import os
 import subprocess
 import sys
+import time
 
 
 def run_uhubctl(location: str, port: str, action: str) -> None:
@@ -70,6 +71,7 @@ def main() -> int:
         for location, port in ports:
             print(f"🔌 Power ON device on uhubctl at location {location}:{port}")
             run_uhubctl(location, port, "on")
+        time.sleep(10)
 
     else:
         for location, port in reversed(ports):
