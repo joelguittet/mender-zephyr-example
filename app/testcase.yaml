@@ -21,7 +21,7 @@ common:
   slow: true
   harness: pytest
   harness_config:
-    pytest_dut_scope: function
+    pytest_dut_scope: session
     pytest_root:
       - "pytest/test_mender_mcu_client.py"
   tags:
