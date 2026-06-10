@@ -43,9 +43,7 @@ def mac_address(dut: DeviceAdapter) -> str:
 
 @pytest.mark.order('first')
 @pytest.mark.dependency()
-def test_device_registration(dut: DeviceAdapter):
-    # Ensure we got the MAC address of the device.
-    assert mac_address
+def test_device_registration(dut: DeviceAdapter, mac_address: str):
     # Ensure the device is not authorized to the mender server.
     helpers.assert_device_not_authenticated(dut)
     device = mender_management.get_device_by_mac(mac_address)
@@ -64,12 +62,10 @@ def test_device_registration(dut: DeviceAdapter):
 
 
 @pytest.mark.dependency(depends=['test_device_registration'])
-def test_device_inventory(dut: DeviceAdapter):
+def test_device_inventory(dut: DeviceAdapter, mac_address: str):
     # Check if inventory add-on is built-in.
     if not find_in_config(Path(dut.device_config.app_build_dir) / 'zephyr' / '.config', 'CONFIG_MENDER_CLIENT_ADD_ON_INVENTORY'):
         pytest.skip("Inventory add-on is not built-in")
-    # Ensure we got the MAC address of the device.
-    assert mac_address
     # Ensure the device is authorized on the mender server.
     helpers.assert_device_authenticated(dut)
     device = mender_management.get_device_by_mac(mac_address)
@@ -105,12 +101,10 @@ def test_device_inventory(dut: DeviceAdapter):
 
 
 @pytest.mark.dependency(depends=['test_device_registration'])
-def test_device_configure(dut: DeviceAdapter):
+def test_device_configure(dut: DeviceAdapter, mac_address: str):
     # Check if configure add-on is built-in.
     if not find_in_config(Path(dut.device_config.app_build_dir) / 'zephyr' / '.config', 'CONFIG_MENDER_CLIENT_ADD_ON_CONFIGURE'):
         pytest.skip("Configure add-on is not built-in")
-    # Ensure we got the MAC address of the device.
-    assert mac_address
     # Ensure the device is authorized on the mender server.
     helpers.assert_device_authenticated(dut)
     device = mender_management.get_device_by_mac(mac_address)
@@ -150,12 +144,10 @@ def test_device_configure(dut: DeviceAdapter):
 
 
 @pytest.mark.dependency(depends=['test_device_registration'])
-def test_device_troubleshoot_shell(dut: DeviceAdapter):
+def test_device_troubleshoot_shell(dut: DeviceAdapter, mac_address: str):
     # Check if troubleshoot add-on shell is built-in.
     if not find_in_config(Path(dut.device_config.app_build_dir) / 'zephyr' / '.config', 'CONFIG_MENDER_CLIENT_TROUBLESHOOT_SHELL'):
         pytest.skip("Troubleshoot add-on shell is not built-in")
-    # Ensure we got the MAC address of the device.
-    assert mac_address
     # Ensure the device is authorized on the mender server.
     helpers.assert_device_authenticated(dut)
     device = mender_management.get_device_by_mac(mac_address)
@@ -172,9 +164,7 @@ def test_device_troubleshoot_shell(dut: DeviceAdapter):
 
 
 @pytest.mark.dependency(depends=['test_device_registration'])
-def test_device_valid_firmware_update(dut: DeviceAdapter):
-    # Ensure we got the MAC address of the device.
-    assert mac_address
+def test_device_valid_firmware_update(dut: DeviceAdapter, mac_address: str):
     # Get the firmware version of the device.
     fw_version = helpers.get_device_firmware_version(dut)
     assert fw_version == "0.1.0+0", f"🔴​​​ Device has invalid firmware version '{fw_version}'"
@@ -221,7 +211,7 @@ def test_device_valid_firmware_update(dut: DeviceAdapter):
 
 @pytest.mark.order('last')
 @pytest.mark.dependency(depends=['test_device_registration'])
-def test_device_decomissioning(dut: DeviceAdapter):
+def test_device_decomissioning(dut: DeviceAdapter, mac_address: str):
     # Ensure we got the MAC address of the device.
     assert mac_address
     # Ensure the device is authorized on the mender server.
