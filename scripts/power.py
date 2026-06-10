@@ -53,7 +53,7 @@ def wait_for_serial(path: str, timeout: float = 60.0):
 
     while time.time() < deadline:
         if Path(path).exists():
-            print(f"🔌 Device available at {str}")
+            print(f"🔌 Device available at {path}")
             return
 
         time.sleep(0.25)
@@ -88,6 +88,7 @@ def main() -> int:
             run_uhubctl(location, port, "on")
 
         wait_for_serial(serial_path)
+        time.sleep(5)
 
     else:
         for location, port in reversed(ports):
