@@ -34,8 +34,8 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  setup:
-    # TODO CLEAN
+# TODO CLEAN
+#  setup:
     #name: Setup test bench
     #runs-on: self-hosted
 #
