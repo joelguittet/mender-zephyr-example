@@ -20,6 +20,7 @@ import os
 import subprocess
 import sys
 import time
+from pathlib import Path
 
 
 def run_uhubctl(location: str, port: str, action: str) -> None:
@@ -47,15 +48,29 @@ def run_uhubctl(location: str, port: str, action: str) -> None:
     )
 
 
+def wait_for_serial(path: str, timeout: float = 60.0):
+    deadline = time.time() + timeout
+
+    while time.time() < deadline:
+        if Path(path).exists():
+            print(f"🔌 Device available at {str}")
+            return
+
+        time.sleep(0.25)
+
+    raise TimeoutError(f"{path} did not appear")
+
+
 def main() -> int:
-    if len(sys.argv) < 3:
+    if len(sys.argv) < 4:
         print(
-            "Usage: power.py <on|off> <location,port> [<location,port> ...]",
+            "Usage: power.py <serial-path> <on|off> <location,port> [<location,port> ...]",
             file=sys.stderr,
         )
         return 1
 
-    action = sys.argv[1]
+    serial_path = sys.argv[1]
+    action = sys.argv[2]
 
     if action not in ("on", "off"):
         print(f"Invalid action: {action}", file=sys.stderr)
@@ -63,7 +78,7 @@ def main() -> int:
 
     ports = []
 
-    for arg in sys.argv[2:]:
+    for arg in sys.argv[3:]:
         location, port = arg.split(",", 1)
         ports.append((location, port))
 
@@ -71,7 +86,8 @@ def main() -> int:
         for location, port in ports:
             print(f"🔌 Power ON device on uhubctl at location {location}:{port}")
             run_uhubctl(location, port, "on")
-        time.sleep(10)
+
+        wait_for_serial(serial_path)
 
     else:
         for location, port in reversed(ports):
