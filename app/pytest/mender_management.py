@@ -63,7 +63,7 @@ class MenderManagement:
     # AUTH
     # ============================================================
     def login(self):
-        """Authenticate to Mender Management API using Basic Auth or JSON body."""
+        # Authenticate to Mender Management API using Basic Auth or JSON body.
         url = f"{self.server}/api/management/v1/useradm/auth/login"
 
         try:
@@ -91,13 +91,13 @@ class MenderManagement:
     # DEVICES
     # ============================================================
     def list_devices(self):
-        """Return all devices known by Mender."""
+        # Return all devices known by Mender.
         url = f"{self.server}/api/management/v2/devauth/devices"
         r = self._request("GET", url)
         return r.json() if r.text else {}
 
     def get_device_by_mac(self, mac_address):
-        """Return a single device and auth_set by MAC address."""
+        # Return a single device and auth_set by MAC address.
         devices = self.list_devices()
         for device in devices:
             try:
@@ -116,7 +116,7 @@ class MenderManagement:
         return None
 
     def accept_device(self, device):
-        """Accept device."""
+        # Accept device.
         auth_sets = device.get('auth_sets', [])
         auth = auth_sets[0] if auth_sets else None
         url = f"{self.server}/api/management/v2/devauth/devices/{device['id']}/auth/{auth['id']}/status"
@@ -125,7 +125,7 @@ class MenderManagement:
         return True
 
     def delete_device(self, device):
-        """Delete device."""
+        # Delete device.
         url = f"{self.server}/api/management/v2/devauth/devices/{device['id']}"
         self._request("DELETE", url)
         return True
@@ -134,7 +134,7 @@ class MenderManagement:
     # INVENTORY
     # ============================================================
     def get_device_inventory(self, device):
-        """Retrieve current inventory data for a device."""
+        # Retrieve current inventory data for a device.
         url = f"{self.server}/api/management/v1/inventory/devices/{device['id']}"
         r = self._request("GET", url)
         return r.json() if r.text else {}
@@ -143,19 +143,19 @@ class MenderManagement:
     # CONFIGURATION
     # ============================================================
     def get_device_configuration(self, device):
-        """Retrieve current configuration data for a device."""
+        # Retrieve current configuration data for a device.
         url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device['id']}"
         r = self._request("GET", url)
         return r.json() if r.text else {}
 
     def set_device_configuration(self, device, configuration):
-        """Set configuration key/values for a device."""
+        # Set configuration key/values for a device.
         url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device['id']}"
         self._request("PUT", url, json=configuration)
         return True
 
     def deploy_device_configuration(self, device):
-        """Deploy configuration key/values for a device."""
+        # Deploy configuration key/values for a device.
         url = f"{self.server}/api/management/v1/deviceconfig/configurations/device/{device['id']}/deploy"
         payload = {"retries": 0}
         r = self._request("POST", url, json=payload)
@@ -165,7 +165,7 @@ class MenderManagement:
     # DEPLOYMENTS
     # ============================================================
     def upload_artifact(self, filepath, description=None):
-        """Upload a new artifact (deployment package)."""
+        # Upload a new artifact (deployment package).
         url = f"{self.server}/api/management/v1/deployments/artifacts"
         with open(filepath, "rb") as file:
             files = {"artifact": file}
@@ -174,7 +174,7 @@ class MenderManagement:
             return r.json() if r.text else {}
 
     def list_artifacts(self, name=None):
-        """List artifacts."""
+        # List artifacts.
         url = f"{self.server}/api/management/v1/deployments/artifacts/list"
         params = {}
         if name is not None:
@@ -183,7 +183,7 @@ class MenderManagement:
         return r.json() if r.text else {}
 
     def delete_artifact(self, name):
-        """Delete artifact."""
+        # Delete artifact.
         artifacts = self.list_artifacts(name)
         for artifact in artifacts:
             if artifact.get('name') == name:
@@ -193,14 +193,14 @@ class MenderManagement:
         return True
 
     def deploy_device_firmware(self, name, artifact_name, devices):
-        """Create a deployment for one or more devices."""
+        # Create a deployment for one or more devices.
         url = f"{self.server}/api/management/v1/deployments/deployments"
         payload = {"name": name, "artifact_name": artifact_name, "devices": [device['id'] for device in devices]}
         r = self._request("POST", url, json=payload)
         return r.json() if r.text else {}
 
     def get_deployment_status(self, name=None, deployment=None):
-        """Get status of a deployment."""
+        # Get status of a deployment.
         url = f"{self.server}/api/management/v2/deployments/deployments"
         params = {}
         if name is not None:
@@ -218,7 +218,7 @@ class MenderManagement:
         return None
 
     def wait_for_deployment(self, name=None, deployment=None, timeout=1200, interval=30):
-        """Wait until deployment completes or fails."""
+        # Wait until deployment completes or fails.
         deployment_status = None
         start_time = time.time()
         while time.time() - start_time < timeout:
