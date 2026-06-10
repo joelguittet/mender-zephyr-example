@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 # @file      power.py
 # @brief     Control power of boards
 #
@@ -17,6 +16,7 @@
 # limitations under the License.
 
 
+import os
 import subprocess
 import sys
 
@@ -25,12 +25,33 @@ def run_uhubctl(location: str, port: str, action: str) -> None:
     server = os.getenv("USBPOWER_SERVER", "server")
     username = os.getenv("USBPOWER_USERNAME", "username")
     password = os.getenv("USBPOWER_PASSWORD", "password")
-    subprocess.run(["sshpass", "-p", password, "ssh", "-oStrictHostKeyChecking=no", f"{username}@{server}", "sudo", "/usr/sbin/uhubctl", "-l", location, "-p", port, "-a", action,], check=True)
+    subprocess.run(
+        [
+            "sshpass",
+            "-p",
+            password,
+            "ssh",
+            "-oStrictHostKeyChecking=no",
+            f"{username}@{server}",
+            "sudo",
+            "/usr/sbin/uhubctl",
+            "-l",
+            location,
+            "-p",
+            port,
+            "-a",
+            action,
+        ],
+        check=True,
+    )
 
 
 def main() -> int:
     if len(sys.argv) < 3:
-        print("Usage: power.py <on|off> <location,port> [<location,port> ...]", file=sys.stderr)
+        print(
+            "Usage: power.py <on|off> <location,port> [<location,port> ...]",
+            file=sys.stderr,
+        )
         return 1
 
     action = sys.argv[1]

@@ -37,7 +37,7 @@ patches:
       Add start/stop support to NXP ENET QOS Ethernet driver.
       Reference pull-request: https://github.com/zephyrproject-rtos/zephyr/pull/107854
   - path: zephyr/twister-hw-adapter-pre-post-script-params.patch
-    sha256sum: c63b3d5bada10d2c4cc4ad82a23f1fbb8a2a27b545a8a1e059541e3ef5d7e427
+    sha256sum: c09b712d5c7f2cf7815119efa17a6de2a4b34557675e02c5eb73a9064c63eb3f
     module: zephyr
     author: Joel Guittet
     email: jguittet@witekio.com

@@ -1,4 +1,4 @@
-From 00f32914b681ac7f30a9e042c179dc8d431b7880 Mon Sep 17 00:00:00 2001
+From 2f437b84f05746d87ff79d2796f60892383207b1 Mon Sep 17 00:00:00 2001
 From: Joel Guittet <jguittet@witekio.com>
 Date: Wed, 10 Jun 2026 09:16:45 +0200
 Subject: [PATCH 1/1] twister: allow arguments to pre/post scripts of the
@@ -9,11 +9,11 @@ defined in the hardware map file.
 
 Signed-off-by: Joel Guittet <jguittet@witekio.com>
 ---
- .../src/twister_harness/device/hardware_adapter.py             | 3 ++-
- 1 file changed, 2 insertions(+), 1 deletion(-)
+ .../src/twister_harness/device/hardware_adapter.py        | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/scripts/pylib/pytest-twister-harness/src/twister_harness/device/hardware_adapter.py b/scripts/pylib/pytest-twister-harness/src/twister_harness/device/hardware_adapter.py
-index 766218c4c0e..1c685d9b4ec 100644
+index 766218c4c0e..a312f401b93 100644
 --- a/scripts/pylib/pytest-twister-harness/src/twister_harness/device/hardware_adapter.py
 +++ b/scripts/pylib/pytest-twister-harness/src/twister_harness/device/hardware_adapter.py
 @@ -5,6 +5,7 @@
@@ -24,7 +24,26 @@ index 766218c4c0e..1c685d9b4ec 100644
  import subprocess
  import time
  from pathlib import Path
-@@ -187,7 +188,7 @@ class HardwareAdapter(DeviceAdapter):
+@@ -114,6 +115,8 @@ class HardwareAdapter(DeviceAdapter):
+ 
+     def _device_launch(self) -> None:
+         """Flash and run application on a device and connect with serial port."""
++        if self.device_config.pre_script:
++            self._run_custom_script(self.device_config.pre_script, self.base_timeout)
+         if self.device_config.flash_before:
+             # For hardware devices with shared USB or software USB, connect after flashing.
+             # Retry for up to 10 seconds for USB-CDC based devices to enumerate.
+@@ -142,9 +145,6 @@ class HardwareAdapter(DeviceAdapter):
+             logger.error(msg)
+             raise TwisterHarnessException(msg)
+ 
+-        if self.device_config.pre_script:
+-            self._run_custom_script(self.device_config.pre_script, self.base_timeout)
+-
+         if self.device_config.id:
+             logger.debug('Flashing device %s', self.device_config.id)
+         log_command(logger, 'Flashing command', self.command, level=logging.DEBUG)
+@@ -187,7 +187,7 @@ class HardwareAdapter(DeviceAdapter):
      @staticmethod
      def _run_custom_script(script_path: str | Path, timeout: float) -> None:
          with subprocess.Popen(
