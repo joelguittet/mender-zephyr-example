@@ -98,41 +98,40 @@ jobs:
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
             mender-artifact mender-cli
 
-# TODO BACK
       # Install Raspberry Pi's downstream fork of OpenOCD (used to flash rpi_pico2 board)
-      #- name: Install Raspberry Pi's downstream fork of OpenOCD
-      #  run: |
-      #    apt-get update
-      #    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-      #      git build-essential autoconf automake libtool pkg-config libusb-1.0-0-dev libhidapi-dev libjim-dev tcl
-      #    cd $(mktemp -d)
-      #    git clone https://github.com/raspberrypi/openocd.git
-      #    cd openocd
-      #    git checkout $OPENOCD_VERSION
-      #    git submodule update --init --recursive
-      #    ./bootstrap
-      #    ./configure --enable-cmsis-dap
-      #    make -j$(nproc)
-      #    make install
-      #    which openocd
-      #    openocd --version
-      #  env:
-      #    OPENOCD_VERSION: e23a6bbc635aa426668c040abda8c2d38628e8d4
-#
-      ## Install LinkServer (used to flash frdm-mcxn947 board)
-      #- name: Install LinkServer
-      #  run: |
-      #    apt-get update
-      #    DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
-      #      whiptail libusb-1.0-0-dev dfu-util usbutils hwdata udev wget
-      #    /lib/systemd/systemd-udevd --daemon
-      #    wget https://www.nxp.com/lgfiles/updates/mcuxpresso/LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin
-      #    chmod a+x LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin
-      #    ./LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin acceptLicense skipIdeSelect
-      #    echo "/usr/local/LinkServer_${LINK_SERVER_VERSION}" >> "$GITHUB_PATH"
-      #    rm LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin
-      #  env:
-      #    LINK_SERVER_VERSION: 25.9.134
+      - name: Install Raspberry Pi's downstream fork of OpenOCD
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            git build-essential autoconf automake libtool pkg-config libusb-1.0-0-dev libhidapi-dev libjim-dev tcl
+          cd $(mktemp -d)
+          git clone https://github.com/raspberrypi/openocd.git
+          cd openocd
+          git checkout $OPENOCD_VERSION
+          git submodule update --init --recursive
+          ./bootstrap
+          ./configure --enable-cmsis-dap
+          make -j$(nproc)
+          make install
+          which openocd
+          openocd --version
+        env:
+          OPENOCD_VERSION: e23a6bbc635aa426668c040abda8c2d38628e8d4
+
+      # Install LinkServer (used to flash frdm-mcxn947 board)
+      - name: Install LinkServer
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            whiptail libusb-1.0-0-dev dfu-util usbutils hwdata udev wget
+          /lib/systemd/systemd-udevd --daemon
+          wget https://www.nxp.com/lgfiles/updates/mcuxpresso/LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin
+          chmod a+x LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin
+          ./LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin acceptLicense skipIdeSelect
+          echo "/usr/local/LinkServer_${LINK_SERVER_VERSION}" >> "$GITHUB_PATH"
+          rm LinkServer_${LINK_SERVER_VERSION}.x86_64.deb.bin
+        env:
+          LINK_SERVER_VERSION: 25.9.134
 
       # Checkout mender-zephyr-example
       - name: Checkout mender-zephyr-example
