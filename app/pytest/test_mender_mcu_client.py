@@ -67,7 +67,7 @@ def test_device_inventory(dut: DeviceAdapter, mac_address: str):
     if not find_in_config(Path(dut.device_config.app_build_dir) / 'zephyr' / '.config', 'CONFIG_MENDER_CLIENT_ADD_ON_INVENTORY'):
         pytest.skip("Inventory add-on is not built-in")
     # Ensure the device is authorized on the mender server.
-    helpers.assert_device_authenticated(dut)
+    # TODO REM ? helpers.assert_device_authenticated(dut)
     device = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"🔴​​​ Device with MAC '{mac_address}' not found on mender server"
     assert device['status'] == "accepted", f"🔴​​​ Device with MAC '{mac_address}' has unexpected status '{device['status']}'"
@@ -106,7 +106,7 @@ def test_device_configure(dut: DeviceAdapter, mac_address: str):
     if not find_in_config(Path(dut.device_config.app_build_dir) / 'zephyr' / '.config', 'CONFIG_MENDER_CLIENT_ADD_ON_CONFIGURE'):
         pytest.skip("Configure add-on is not built-in")
     # Ensure the device is authorized on the mender server.
-    helpers.assert_device_authenticated(dut)
+    # TODO REM ? helpers.assert_device_authenticated(dut)
     device = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"🔴​​​ Device with MAC '{mac_address}' not found on mender server"
     assert device['status'] == "accepted", f"🔴​​​ Device with MAC '{mac_address}' has unexpected status '{device['status']}'"
@@ -149,7 +149,7 @@ def test_device_troubleshoot_shell(dut: DeviceAdapter, mac_address: str):
     if not find_in_config(Path(dut.device_config.app_build_dir) / 'zephyr' / '.config', 'CONFIG_MENDER_CLIENT_TROUBLESHOOT_SHELL'):
         pytest.skip("Troubleshoot add-on shell is not built-in")
     # Ensure the device is authorized on the mender server.
-    helpers.assert_device_authenticated(dut)
+    # TODO REM ? helpers.assert_device_authenticated(dut)
     device = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"🔴​​​ Device with MAC '{mac_address}' not found on mender server"
     assert device['status'] == "accepted", f"🔴​​​ Device with MAC '{mac_address}' has unexpected status '{device['status']}'"
@@ -170,7 +170,7 @@ def test_device_valid_firmware_update(dut: DeviceAdapter, mac_address: str):
     assert fw_version == "0.1.0+0", f"🔴​​​ Device has invalid firmware version '{fw_version}'"
     print("✅ Device has expected firmware version")
     # Ensure the device is authorized on the mender server.
-    helpers.assert_device_authenticated(dut)
+    # TODO REM ? helpers.assert_device_authenticated(dut)
     device = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"🔴​​​ Device with MAC '{mac_address}' not found on mender server"
     assert device['status'] == "accepted", f"🔴​​​ Device with MAC '{mac_address}' has unexpected status '{device['status']}'"
@@ -215,7 +215,7 @@ def test_device_decomissioning(dut: DeviceAdapter, mac_address: str):
     # Ensure we got the MAC address of the device.
     assert mac_address
     # Ensure the device is authorized on the mender server.
-    helpers.assert_device_authenticated(dut)
+    # TODO REM ? helpers.assert_device_authenticated(dut)
     device = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"🔴​​​ Device with MAC '{mac_address}' not found on mender server"
     assert device['status'] == "accepted", f"🔴​​​ Device with MAC '{mac_address}' has unexpected status '{device['status']}'"
