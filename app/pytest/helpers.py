@@ -59,6 +59,9 @@ class Helpers:
         return fw_version
 
     def assert_device_not_authenticated(self, dut: DeviceAdapter):
+        # Clear buffer before checking for expected logs
+        dut.clear_buffer()
+        # Try to catch 'Unauthorized' or 'Mender client authenticated' log
         try:
             output = dut.readlines_until(regex=r".*<err>.*\[401\] Unauthorized.*|.*<inf>.*Mender client authenticated.*", timeout=600)
         except (TwisterHarnessTimeoutException, AssertionError):
@@ -70,6 +73,9 @@ class Helpers:
         print("✅ Device is not authenticated")
 
     def assert_device_authenticated(self, dut: DeviceAdapter):
+        # Clear buffer before checking for expected logs
+        dut.clear_buffer()
+        # Try to catch 'Unauthorized' or 'Mender client authenticated' log
         try:
             output = dut.readlines_until(regex=r".*<err>.*\[401\] Unauthorized.*|.*<inf>.*Mender client authenticated.*", timeout=600)
         except (TwisterHarnessTimeoutException, AssertionError):

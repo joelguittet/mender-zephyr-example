@@ -416,3 +416,26 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
+
+################ TODO
+
+probleme 1:
+
+[00:01:54.957,000] [1;31m<err> os:  ** FATAL EXCEPTION[0m
+[00:01:54.957,000] [1;31m<err> os:  ** CPU 0 EXCCAUSE 28 (load prohibited)[0m
+[00:01:54.957,000] [1;31m<err> os:  **  PC 0x4201fef1 VADDR 0xb6[0m
+[00:01:54.957,000] [1;31m<err> os:  **  PS 0x60420[0m
+[00:01:54.957,000] [1;31m<err> os:  **    (INTLEVEL:0 EXCM: 0 UM:1 RING:0 WOE:1 OWB:4 CALLINC:2)[0m
+[00:01:54.957,000] [1;31m<err> os:  **  A0 0x8201ff9e  SP 0x3fca22c0  A2 0  A3 0x1[0m
+[00:01:54.957,000] [1;31m<err> os:  **  A4 0  A5 0xb6  A6 0x1  A7 0x3fcc7ea0[0m
+[00:01:54.957,000] [1;31m<err> os:  **  A8 0x1  A9 0 A10 0xb A11 0x60a20[0m
+[00:01:54.957,000] [1;31m<err> os:  ** A12 0x60620 A13 0x3fce2910 A14 0x3fca22c0 A15 0x3fcc6bcc[0m
+[00:01:54.957,000] [1;31m<err> os:  ** LBEG 0x40056f5c LEND 0x40056f72 LCOUNT 0xffffffff[0m
+[00:01:54.957,000] [1;31m<err> os:  ** SAR 0x1f[0m
+[00:01:54.957,000] [1;31m<err> os:  **  THREADPTR 0x3fcc6bb4[0m
+[00:01:54.957,000] [1;31m<err> os: >>> ZEPHYR FATAL ERROR 0: CPU exception on CPU 0[0m
+[00:01:54.957,000] [1;31m<err> os: Current thread: 0x3fce2910 (mender_websocket)[0m
+[00:01:55.043,000] [1;31m<err> os: Halting system[0m
+
+
+probleme 2: similaire ci-dessus mais sur mender troubleshoot shell thread
