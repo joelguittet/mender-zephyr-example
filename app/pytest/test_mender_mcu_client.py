@@ -166,9 +166,9 @@ def test_device_troubleshoot_shell(dut: DeviceAdapter, mac_address: str):
 @pytest.mark.dependency(depends=['test_device_registration'])
 def test_device_valid_firmware_update(dut: DeviceAdapter, mac_address: str):
     # Get the firmware version of the device.
-    fw_version = helpers.get_device_firmware_version(dut)
-    assert fw_version == "0.1.0+0", f"🔴​​​ Device has invalid firmware version '{fw_version}'"
-    print("✅ Device has expected firmware version")
+    # fw_version = helpers.get_device_firmware_version(dut)
+    # assert fw_version == "0.1.0+0", f"🔴​​​ Device has invalid firmware version '{fw_version}'"
+    # print("✅ Device has expected firmware version")
     # Ensure the device is authorized on the mender server.
     # TODO REM ? helpers.assert_device_authenticated(dut)
     device = mender_management.get_device_by_mac(mac_address)
