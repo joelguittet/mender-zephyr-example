@@ -59,32 +59,32 @@ class Helpers:
         return fw_version
 
     def assert_device_not_authenticated(self, dut: DeviceAdapter):
-        # Clear buffer before checking for expected logs
-        dut.clear_buffer()
-        # Try to catch 'Unauthorized' or 'Mender client authenticated' log
+        output = []
+        # Try to catch 'Unauthorized' log
         try:
-            output = dut.readlines_until(regex=r".*<err>.*\[401\] Unauthorized.*|.*<inf>.*Mender client authenticated.*", timeout=600)
+            output = dut.readlines_until(regex=r".*<err>.*\[401\] Unauthorized.*", timeout=600)
+            print("✅ Device is not authenticated")
         except (TwisterHarnessTimeoutException, AssertionError):
+            # Check if device is still authenticated
+            try:
+                match_no_lines(output, ["Mender client authenticated"])
+            except (AssertionError):
+                raise AssertionError("🔴​​​ Device is authenticated to the server but it should not")
             raise AssertionError("🔴​​​ Device is not communicating with the server")
-        try:
-            match_no_lines(output[-1:], ["Mender client authenticated"])
-        except (AssertionError):
-            raise AssertionError("🔴​​​ Device is authenticated to the server but it should not")
-        print("✅ Device is not authenticated")
 
     def assert_device_authenticated(self, dut: DeviceAdapter):
-        # Clear buffer before checking for expected logs
-        dut.clear_buffer()
-        # Try to catch 'Unauthorized' or 'Mender client authenticated' log
+        output = []
+        # Try to catch 'Mender client authenticated' log
         try:
-            output = dut.readlines_until(regex=r".*<err>.*\[401\] Unauthorized.*|.*<inf>.*Mender client authenticated.*", timeout=600)
+            output = dut.readlines_until(regex=r".*<inf>.*Mender client authenticated.*", timeout=600)
+            print("✅ Device is authenticated")
         except (TwisterHarnessTimeoutException, AssertionError):
+            # Check if device is unauthorized
+            try:
+                match_no_lines(output, [r"\[401\] Unauthorized"])
+            except (AssertionError):
+                raise AssertionError("🔴​​​ Device is not authenticated to the server but it should")
             raise AssertionError("🔴​​​ Device is not communicating with the server")
-        try:
-            match_no_lines(output[-1:], [r"\[401\] Unauthorized"])
-        except (AssertionError):
-            raise AssertionError("🔴​​​ Device is not authenticated to the server but it should")
-        print("✅ Device is authenticated")
 
     def assert_device_troubleshoot_connected(self, dut: DeviceAdapter):
         try:
