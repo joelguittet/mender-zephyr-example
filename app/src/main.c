@@ -277,9 +277,11 @@ network_connect(struct net_if *iface) {
     if (0 != (err = net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params)))) {
         if (-EALREADY == err) {
             LOG_INF("Network is already connected");
-            return 0;
+            /* Restart DHCP client */
+            net_dhcpv4_restart(iface);
+        } else {
+            LOG_WRN("An error occured requesting connection to the network (err=%d)", err);
         }
-        LOG_WRN("An error occured requesting connection to the network (err=%d)", err);
     }
 
     /* Waiting interface to connect to the network */
@@ -299,9 +301,11 @@ network_connect(struct net_if *iface) {
                 if (0 != (err = net_mgmt(NET_REQUEST_WIFI_CONNECT, iface, &params, sizeof(struct wifi_connect_req_params)))) {
                     if (-EALREADY == err) {
                         LOG_INF("Network is already connected");
-                        return 0;
+                        /* Restart DHCP client */
+                        net_dhcpv4_restart(iface);
+                    } else {
+                        LOG_WRN("An error occured requesting connection to the network (err=%d)", err);
                     }
-                    LOG_WRN("An error occured requesting connection to the network (err=%d)", err);
                 }
             } else {
                 LOG_ERR("Not connected to the network (%d/%d)", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
@@ -316,9 +320,11 @@ network_connect(struct net_if *iface) {
     if (0 != (err = net_if_up(iface))) {
         if (-EALREADY == err) {
             LOG_INF("Network interface is already up");
-            return 0;
+            /* Restart DHCP client */
+            net_dhcpv4_restart(iface);
+        } else {
+            LOG_WRN("An error occured requesting interface to up (err=%d)", err);
         }
-        LOG_WRN("An error occured requesting interface to up (err=%d)", err);
     }
 
     /* Waiting interface to connect to the network */
@@ -349,19 +355,25 @@ network_connect(struct net_if *iface) {
 int
 network_disconnect(struct net_if *iface) {
 
+    int err;
+
 #ifdef CONFIG_WIFI
 
     /* Request disconnection of the network */
-    net_mgmt(NET_REQUEST_WIFI_DISCONNECT, iface, NULL, 0);
+    if (0 != (err = net_mgmt(NET_REQUEST_WIFI_DISCONNECT, iface, NULL, 0))) {
+        LOG_WRN("An error occured requesting disconnection of the network (err=%d)", err);
+    }
 
 #else
 
     /* Down interface */
-    net_if_down(iface);
+    if (0 != (err = net_if_down(iface))) {
+        LOG_WRN("An error occured requesting interface to down (err=%d)", err);
+    }
 
 #endif /* CONFIG_WIFI */
 
-    return 0;
+    return err;
 }
 
 /**

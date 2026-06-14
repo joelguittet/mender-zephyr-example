@@ -33,6 +33,7 @@ tests:
   mender.mcu.client.default:
     extra_args: EXTRA_CONF_FILE="${WEST_TOPDIR}/local.conf;mcumgr.conf"
     extra_configs:
+      # TODO doesn't work...
       - CONFIG_LOG_BACKEND_SHOW_COLOR=n
     platform_allow:
       - esp32s3_devkitc/esp32s3/procpu

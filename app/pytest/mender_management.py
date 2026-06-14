@@ -228,3 +228,10 @@ class MenderManagement:
                 return deployment_status
             time.sleep(interval)
         return deployment_status
+
+    def stop_deployment(self, deployment_status):
+        # Abord deployment.
+        url = f"{self.server}/api/management/v1/deployments/deployments/{deployment_status['id']}/status"
+        payload = {"status": "aborted"}
+        self._request("PUT", url, json=payload)
+        return True

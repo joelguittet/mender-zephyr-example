@@ -128,8 +128,12 @@ def test_device_configure(dut: DeviceAdapter, mac_address: str):
     deployment_status = mender_management.wait_for_deployment(deployment=deployment)
     assert deployment_status is not None, "🔴​​​ Deployment status not found"
     if deployment_status['status'] != 'finished':
+        # Stop the deployment
+        mender_management.stop_deployment(deployment_status)
         raise AssertionError(f"🔴​​​ Deployment did not complete successfully, it has unexpected status '{deployment_status}'")
     if deployment_status.get('statistics').get('status').get('success') != 1:
+        # Stop the deployment
+        mender_management.stop_deployment(deployment_status)
         raise AssertionError(f"🔴​​​ Deployment did not complete successfully, it has unexpected status '{deployment_status}'")
     print("✅ Device configuration deployment done successfuly")
     # Wait until the device configuration is updated.
@@ -202,12 +206,16 @@ def test_device_valid_firmware_update(dut: DeviceAdapter, mac_address: str):
     try:
         # Deploy artifact to the device.
         mender_management.deploy_device_firmware(deployment_name, artifact_name, [device])
-        # "Wait for deployment completes or fails.
+        # Wait for deployment completes or fails.
         deployment_status = mender_management.wait_for_deployment(name=deployment_name)
         assert deployment_status is not None, "🔴​​​ Deployment status not found"
         if deployment_status['status'] != 'finished':
+            # Stop the deployment
+            mender_management.stop_deployment(deployment_status)
             raise AssertionError(f"🔴​​​ Deployment did not complete successfully, it has unexpected status '{deployment_status}'")
         if deployment_status.get('statistics').get('status').get('success') != 1:
+            # Stop the deployment
+            mender_management.stop_deployment(deployment_status)
             raise AssertionError(f"🔴​​​ Deployment did not complete successfully, it has unexpected status '{deployment_status}'")
     finally:
         # Remove artifact from the server (done even in case the above deployment fails).
