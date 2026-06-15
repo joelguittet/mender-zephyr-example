@@ -46,3 +46,12 @@ patches:
     comments: |
       Allow to pass parameters to the pre/post scripts of the hardware map file.
       Reference pull-request: TODO
+  - path: zephyr/airoc-logs.patch
+    sha256sum: ed1fa6acd96ccb72e23be58a86a8b7c7563a546cf89ddf1d5a4397cd25316d43
+    module: zephyr
+    author: Joel Guittet
+    email: joelguittet@gmail.com
+    date: 2026-06-15
+    upstreamable: false
+    comments: |
+      Add logs to wifi driver
