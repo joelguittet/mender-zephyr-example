@@ -221,9 +221,25 @@ def test_device_valid_firmware_update(dut: DeviceAdapter, mac_address: str):
         # Remove artifact from the server (done even in case the above deployment fails).
         mender_management.delete_artifact(artifact_name)
     print("✅ Device firmware deployment done successfuly")
+    # TODO CLEAN
     # Get the firmware version of the device.
-    fw_version = helpers.get_device_firmware_version(dut)
-    assert fw_version == expected_version, f"🔴​​​ Device has invalid firmware version '{fw_version}'"
+    #fw_version = helpers.get_device_firmware_version(dut)
+    #assert fw_version == expected_version, f"🔴​​​ Device has invalid firmware version '{fw_version}'"
+    # Wait until the device inventory is updated.
+    def get_device_inventory():
+        inventory = mender_management.get_device_inventory(device)
+        print(f"🔵 Device inventory at {datetime.now(timezone.utc)} is: {inventory}")
+        if inventory is not None and inventory.get('updated_ts'):
+            return inventory, inventory.get('updated_ts')
+        return None, None
+    inventory = helpers.run_until_data_refreshed(get_device_inventory)
+    assert inventory is not None, "🔴​​​ Device inventory not found"
+    # Ensure of the device inventory content.
+    inventory = {item['name']: item['value'] for item in inventory.get('attributes', [])}
+    print(f"Device reported inventory: '{inventory}'")
+    assert inventory.get('rootfs-image.version') is not None, "🔴​​​ Device inventory is invalid"
+    m = re.search(f"{find_in_config(Path(dut.device_config.app_build_dir) / 'zephyr' / '.config', 'CONFIG_EXAMPLE_ARTIFACT_NAME_PREFIX')}-v0.2.0", inventory.get('rootfs-image.version'))
+    assert m is not None, "🔴​​​ Device inventory is invalid"
     print("✅ Device has expected firmware version")
 
 
