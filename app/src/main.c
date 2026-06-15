@@ -323,6 +323,8 @@ network_connect(struct net_if *iface) {
         }
     }
 
+#endif /* CONFIG_WIFI */
+
     /* Waiting interface to connect to the network */
     int      tries  = 0;
     uint32_t events = 0;
@@ -390,11 +392,13 @@ authentication_success_cb(void) {
     LOG_INF("Mender client authenticated");
 
 #ifdef CONFIG_MENDER_CLIENT_ADD_ON_TROUBLESHOOT
+
     /* Activate troubleshoot add-on (deactivated by default) */
     if (MENDER_OK != (ret = mender_troubleshoot_activate())) {
         LOG_ERR("Unable to activate troubleshoot add-on");
         return ret;
     }
+
 #endif /* CONFIG_MENDER_CLIENT_ADD_ON_TROUBLESHOOT */
 
     /* Validate the image if it is still pending */
