@@ -350,6 +350,13 @@ network_connect(struct net_if *iface) {
 #endif /* CONFIG_WIFI */
             } else {
                 LOG_ERR("Not connected to the network (%d/%d)", tries, CONFIG_EXAMPLE_NETWORK_CONNECT_FAILS_MAX_TRIES);
+
+                ////TODO TEMP FOIR TEST
+LOG_WRN("Restarting system because no net");
+    log_flush();
+    sys_reboot(SYS_REBOOT_WARM);
+
+                ////
                 return -ENODEV;
             }
         }
