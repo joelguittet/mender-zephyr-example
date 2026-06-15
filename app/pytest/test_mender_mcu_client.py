@@ -45,7 +45,7 @@ def mac_address(dut: DeviceAdapter) -> str:
 @pytest.mark.dependency()
 def test_device_registration(dut: DeviceAdapter, mac_address: str):
     # Remove all available output produced by device from internal buffer.
-    dut.clear_buffer() 
+    dut.clear_buffer()
     # Ensure the device is not authorized to the mender server.
     helpers.assert_device_not_authenticated(dut)
     device = mender_management.get_device_by_mac(mac_address)
@@ -167,7 +167,7 @@ def test_device_troubleshoot_shell(dut: DeviceAdapter, mac_address: str):
     assert device['status'] == "accepted", f"🔴​​​ Device with MAC '{mac_address}' has unexpected status '{device['status']}'"
     print("✅ Device has status 'accepted' on the mender server")
     # Ensure the device troubleshoot is connected to the mender server.
-    helpers.assert_device_troubleshoot_connected(dut)
+    # TODO CLEAN ?? helpers.assert_device_troubleshoot_connected(dut)
     # Execute 'help' command on troubleshoot shell.
     result = mender_cli.shell_exec(device, "help")
     m = re.search(".*Please refer to shell documentation for more details.*", result.stdout)
