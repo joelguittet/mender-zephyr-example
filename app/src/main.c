@@ -124,6 +124,8 @@ static K_EVENT_DEFINE(mender_client_events);
 #define MENDER_CLIENT_EVENT_DISCONNECT        (1 << 3)
 #define MENDER_CLIENT_EVENT_RESTART           (1 << 4)
 
+bool already_connected = false;
+
 /**
  * @brief Network management callback
  */
@@ -213,6 +215,9 @@ network_connect_cb(void) {
 
     LOG_INF("Mender client connect network");
 
+    ///////TODO REM DEBUG
+    if (already_connected) return MENDER_OK;
+
     /* This callback can be used to configure network connection */
     /* Note that the application can connect the network before if required */
     /* This callback only indicates the mender-client requests network access now */
@@ -241,7 +246,7 @@ network_release_cb(void) {
     /* This callback can be used to release network connection */
     /* Note that the application can keep network activated if required */
     /* This callback only indicates the mender-client doesn't request network access now */
-    k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_DISCONNECT);
+    ///TODO DEBUG k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_DISCONNECT);
 
     return MENDER_OK;
 }
@@ -964,7 +969,7 @@ main(void) {
                 if (0 != network_connect(iface)) {
                     k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_CONNECTION_FAILED);
                     LOG_ERR("Unable to connect network");
-                } else {
+                } else {already_connected = true;
                     connected = true;
                     k_event_post(&mender_client_events, MENDER_CLIENT_EVENT_CONNECTED);
                     LOG_INF("Connected to the network");
