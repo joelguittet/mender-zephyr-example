@@ -23,6 +23,7 @@ import uuid
 from datetime import datetime, timezone
 from pathlib import Path
 from twister_harness import DeviceAdapter
+from twister_harness import Shell
 from twister_harness.helpers.utils import find_in_config
 from mender_cli import MenderCli
 from mender_management import MenderManagement
@@ -43,11 +44,11 @@ def mac_address(dut: DeviceAdapter) -> str:
 
 @pytest.mark.order('first')
 @pytest.mark.dependency()
-def test_device_registration(dut: DeviceAdapter, mac_address: str):
+def test_device_registration(dut: DeviceAdapter, shell: Shell, mac_address: str):
     # Remove all available output produced by device from internal buffer.
     dut.clear_buffer()
     # Ensure the device is not authorized to the mender server.
-    helpers.assert_device_not_authenticated(dut)
+    helpers.assert_device_not_authenticated(dut, shell)
     device = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"🔴​​​ Device with MAC '{mac_address}' not found on mender server"
     assert device['status'] == "pending", f"🔴​​​ Device with MAC '{mac_address}' has unexpected status '{device['status']}'"
@@ -55,7 +56,7 @@ def test_device_registration(dut: DeviceAdapter, mac_address: str):
     # Accept the device on the mender server.
     mender_management.accept_device(device)
     # Ensure the device is authorized on the mender server.
-    helpers.assert_device_authenticated(dut)
+    helpers.assert_device_authenticated(dut, shell)
     device = mender_management.get_device_by_mac(mac_address)
     assert device is not None, f"🔴​​​ Device with MAC '{mac_address}' not found on mender server"
     assert device['status'] == "accepted", f"🔴​​​ Device with MAC '{mac_address}' has unexpected status '{device['status']}'"
@@ -245,7 +246,7 @@ def test_device_valid_firmware_update(dut: DeviceAdapter, mac_address: str):
 
 @pytest.mark.order('last')
 @pytest.mark.dependency(depends=['test_device_registration'])
-def test_device_decomissioning(dut: DeviceAdapter, mac_address: str):
+def test_device_decomissioning(dut: DeviceAdapter, shell: Shell, mac_address: str):
     # Remove all available output produced by device from internal buffer.
     dut.clear_buffer()
     # Ensure the device is authorized on the mender server.
@@ -257,5 +258,5 @@ def test_device_decomissioning(dut: DeviceAdapter, mac_address: str):
     # Decomissioning of the device on the server.
     mender_management.delete_device(device)
     # Ensure the device is not authorized to the mender server.
-    helpers.assert_device_not_authenticated(dut)
+    helpers.assert_device_not_authenticated(dut, shell)
     print("✅ Device decomissioning done successfully on the mender server")

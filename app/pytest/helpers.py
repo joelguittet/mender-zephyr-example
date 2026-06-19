@@ -23,6 +23,7 @@ import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from twister_harness import DeviceAdapter
+from twister_harness import Shell
 from twister_harness.exceptions import TwisterHarnessTimeoutException
 from twister_harness.helpers.utils import match_no_lines
 
@@ -58,7 +59,7 @@ class Helpers:
         print(f"🔵​ Firmware version of the device is '{fw_version}'")
         return fw_version
 
-    def assert_device_not_authenticated(self, dut: DeviceAdapter):
+    def assert_device_not_authenticated(self, dut: DeviceAdapter, shell: Shell):
         output = []
         # Try to catch 'Unauthorized' log
         try:
@@ -70,9 +71,10 @@ class Helpers:
                 match_no_lines(output, ["Mender client authenticated"])
             except (AssertionError):
                 raise AssertionError("🔴​​​ Device is authenticated to the server but it should not")
+            shell.exec_command("net iface")
             raise AssertionError("🔴​​​ Device is not communicating with the server")
 
-    def assert_device_authenticated(self, dut: DeviceAdapter):
+    def assert_device_authenticated(self, dut: DeviceAdapter, shell: Shell):
         output = []
         # Try to catch 'Mender client authenticated' log
         try:
@@ -84,6 +86,7 @@ class Helpers:
                 match_no_lines(output, [r"\[401\] Unauthorized"])
             except (AssertionError):
                 raise AssertionError("🔴​​​ Device is not authenticated to the server but it should")
+            shell.exec_command("net iface")
             raise AssertionError("🔴​​​ Device is not communicating with the server")
 
     def assert_device_troubleshoot_connected(self, dut: DeviceAdapter):
