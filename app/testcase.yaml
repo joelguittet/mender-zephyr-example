@@ -35,7 +35,7 @@ tests:
     extra_configs:
       # TODO doesn't work...
       - CONFIG_LOG_BACKEND_SHOW_COLOR=n
-    platform_allow:
+    integration_platforms:
       - esp32s3_devkitc/esp32s3/procpu
       # TODO: an issue prevent to use the frdm-mcxn947 board with twister, see:
       # https://github.com/zephyrproject-rtos/zephyr/issues/102568
@@ -44,7 +44,7 @@ tests:
       - rpi_pico2/rp2350a/m33/w
   mender.mcu.client.troubleshoot:
     extra_args: EXTRA_CONF_FILE="${WEST_TOPDIR}/local.conf;mcumgr.conf;troubleshoot.conf"
-    platform_allow:
+    integration_platforms:
       - esp32s3_devkitc/esp32s3/procpu
       # TODO: an issue prevent to use the frdm-mcxn947 board with twister, see:
       # https://github.com/zephyrproject-rtos/zephyr/issues/102568

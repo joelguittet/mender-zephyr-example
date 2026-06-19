@@ -194,7 +194,7 @@ jobs:
         working-directory: mender-zephyr-example
         id: execute-tests
         run: |
-          west twister -T app -v --allow-installed-plugin --enable-slow --inline-logs --device-testing --hardware-map /__w/mender-zephyr-example/mender-zephyr-example/map.yml
+          west twister -T app -v --allow-installed-plugin --enable-slow --inline-logs --integration --device-testing --hardware-map /__w/mender-zephyr-example/mender-zephyr-example/map.yml
         env:
           USBPOWER_SERVER: "proxmox-host"
           USBPOWER_USERNAME: ${{ secrets.USBPOWER_USERNAME }}
