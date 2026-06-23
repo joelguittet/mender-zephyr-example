@@ -37,9 +37,9 @@ helpers = Helpers()
 
 
 @pytest.fixture(scope="session")
-def mac_address(dut: DeviceAdapter) -> str:
+def mac_address(dut: DeviceAdapter, shell: Shell) -> str:
     # Get the MAC address of the device.
-    return helpers.get_device_mac_address(dut)
+    return helpers.get_device_mac_address(dut, shell)
 
 
 @pytest.mark.order('first')

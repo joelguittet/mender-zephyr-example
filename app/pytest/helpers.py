@@ -33,7 +33,8 @@ class Helpers:
     Provides helper methods for device management.
     """
 
-    def get_device_mac_address(self, dut: DeviceAdapter) -> str:
+    def get_device_mac_address(self, dut: DeviceAdapter, shell: Shell) -> str:
+        shell.exec_command("net iface") # TODO TEMP
         try:
             output = dut.readlines_until(regex="MAC address of the device '[0-9A-Za-z:]+'", timeout=60)
         except (TwisterHarnessTimeoutException, AssertionError):
