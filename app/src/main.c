@@ -185,20 +185,40 @@ net_event_handler(struct net_mgmt_event_callback *cb, uint32_t mgmt_event, struc
 #endif
 
     switch (mgmt_event) {
-        case NET_EVENT_IPV4_ADDR_ADD:
+        case NET_EVENT_L4_CONNECTED:
+            LOG_INF("Got IPv4 event: 'NET_EVENT_L4_CONNECTED'");
+            break;
+        case NET_EVENT_L4_DISCONNECTED:
+            LOG_INF("Got IPv4 event: 'NET_EVENT_L4_DISCONNECTED'");
+            break;
+        case NET_EVENT_IPV4_DHCP_BOUND:
             /* Connected to network */
-            LOG_INF("Got IPv4 event: 'NET_EVENT_IPV4_ADDR_ADD'");
+            LOG_INF("Got IPv4 event: 'NET_EVENT_IPV4_DHCP_BOUND'");
             /* Print interface information */
             net_if_ipv4_addr_foreach(iface, print_dhcpv4_addr, NULL);
             /* Indicate the network is available */
             k_event_post(&network_events, NETWORK_EVENT_CONNECTED);
             break;
-        case NET_EVENT_IPV4_ADDR_DEL:
+        case NET_EVENT_IPV4_DHCP_STOP:
             /* Disconnected from network */
-            LOG_INF("Got IPv4 event: 'NET_EVENT_IPV4_ADDR_DEL'");
+            LOG_INF("Got IPv4 event: 'NET_EVENT_IPV4_DHCP_STOP'");
             /* Indicate the network is not available */
             k_event_post(&network_events, NETWORK_EVENT_DISCONNECTED);
             break;
+        //case NET_EVENT_IPV4_ADDR_ADD:
+        //    /* Connected to network */
+        //    LOG_INF("Got IPv4 event: 'NET_EVENT_IPV4_ADDR_ADD'");
+        //    /* Print interface information */
+        //    net_if_ipv4_addr_foreach(iface, print_dhcpv4_addr, NULL);
+        //    /* Indicate the network is available */
+        //    k_event_post(&network_events, NETWORK_EVENT_CONNECTED);
+        //    break;
+        //case NET_EVENT_IPV4_ADDR_DEL:
+        //    /* Disconnected from network */
+        //    LOG_INF("Got IPv4 event: 'NET_EVENT_IPV4_ADDR_DEL'");
+        //    /* Indicate the network is not available */
+        //    k_event_post(&network_events, NETWORK_EVENT_DISCONNECTED);
+        //    break;
     }
 }
 
@@ -732,7 +752,8 @@ main(void) {
     net_mgmt_event_wait_on_iface(iface, NET_EVENT_SUPPLICANT_IFACE_ADDED, NULL, NULL, NULL, K_SECONDS(30));
 #endif /* CONFIG_WIFI_NM_WPA_SUPPLICANT */
 #endif /* CONFIG_WIFI */
-    net_mgmt_init_event_callback(&mgmt_cb, net_event_handler, NET_EVENT_IPV4_ADDR_ADD | NET_EVENT_IPV4_ADDR_DEL);
+    //net_mgmt_init_event_callback(&mgmt_cb, net_event_handler, NET_EVENT_IPV4_ADDR_ADD | NET_EVENT_IPV4_ADDR_DEL);
+    net_mgmt_init_event_callback(&mgmt_cb, net_event_handler, NET_EVENT_L4_CONNECTED | NET_EVENT_L4_DISCONNECTED | NET_EVENT_IPV4_DHCP_BOUND | NET_EVENT_IPV4_DHCP_STOP);
     net_mgmt_add_event_callback(&mgmt_cb);
     net_dhcpv4_start(iface);
 
