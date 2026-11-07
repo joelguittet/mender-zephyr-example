@@ -1,0 +1,92 @@
+From db5abd52060152071346be7f1419735cb97da501 Mon Sep 17 00:00:00 2001
+From: Joel Guittet <joelguittet@gmail.com>
+Date: Fri, 24 Apr 2026 00:01:29 +0200
+Subject: [PATCH 1/1] drivers: ethernet: nxp enet: add start and stop support
+
+Add support for the start and stop functions in the enet qos driver.
+This avoids errors while the network is being disconnected,
+but the driver is not stopped.
+
+Signed-off-by: Joel Guittet <joelguittet@gmail.com>
+---
+ .../eth_nxp_enet_qos/eth_nxp_enet_qos.c       | 42 +++++++++++++++++--
+ 1 file changed, 38 insertions(+), 4 deletions(-)
+
+diff --git a/drivers/ethernet/eth_nxp_enet_qos/eth_nxp_enet_qos.c b/drivers/ethernet/eth_nxp_enet_qos/eth_nxp_enet_qos.c
+index 3c34f84f246..4510f73bb8a 100644
+--- a/drivers/ethernet/eth_nxp_enet_qos/eth_nxp_enet_qos.c
++++ b/drivers/ethernet/eth_nxp_enet_qos/eth_nxp_enet_qos.c
+@@ -1026,8 +1026,11 @@ static inline void enet_qos_mac_config_init(enet_qos_t *base, struct nxp_enet_qo
+ #endif
+ }
+ 
+-static inline void enet_qos_start(enet_qos_t *base)
++static int eth_nxp_enet_qos_start(const struct device *dev, struct net_if *iface)
+ {
++	const struct nxp_enet_qos_mac_config *config = dev->config;
++	enet_qos_t *base = config->module.base;
++
+ 	/* Set start bits of the RX and TX DMAs */
+ 	base->DMA_CH[0].DMA_CHX_RX_CTRL |=
+ 		ENET_QOS_REG_PREP(DMA_CH_DMA_CHX_RX_CTRL, SR, 0b1);
+@@ -1052,6 +1055,38 @@ static inline void enet_qos_start(enet_qos_t *base)
+ 		/* Receive and Transmit IRQs */
+ 		ENET_QOS_REG_PREP(MAC_INTERRUPT_ENABLE, TXSTSIE, 0b1) |
+ 		ENET_QOS_REG_PREP(MAC_INTERRUPT_ENABLE, RXSTSIE, 0b1);
++
++	/* Start the TX and RX on the MAC */
++	base->MAC_CONFIGURATION |=
++		ENET_QOS_REG_PREP(MAC_CONFIGURATION, TE, 0b1) |
++		ENET_QOS_REG_PREP(MAC_CONFIGURATION, RE, 0b1);
++
++	return 0;
++}
++
++static int eth_nxp_enet_qos_stop(const struct device *dev, struct net_if *iface)
++{
++	const struct nxp_enet_qos_mac_config *config = dev->config;
++	enet_qos_t *base = config->module.base;
++
++	/* Stop the TX and RX on the MAC */
++	base->MAC_CONFIGURATION &=
++		~(ENET_QOS_REG_PREP(MAC_CONFIGURATION, TE, 0b1) |
++		ENET_QOS_REG_PREP(MAC_CONFIGURATION, RE, 0b1));
++
++	/* Stop DMA TX and RX channels */
++	base->DMA_CH[0].DMA_CHX_RX_CTRL &=
++		~ENET_QOS_REG_PREP(DMA_CH_DMA_CHX_RX_CTRL, SR, 0b1);
++	base->DMA_CH[0].DMA_CHX_TX_CTRL &=
++		~ENET_QOS_REG_PREP(DMA_CH_DMA_CHX_TX_CTRL, ST, 0b1);
++
++	/* Disable DMA interrupts */
++	base->DMA_CH[0].DMA_CHX_INT_EN = 0;
++
++	/* Disable MAC interrupts */
++	base->MAC_INTERRUPT_ENABLE = 0;
++
++	return 0;
+ }
+ 
+ static inline void enet_qos_tx_desc_init(enet_qos_t *base, struct nxp_enet_qos_tx_data *tx)
+@@ -1221,9 +1256,6 @@ static int eth_nxp_enet_qos_init(const struct device *dev)
+ 		return ret;
+ 	}
+ 
+-	/* Clearly, start the cogs to motion. */
+-	enet_qos_start(base);
+-
+ 	/* Reclaims outstanding transmit frames from a DMA that does not
+ 	 * complete, guarding the oldest frame in flight.
+ 	 */
+@@ -1313,6 +1345,8 @@ static const struct ethernet_api api_funcs = {
+ 	.get_capabilities = eth_nxp_enet_qos_get_capabilities,
+ 	.get_phy = eth_nxp_enet_qos_get_phy,
+ 	.set_config = eth_nxp_enet_qos_set_config,
++	.start = eth_nxp_enet_qos_start,
++	.stop = eth_nxp_enet_qos_stop,
+ #if defined(CONFIG_PTP_CLOCK_NXP_ENET_QOS)
+ 	.get_ptp_clock = eth_nxp_enet_qos_get_ptp_clock,
+ #endif
+-- 
+2.43.0
+

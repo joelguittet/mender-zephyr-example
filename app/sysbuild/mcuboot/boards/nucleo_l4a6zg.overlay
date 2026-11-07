@@ -1,0 +1,54 @@
+/**
+ * @file      nucleo_l4a6zg.overlay
+ * @brief     nucleo-l4a6zg board mcuboot overlay
+ *
+ * Copyright joelguittet and mender-mcu-client contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/ {
+    chosen {
+        zephyr,code-partition = &boot_partition;
+        mender,storage-partition = &storage_partition;
+    };
+};
+
+&flash0 {
+    partitions {
+        compatible = "fixed-partitions";
+        #address-cells = <1>;
+        #size-cells = <1>;
+        /* Bootloader slot: 56KB */
+        boot_partition: partition@0 {
+            label = "mcuboot";
+            reg = <0x00000000 DT_SIZE_K(56)>;
+            read-only;
+        };
+        /* Application slot: 480KB */
+        slot0_partition: partition@e000 {
+            label = "image-0";
+            reg = <0x0000E000 DT_SIZE_K(480)>;
+        };
+        /* Update slot: 480KB */
+        slot1_partition: partition@86000 {
+            label = "image-1";
+            reg = <0x00086000 DT_SIZE_K(480)>;
+        };
+        /* Storage slot: 8KB */
+        storage_partition: partition@fe000 {
+            label = "storage";
+            reg = <0x000FE000 DT_SIZE_K(8)>;
+        };
+    };
+};

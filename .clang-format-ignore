@@ -1,0 +1,2 @@
+modules/msgpack-c/include/msgpack/pack_template.h
+modules/msgpack-c/include/msgpack/sysdep.h

@@ -1,0 +1,87 @@
+/**
+ * @file      nucleo_l4a6zg.overlay
+ * @brief     nucleo-l4a6zg board project overlay
+ *
+ * Copyright joelguittet and mender-mcu-client contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/ {
+    chosen {
+        zephyr,code-partition = &slot0_partition;
+        mender,storage-partition = &storage_partition;
+    };
+};
+
+&flash0 {
+    partitions {
+        compatible = "fixed-partitions";
+        #address-cells = <1>;
+        #size-cells = <1>;
+        /* Bootloader slot: 56KB */
+        boot_partition: partition@0 {
+            label = "mcuboot";
+            reg = <0x00000000 DT_SIZE_K(56)>;
+            read-only;
+        };
+        /* Application slot: 480KB */
+        slot0_partition: partition@e000 {
+            label = "image-0";
+            reg = <0x0000E000 DT_SIZE_K(480)>;
+        };
+        /* Update slot: 480KB */
+        slot1_partition: partition@86000 {
+            label = "image-1";
+            reg = <0x00086000 DT_SIZE_K(480)>;
+        };
+        /* Storage slot: 8KB */
+        storage_partition: partition@fe000 {
+            label = "storage";
+            reg = <0x000FE000 DT_SIZE_K(8)>;
+        };
+    };
+};
+
+&arduino_i2c {
+    status = "okay";
+
+    /* ATECC608A Crypto Element */
+    atecc608a@60 {
+        compatible = "atmel,atecc608";
+        reg = <0x60>;
+    };
+};
+
+&arduino_spi {
+    status = "okay";
+
+    /* W5500 SPI/Ethernet Controller */
+    eth_w5500: eth_w5500@0 {
+        compatible = "wiznet,w5500";
+        reg = <0x0>;
+        spi-max-frequency = <20000000>;
+        int-gpios = <&arduino_header ARDUINO_HEADER_R3_D2 GPIO_ACTIVE_LOW>;
+        /* MAC address is used to identify the device on the mender-server */
+        local-mac-address = [00 08 DC 01 02 03];
+    };
+};
+
+&clk_hsi48 {
+    /* HSI48 required for RNG */
+    status = "okay";
+};
+
+&rng {
+    status = "okay";
+};

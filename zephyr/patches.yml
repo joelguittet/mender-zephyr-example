@@ -1,0 +1,38 @@
+# @file      patches.yml
+# @brief     Patch files metadata
+#
+# Copyright joelguittet and mender-mcu-client contributors
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+patches:
+  - path: zephyr/drivers-ethernet-nxp-enet-qos-start-stop.patch
+    sha256sum: 8151e94d3f6ec91d851cca1c75276641761f6485b3fe4f5f6c5d383e1bc190b8
+    module: zephyr
+    author: Joel Guittet
+    email: joelguittet@gmail.com
+    date: 2026-04-24
+    upstreamable: true
+    comments: |
+      Add start/stop support to NXP ENET QOS Ethernet driver.
+      Reference pull-request: https://github.com/zephyrproject-rtos/zephyr/pull/107854
+  - path: zephyr/twister-hw-adapter-pre-post-script-params.patch
+    sha256sum: be304d92b5869c21b7c4750245d30c8d2c9d7e6bd65bd49c506953a8a35f8c0d
+    module: zephyr
+    author: Joel Guittet
+    email: joelguittet@gmail.com
+    date: 2026-06-24
+    upstreamable: true
+    comments: |
+      Cleanup and reordering of twister pre/post scripts
+      Reference pull-request: https://github.com/zephyrproject-rtos/zephyr/pull/111479

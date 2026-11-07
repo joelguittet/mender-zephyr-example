@@ -1,0 +1,66 @@
+/**
+ * @file      rpi_pico2_rp2350a_m33_0_w.overlay
+ * @brief     rpi_pico2 board mcuboot overlay
+ *
+ * Copyright joelguittet and mender-mcu-client contributors
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/delete-node/ &code_partition;
+
+/ {
+    chosen {
+        zephyr,code-partition = &boot_partition;
+        mender,storage-partition = &storage_partition;
+    };
+};
+
+&flash0 {
+    partitions {
+        compatible = "fixed-partitions";
+        #address-cells = <1>;
+        #size-cells = <1>;
+        /* Bootloader slot: 64KB */
+        boot_partition: partition@0 {
+            compatible = "zephyr,mapped-partition";
+            label = "mcuboot";
+            reg = <0x00000000 DT_SIZE_K(64)>;
+            read-only;
+        };
+        /* Application slot: 1856KB */
+        slot0_partition: partition@10000 {
+            compatible = "zephyr,mapped-partition";
+            label = "image-0";
+            reg = <0x00010000 DT_SIZE_K(1856)>;
+        };
+        /* Update slot: 1856KB */
+        slot1_partition: partition@1e0000 {
+            compatible = "zephyr,mapped-partition";
+            label = "image-1";
+            reg = <0x001E0000 DT_SIZE_K(1856)>;
+        };
+        /* Storage slot: 64KB */
+        storage_partition: partition@3b0000 {
+            compatible = "zephyr,mapped-partition";
+            label = "storage";
+            reg = <0x003B0000 DT_SIZE_K(64)>;
+        };
+        /* LittleFS slot: 256KB */
+        littlefs_partition: partition@3c0000 {
+            compatible = "zephyr,mapped-partition";
+            label = "littlefs";
+            reg = <0x003C0000 DT_SIZE_K(256)>;
+        };
+    };
+};
